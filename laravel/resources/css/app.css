@@ -10,3 +10,9 @@
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 }
+
+.custom-toast {
+    font-size: 13px;
+    font-weight: 450;
+    border-radius: 999px !important;
+}

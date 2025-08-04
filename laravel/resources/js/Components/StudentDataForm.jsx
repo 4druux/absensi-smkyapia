@@ -1,76 +1,91 @@
-import React, { useState, useRef } from "react";
+import { useRef, useEffect, useState } from "react";
+import { useForm, usePage } from "@inertiajs/react";
 import { Save, Users, PlusCircle, Trash2, Upload } from "lucide-react";
-import Papa from "papaparse";
+import toast from "react-hot-toast";
+import Button from "./common/Button";
 
-const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
-    // Component states
-    const [classCode, setClassCode] = useState(initialData?.classCode || "");
-    const [major, setMajor] = useState(initialData?.major || "");
-    const [students, setStudents] = useState(
-        initialData?.students || [{ id: Date.now(), studentId: "", name: "" }]
-    );
-    const [errors, setErrors] = useState({});
-    const [importError, setImportError] = useState(null);
+const StudentDataForm = () => {
+    const { props } = usePage();
+    const { errors: pageErrors = {} } = props;
+
+    const { data, setData, post, processing, reset } = useForm({
+        kelas: "",
+        jurusan: "",
+        students: [{ id: Date.now(), nis: "", nama: "" }],
+    });
+
+    const [clientErrors, setClientErrors] = useState({});
     const fileInputRef = useRef(null);
+    const formRef = useRef(null);
+    const [importError, setImportError] = useState("");
 
-    // Handler for student input changes
+    useEffect(() => {
+        if (props.flash?.success) {
+            toast.success(props.flash.success);
+        }
+        if (props.flash?.error) {
+            toast.error(props.flash.error);
+        }
+    }, [props.flash]);
+
     const handleStudentChange = (index, field, value) => {
-        const updatedStudents = [...students];
+        const updatedStudents = [...data.students];
         updatedStudents[index][field] = value;
-        setStudents(updatedStudents);
+        setData("students", updatedStudents);
     };
 
-    // Handler to add a new empty student row
     const addStudentRow = () => {
-        setStudents([...students, { id: Date.now(), studentId: "", name: "" }]);
+        setData("students", [
+            ...data.students,
+            { id: Date.now(), nis: "", nama: "" },
+        ]);
     };
 
-    // Handler to remove a student row
     const removeStudentRow = (id) => {
-        const updatedStudents = students.filter((student) => student.id !== id);
-        setStudents(updatedStudents);
+        if (data.students.length <= 1) {
+            toast.error("Minimal harus ada satu baris siswa.");
+            return;
+        }
+        const updatedStudents = data.students.filter(
+            (student) => student.id !== id
+        );
+        setData("students", updatedStudents);
     };
 
-    // Triggers the hidden file input
     const handleImportClick = () => {
+        setImportError("");
         fileInputRef.current.click();
     };
 
-    // Centralized function to process the parsed data
-    const processImportedData = (data) => {
-        if (!data || data.length === 0) {
-            setImportError(
-                "Tidak ada data yang dapat diimpor dari file. Pastikan file tidak kosong."
-            );
-            return;
-        }
-
-        const importedStudents = data
+    const processImportedData = (importedData) => {
+        const newStudents = importedData
             .map((row, index) => ({
                 id: Date.now() + index,
-                name:
-                    row["NAMA SISWA"]?.trim() ||
-                    row["Nama Siswa"]?.trim() ||
-                    row["nama siswa"]?.trim() ||
-                    row["name"]?.trim() ||
-                    "",
-                studentId: String(
+                nama: (
+                    row["NAMA SISWA"] ||
+                    row["Nama Siswa"] ||
+                    row["nama"] ||
+                    ""
+                )
+                    .toString()
+                    .trim(),
+                nis: (
                     row["NOMOR INDUK"] ||
-                        row["Nomor Induk"] ||
-                        row["nomor induk"] ||
-                        row["studentId"] ||
-                        ""
-                ).trim(),
+                    row["Nomor Induk"] ||
+                    row["nis"] ||
+                    ""
+                )
+                    .toString()
+                    .trim(),
             }))
-            .filter((s) => s.studentId && s.name);
+            .filter((s) => s.nis && s.nama);
 
-        if (importedStudents.length > 0) {
-            setStudents(importedStudents);
+        if (newStudents.length > 0) {
+            toast.success(`${newStudents.length} data siswa berhasil diimpor.`);
+            setData("students", newStudents);
         } else {
-            const headers = Object.keys(data[0] || {}).join(", ");
-            console.error("Header yang terdeteksi:", headers);
             setImportError(
-                `Gagal menemukan kolom yang cocok. Pastikan file Anda memiliki header 'NAMA SISWA' dan 'NOMOR INDUK'. Header yang terdeteksi: ${headers}`
+                "Gagal memuat data. Pastikan file memiliki kolom 'NAMA SISWA' dan 'NOMOR INDUK'."
             );
         }
     };
@@ -78,130 +93,163 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        setImportError(null);
 
+        const reader = new FileReader();
         const fileExtension = file.name.split(".").pop().toLowerCase();
-        const fileMimeType = file.type;
 
-        console.log(
-            `File detected: Name=${file.name}, MIME Type=${fileMimeType}, Extension=${fileExtension}`
-        );
-
-        if (fileMimeType === "text/csv" || fileExtension === "csv") {
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                complete: (results) => {
-                    processImportedData(results.data);
-                },
-                error: (error) => {
-                    setImportError(
-                        "Gagal memproses file CSV. Periksa format file Anda."
-                    );
-                    console.error("Error parsing CSV:", error);
-                },
-            });
-        } else if (
-            fileMimeType ===
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-            fileMimeType === "application/vnd.ms-excel" ||
-            fileExtension === "xlsx" ||
-            fileExtension === "xls"
-        ) {
-            if (typeof window.XLSX === "undefined") {
-                setImportError(
-                    "Library untuk membaca file Excel (SheetJS) tidak termuat. Pastikan Anda telah menambahkan tag <script> di file HTML utama Anda."
-                );
-                console.error(
-                    "SheetJS (XLSX) library not found on window object."
-                );
-                event.target.value = null; // Reset input
-                return;
-            }
-
-            const reader = new FileReader();
+        if (fileExtension === "csv") {
             reader.onload = (e) => {
-                try {
-                    const XLSX = window.XLSX;
-                    const data = e.target.result;
-                    const workbook = XLSX.read(new Uint8Array(data), {
-                        type: "array",
-                    });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet);
-                    processImportedData(json);
-                } catch (err) {
-                    setImportError(
-                        "Gagal memproses file Excel. File mungkin rusak atau formatnya tidak didukung."
+                if (window.Papa) {
+                    const { data: jsonData } = window.Papa.parse(
+                        e.target.result,
+                        { header: true, skipEmptyLines: true }
                     );
-                    console.error("Error processing Excel file:", err);
+                    processImportedData(jsonData);
+                } else {
+                    setImportError(
+                        "Library PapaParse untuk CSV tidak ditemukan."
+                    );
                 }
             };
-            reader.onerror = (err) => {
-                setImportError("Gagal membaca file.");
-                console.error("FileReader error:", err);
+            reader.readAsText(file);
+        } else if (fileExtension === "xlsx" || fileExtension === "xls") {
+            if (typeof window.XLSX === "undefined") {
+                setImportError(
+                    "Library untuk membaca file Excel (SheetJS) tidak termuat."
+                );
+                return;
+            }
+            reader.onload = (e) => {
+                try {
+                    const workbook = window.XLSX.read(e.target.result, {
+                        type: "binary",
+                    });
+                    const sheetName = workbook.SheetNames[0];
+                    const jsonData = window.XLSX.utils.sheet_to_json(
+                        workbook.Sheets[sheetName]
+                    );
+                    processImportedData(jsonData);
+                } catch (err) {
+                    setImportError(
+                        "Gagal memproses file Excel. Pastikan formatnya benar."
+                    );
+                }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsBinaryString(file);
         } else {
             setImportError(
-                `Format file tidak didukung. Silakan gunakan file .csv atau .xlsx.`
+                "Format file tidak didukung. Gunakan .csv, .xlsx, atau .xls."
             );
         }
-
         event.target.value = null;
     };
 
     const validateForm = () => {
         const newErrors = {};
-        if (!classCode.trim()) newErrors.classCode = "Kode kelas harus diisi";
-        if (!major.trim()) newErrors.major = "Jurusan harus diisi";
+        let firstErrorId = null;
 
-        const studentErrors = [];
-        let hasStudentError = false;
-        if (
-            students.length === 0 ||
-            students.every((s) => !s.name && !s.studentId)
-        ) {
-            newErrors.students = "Minimal harus ada satu siswa.";
-            hasStudentError = true;
-        } else {
-            students.forEach((student, index) => {
-                const error = {};
-                if (!String(student.studentId).trim()) {
-                    error.studentId = "Nomor induk harus diisi";
-                    hasStudentError = true;
-                }
-                if (!String(student.name).trim()) {
-                    error.name = "Nama siswa harus diisi";
-                    hasStudentError = true;
-                }
-                studentErrors[index] = error;
-            });
+        if (!data.kelas.trim()) {
+            newErrors.kelas = "Kode kelas wajib diisi.";
+            if (!firstErrorId) firstErrorId = "kelas";
         }
-        if (hasStudentError) newErrors.studentErrors = studentErrors;
 
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        if (!data.jurusan.trim()) {
+            newErrors.jurusan = "Jurusan wajib diisi.";
+            if (!firstErrorId) firstErrorId = "jurusan";
+        }
+
+        let studentErrorFound = false;
+        data.students.forEach((student, index) => {
+            if (!student.nama.trim() && !studentErrorFound) {
+                if (!firstErrorId) firstErrorId = `student-nama-${index}`;
+                studentErrorFound = true;
+            }
+            if (!student.nis.trim() && !studentErrorFound) {
+                if (!firstErrorId) firstErrorId = `student-nis-${index}`;
+                studentErrorFound = true;
+            }
+        });
+
+        const validStudents = data.students.filter(
+            (s) => s.nama.trim() && s.nis.trim()
+        );
+        if (validStudents.length === 0) {
+            newErrors.students =
+                "Minimal harus ada satu siswa yang valid (nama dan NIS terisi).";
+            if (!firstErrorId) firstErrorId = "students-list-error";
+        }
+
+        setClientErrors(newErrors);
+
+        return {
+            isValid: Object.keys(newErrors).length === 0,
+            firstErrorId: firstErrorId,
+        };
     };
 
-    // Form submission handler
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            const finalStudentData = {
-                classCode: classCode.trim(),
-                major: major.trim(),
-                students: students
-                    .map((s) => ({
-                        studentId: String(s.studentId).trim(),
-                        name: String(s.name).trim(),
-                    }))
-                    .filter((s) => s.studentId && s.name),
-            };
-            onSaveAndContinue(finalStudentData);
+        const { isValid, firstErrorId } = validateForm();
+
+        if (!isValid) {
+            toast.error(
+                "Harap periksa kembali data Anda, ada yang belum terisi."
+            );
+            if (firstErrorId && formRef.current) {
+                const errorElement = formRef.current.querySelector(
+                    `#${firstErrorId}`
+                );
+                if (errorElement) {
+                    errorElement.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                    });
+                    errorElement.focus({ preventScroll: true });
+                }
+            }
+            return;
         }
+
+        setClientErrors({});
+
+        const payload = {
+            ...data,
+            students: data.students.filter((s) => s.nama && s.nis),
+        };
+
+        post(route("data-siswa.store"), {
+            onSuccess: () => {
+                reset();
+                setData("students", [{ id: Date.now(), nis: "", nama: "" }]);
+            },
+            onError: (errors) => {
+                toast.error(
+                    "Gagal menyimpan data, periksa pesan error di form."
+                );
+
+                const firstErrorKey = Object.keys(errors)[0];
+                let elementIdToFocus = firstErrorKey;
+
+                if (firstErrorKey.startsWith("students.")) {
+                    const [, index, field] = firstErrorKey.split(".");
+                    elementIdToFocus = `student-${field}-${index}`;
+                }
+
+                const errorElement = formRef.current.querySelector(
+                    `#${elementIdToFocus}`
+                );
+                if (errorElement) {
+                    errorElement.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center",
+                    });
+                    errorElement.focus({ preventScroll: true });
+                }
+            },
+        });
     };
+
+    const displayErrors = { ...pageErrors, ...clientErrors };
 
     return (
         <div>
@@ -209,30 +257,33 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
                 <h3 className="text-white">Data Siswa</h3>
             </div>
 
-            {/* Form Content */}
-            <div className="px-3 md:px-7 -mt-20">
-                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg">
+            <div className="px-3 md:px-7 -mt-20 pb-10">
+                <div className="bg-white shadow-lg rounded-2xl p-4 md:p-8 flex flex-col space-y-6">
                     <div className="flex items-center space-x-3 mb-8">
                         <div className="p-3 bg-sky-100 rounded-lg">
                             <Users className="w-6 h-6 text-sky-600" />
                         </div>
                         <div>
-                            <h3 className="text-md md:text-lg font-medium text-gray-700">
+                            <h3 className="text-md md:text-lg font-medium text-neutral-700">
                                 Input Data Kelas & Siswa
                             </h3>
-                            <p className="text-xs md:text-sm text-gray-500">
+                            <p className="text-xs md:text-sm text-neutral-500">
                                 Masukkan informasi kelas dan daftar siswa di
                                 bawah ini.
                             </p>
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Class Info */}
+                    <form
+                        ref={formRef}
+                        onSubmit={handleSubmit}
+                        className="space-y-6"
+                        noValidate
+                    >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label
-                                    htmlFor="classCode"
+                                    htmlFor="kelas"
                                     className="block text-sm font-medium text-neutral-700 mb-2"
                                 >
                                     Kode Kelas{" "}
@@ -240,27 +291,27 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
                                 </label>
                                 <input
                                     type="text"
-                                    id="classCode"
-                                    value={classCode}
+                                    id="kelas"
+                                    value={data.kelas}
                                     onChange={(e) =>
-                                        setClassCode(e.target.value)
+                                        setData("kelas", e.target.value)
                                     }
-                                    placeholder="Contoh: XI-RPL-1"
+                                    placeholder="XI-TKJ-1"
                                     className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
-                                        errors.classCode
+                                        displayErrors.kelas
                                             ? "border-red-400"
                                             : "border-neutral-300 focus:border-sky-500"
                                     }`}
                                 />
-                                {errors.classCode && (
+                                {displayErrors.kelas && (
                                     <p className="mt-1 text-xs text-red-600">
-                                        {errors.classCode}
+                                        {displayErrors.kelas}
                                     </p>
                                 )}
                             </div>
                             <div>
                                 <label
-                                    htmlFor="major"
+                                    htmlFor="jurusan"
                                     className="block text-sm font-medium text-neutral-700 mb-2"
                                 >
                                     Jurusan{" "}
@@ -268,42 +319,39 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
                                 </label>
                                 <input
                                     type="text"
-                                    id="major"
-                                    value={major}
-                                    onChange={(e) => setMajor(e.target.value)}
-                                    placeholder="Contoh: Rekayasa Perangkat Lunak"
+                                    id="jurusan"
+                                    value={data.jurusan}
+                                    onChange={(e) =>
+                                        setData("jurusan", e.target.value)
+                                    }
+                                    placeholder="Rekayasa Perangkat Lunak"
                                     className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
-                                        errors.major
+                                        displayErrors.jurusan
                                             ? "border-red-400"
                                             : "border-neutral-300 focus:border-sky-500"
                                     }`}
                                 />
-                                {errors.major && (
+                                {displayErrors.jurusan && (
                                     <p className="mt-1 text-xs text-red-600">
-                                        {errors.major}
+                                        {displayErrors.jurusan}
                                     </p>
                                 )}
                             </div>
                         </div>
 
-                        {/* Student List */}
-                        <div className="border-t border-gray-200 pt-6">
+                        <div className="border-t border-neutral-200 pt-6">
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                                <label
-                                    htmlFor="studentFile"
-                                    className="block text-sm font-medium text-neutral-700 mb-2"
-                                >
+                                <label className="block text-sm font-medium text-neutral-700">
                                     Daftar Siswa{" "}
                                     <span className="text-red-600">*</span>
                                 </label>
-
                                 <div className="flex items-center justify-end space-x-2">
                                     <input
                                         type="file"
                                         ref={fileInputRef}
                                         onChange={handleFileChange}
                                         style={{ display: "none" }}
-                                        accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                                        accept=".csv, .xlsx, .xls"
                                     />
                                     <button
                                         type="button"
@@ -323,28 +371,34 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
                                     </button>
                                 </div>
                             </div>
-
                             {importError && (
-                                <div className="bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4">
+                                <div className="text-center bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4 w-fit">
                                     {importError}
+                                </div>
+                            )}
+                            {displayErrors.students && (
+                                <div
+                                    id="students-list-error"
+                                    className="text-center bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4 w-fit"
+                                >
+                                    {displayErrors.students}
                                 </div>
                             )}
 
                             <div className="grid grid-cols-1 gap-4">
-                                {students.map((student, index) => (
+                                {data.students.map((student, index) => (
                                     <div
                                         key={student.id}
-                                        className="flex flex-col md:flex-row items-end md:items-center gap-3 border border-gray-300 md:border-none p-4 md:p-0 rounded-xl "
+                                        className="flex flex-col md:flex-row items-end md:items-center gap-3 border border-neutral-300 md:border-none p-4 md:p-0 rounded-xl"
                                     >
                                         <div className="flex items-start md:items-center justify-between gap-2 w-full">
                                             <div className="text-sm text-neutral-600 font-medium pr-2 mt-0 md:mt-6">
                                                 {index + 1}.
                                             </div>
-
                                             <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full">
                                                 <div className="w-full">
                                                     <label
-                                                        htmlFor={`studentName-${index}`}
+                                                        htmlFor={`student-nama-${index}`}
                                                         className="block text-sm font-medium text-neutral-700 mb-2"
                                                     >
                                                         Nama Siswa{" "}
@@ -354,29 +408,39 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
                                                     </label>
                                                     <input
                                                         type="text"
-                                                        value={student.name}
+                                                        id={`student-nama-${index}`}
+                                                        value={student.nama}
                                                         onChange={(e) =>
                                                             handleStudentChange(
                                                                 index,
-                                                                "name",
+                                                                "nama",
                                                                 e.target.value
                                                             )
                                                         }
                                                         placeholder="Nama Lengkap Siswa"
                                                         className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none placeholder:text-sm ${
-                                                            errors
-                                                                .studentErrors?.[
-                                                                index
-                                                            ]?.name
-                                                                ? "border-red-600"
-                                                                : "border-gray-300"
+                                                            displayErrors[
+                                                                `students.${index}.nama`
+                                                            ]
+                                                                ? "border-red-500"
+                                                                : "border-neutral-300 focus:border-sky-500"
                                                         }`}
                                                     />
+                                                    {displayErrors[
+                                                        `students.${index}.nama`
+                                                    ] && (
+                                                        <p className="mt-1 text-xs text-red-600">
+                                                            {
+                                                                displayErrors[
+                                                                    `students.${index}.nama`
+                                                                ]
+                                                            }
+                                                        </p>
+                                                    )}
                                                 </div>
-
                                                 <div className="w-full">
                                                     <label
-                                                        htmlFor={`studentId-${index}`}
+                                                        htmlFor={`student-nis-${index}`}
                                                         className="block text-sm font-medium text-neutral-700 mb-2"
                                                     >
                                                         Nomor Induk{" "}
@@ -386,37 +450,45 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
                                                     </label>
                                                     <input
                                                         type="text"
-                                                        value={
-                                                            student.studentId
-                                                        }
+                                                        id={`student-nis-${index}`}
+                                                        value={student.nis}
                                                         onChange={(e) =>
                                                             handleStudentChange(
                                                                 index,
-                                                                "studentId",
+                                                                "nis",
                                                                 e.target.value
                                                             )
                                                         }
-                                                        placeholder="Nomor Induk"
+                                                        placeholder="Nomor Induk Siswa"
                                                         className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none placeholder:text-sm ${
-                                                            errors
-                                                                .studentErrors?.[
-                                                                index
-                                                            ]?.studentId
-                                                                ? "border-red-600"
-                                                                : "border-gray-300"
+                                                            displayErrors[
+                                                                `students.${index}.nis`
+                                                            ]
+                                                                ? "border-red-500"
+                                                                : "border-neutral-300 focus:border-sky-500"
                                                         }`}
                                                     />
+                                                    {displayErrors[
+                                                        `students.${index}.nis`
+                                                    ] && (
+                                                        <p className="mt-1 text-xs text-red-600">
+                                                            {
+                                                                displayErrors[
+                                                                    `students.${index}.nis`
+                                                                ]
+                                                            }
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <div className="mt-0 md:mt-8">
+                                        <div className="w-full md:w-auto mt-2 md:mt-6 flex justify-end">
                                             <button
                                                 type="button"
                                                 onClick={() =>
                                                     removeStudentRow(student.id)
                                                 }
-                                                className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-colors cursor-pointer"
+                                                className="p-2 text-red-500 hover:bg-red-100 rounded-full cursor-pointer"
                                             >
                                                 <Trash2 size={18} />
                                             </button>
@@ -424,22 +496,17 @@ const StudentDataForm = ({ onSaveAndContinue, initialData }) => {
                                     </div>
                                 ))}
                             </div>
-                            {errors.students && (
-                                <p className="mt-2 text-sm text-red-600">
-                                    {errors.students}
-                                </p>
-                            )}
                         </div>
 
-                        {/* Submit Button */}
-                        <div className="pt-6 flex justify-end border-t border-gray-200">
-                            <button
+                        <div className="pt-6 flex justify-end border-t border-neutral-200">
+                            <Button
                                 type="submit"
-                                className="flex items-center justify-center bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 px-6 rounded-full transition-colors duration-200 space-x-2 shadow-md hover:shadow-lg text-sm"
+                                variant="primary"
+                                disabled={processing}
                             >
-                                <Save className="w-4 h-4" />
-                                <span>Simpan</span>
-                            </button>
+                                <Save className="w-4 h-4 mr-2" />
+                                {processing ? "Menyimpan..." : "Simpan"}
+                            </Button>
                         </div>
                     </form>
                 </div>

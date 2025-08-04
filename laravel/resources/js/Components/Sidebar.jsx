@@ -1,24 +1,22 @@
 import React from "react";
-import { Users, ClipboardCheck, School } from "lucide-react";
-import { useAppContext } from "@/Context/AppContext";
+import { Users, ClipboardCheck } from "lucide-react";
+import { Link } from "@inertiajs/react";
 
 const Sidebar = ({ isOpen }) => {
-    const { currentPage, onPageChange } = useAppContext();
-
     const menuItems = [
         {
-            id: "input",
+            id: "data-siswa",
             label: "Input Data Siswa",
             icon: Users,
             description: "Input kelas dan daftar siswa",
-            disabled: false,
+            href: "/data-siswa",
         },
         {
-            id: "attendance",
+            id: "absensi",
             label: "Absensi",
             icon: ClipboardCheck,
             description: "Kelola absensi siswa",
-            disabled: false,
+            href: "/absensi",
         },
     ];
 
@@ -38,7 +36,7 @@ const Sidebar = ({ isOpen }) => {
                             alt="Logo"
                             className="w-10 md:w-14 object-cover"
                         />
-                        <div className="">
+                        <div>
                             <h1 className="text-md md:text-lg uppercase font-semibold text-neutral-700">
                                 Sistem Absensi
                             </h1>
@@ -53,16 +51,13 @@ const Sidebar = ({ isOpen }) => {
                     <ul className="space-y-2">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = currentPage === item.id;
-                            const isDisabled = item.disabled;
+                            const isActive =
+                                window.location.pathname === item.href;
 
                             return (
                                 <li key={item.id}>
-                                    <button
-                                        onClick={() =>
-                                            !isDisabled && onPageChange(item.id)
-                                        }
-                                        disabled={isDisabled}
+                                    <Link
+                                        href={item.href}
                                         className={`w-full flex items-center space-x-2 md:space-x-3 p-4 rounded-2xl transition-all duration-200 text-left cursor-pointer ${
                                             isActive
                                                 ? "bg-sky-100"
@@ -96,7 +91,7 @@ const Sidebar = ({ isOpen }) => {
                                                 {item.description}
                                             </div>
                                         </div>
-                                    </button>
+                                    </Link>
                                 </li>
                             );
                         })}

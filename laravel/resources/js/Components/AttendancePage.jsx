@@ -1,76 +1,125 @@
-import React, { useState, useEffect } from "react";
-import {
-    ClipboardCheck,
-    Users,
-    BookOpen,
-    CheckCircle,
-    AlertTriangle,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { router, Link } from "@inertiajs/react";
+import toast from "react-hot-toast";
+import { Save, ArrowLeft } from "lucide-react";
+import BreadcrumbNav from "./common/BreadcrumbNav";
+import AbsensiTable from "./absensi/AbsensiTable";
+import AbesensiCard from "./absensi/AbsensiCard";
+import AbsensiHeader from "./absensi/AbsensiHeader";
+import AbsensiNotFound from "./absensi/AbsensiNotFound";
+import Button from "./common/Button";
 
-const AttendancePage = ({ studentData }) => {
-    const [attendance, setAttendance] = useState({});
+const AttendancePage = ({
+    studentData,
+    tanggal,
+    bulan,
+    namaBulan,
+    tahun,
+    initialAttendance = {},
+    tanggalAbsen,
+}) => {
+    if (
+        !studentData ||
+        !studentData.students ||
+        studentData.students.length === 0
+    ) {
+        const breadcrumbItems = [
+            { label: "Absensi", href: route("absensi.index") },
+            { label: tahun, href: route("absensi.year.show", { tahun }) },
+            {
+                label: namaBulan,
+                href: route("absensi.month.show", { tahun, bulan }),
+            },
+            { label: "Data Tidak Ditemukan", href: null },
+        ];
 
-    if (!studentData) {
         return (
-            <div>
-                <div className="px-3 md:px-7 h-[120px] bg-sky-500 rounded-b-4xl shadow-lg">
-                    <h3 className="text-white">Presensi</h3>
-                </div>
-
-                <div className="px-3 md:px-7 -mt-20">
-                    <div className="bg-white rounded-2xl shadow-lg p-4 flex flex-col items-center justify-center space-y-2 py-20">
-                        <AlertTriangle className="mx-auto h-12 w-12 text-yellow-400" />
-                        <h3 className="mt-2 text-lg font-medium text-gray-700">
-                            Data Siswa Kosong
-                        </h3>
-                        <p className="px-4 text-center text-sm text-gray-500">
-                            Silakan input data siswa terlebih dahulu pada tab
-                            'Input Data Siswa'.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <AbsensiNotFound
+                breadcrumbItems={breadcrumbItems}
+                title="Data Siswa Kosong"
+                message="Tidak ditemukan data siswa untuk tanggal ini. Silakan input data siswa terlebih dahulu pada tab 'Input Data Siswa'."
+            />
         );
     }
 
-    useEffect(() => {
-        const initialAttendance = {};
-        studentData.students.forEach((student) => {
-            initialAttendance[student] = null;
-        });
-        setAttendance(initialAttendance);
-    }, [studentData.students]);
+    const [attendance, setAttendance] = useState({});
+    const [processing, setProcessing] = useState(false);
 
-    const handleAttendanceChange = (studentName, status) => {
-        setAttendance((prev) => ({
-            ...prev,
-            [studentName]: prev[studentName] === status ? null : status,
-        }));
+    useEffect(() => {
+        const initialState = {};
+        if (studentData?.students) {
+            studentData.students.forEach((student) => {
+                initialState[student.id] =
+                    initialAttendance[student.id] || null;
+            });
+        }
+        setAttendance(initialState);
+    }, [studentData, initialAttendance]);
+
+    const handleAttendanceChange = (studentId, status) => {
+        setAttendance((prev) => {
+            const newAttendance = { ...prev };
+            newAttendance[studentId] =
+                newAttendance[studentId] === status ? null : status;
+            return newAttendance;
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const allStudentIdsOnPage = studentData.students.map(
+            (student) => student.id
+        );
+        const payload = {
+            attendance: Object.entries(attendance)
+                .filter(([, status]) => status !== null)
+                .map(([siswa_id, status]) => ({
+                    siswa_id,
+                    status,
+                })),
+            all_student_ids: allStudentIdsOnPage,
+        };
+        router.post(
+            route("absensi.day.store", { tahun, bulan, tanggal }),
+            payload,
+            {
+                preserveState: true,
+                onStart: () => setProcessing(true),
+                onFinish: () => setProcessing(false),
+                onSuccess: () => {
+                    toast.success("Absensi berhasil disimpan!");
+                },
+                onError: (errors) => {
+                    console.error(errors);
+                    toast.error("Gagal menyimpan. Periksa error di console.");
+                },
+            }
+        );
     };
 
     const attendanceStatuses = [
         {
-            key: "late",
+            key: "telat",
             label: "Telat",
             color: "bg-yellow-100 text-yellow-800 border-yellow-300",
         },
         {
-            key: "sick",
+            key: "sakit",
             label: "Sakit",
             color: "bg-blue-100 text-blue-800 border-blue-300",
         },
         {
-            key: "permission",
+            key: "izin",
             label: "Izin",
             color: "bg-green-100 text-green-800 border-green-300",
         },
         {
-            key: "absent",
+            key: "alfa",
             label: "Alfa",
             color: "bg-red-100 text-red-800 border-red-300",
         },
         {
-            key: "truant",
+            key: "bolos",
             label: "Bolos",
             color: "bg-purple-100 text-purple-800 border-purple-300",
         },
@@ -79,218 +128,111 @@ const AttendancePage = ({ studentData }) => {
     const getAttendanceSummary = () => {
         const summary = {
             present: 0,
-            late: 0,
-            sick: 0,
-            permission: 0,
-            absent: 0,
-            truant: 0,
+            telat: 0,
+            sakit: 0,
+            izin: 0,
+            alfa: 0,
+            bolos: 0,
             notMarked: 0,
         };
+        const totalStudents = studentData.students.length;
 
         Object.values(attendance).forEach((status) => {
-            if (status === null) {
-                summary.notMarked++;
-            } else if (status === "late") {
-                summary.late++;
-            } else {
-                summary[status]++;
-            }
+            if (status === null) summary.notMarked++;
+            else if (summary.hasOwnProperty(status)) summary[status]++;
         });
 
         summary.present =
-            studentData.students.length -
-            summary.late -
-            summary.sick -
-            summary.permission -
-            summary.absent -
-            summary.truant -
-            summary.notMarked;
+            totalStudents -
+            (summary.telat +
+                summary.sakit +
+                summary.izin +
+                summary.alfa +
+                summary.bolos +
+                summary.notMarked);
         return summary;
     };
 
     const summary = getAttendanceSummary();
 
+    const breadcrumbItems = [
+        { label: "Absensi", href: route("absensi.index") },
+        { label: tahun, href: route("absensi.year.show", { tahun }) },
+        {
+            label: namaBulan,
+            href: route("absensi.month.show", { tahun, bulan }),
+        },
+        {
+            label: "Presensi Harian",
+            href: null,
+        },
+    ];
+
     return (
-        <div>
-            <div className="px-3 md:px-7 h-[120px] bg-sky-500 rounded-b-4xl shadow-lg">
-                <h3 className="text-white">Presensi</h3>
-            </div>
-            <div className="px-3 md:px-7 -mt-14">
-                <div className="bg-white shadow-lg rounded-2xl p-8 flex flex-col space-y-2">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-end space-x-3">
-                            <div className="p-3 bg-sky-100 rounded-lg">
-                                <ClipboardCheck className="w-6 h-6 text-sky-600" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-700">
-                                    Absensi Siswa
-                                </h3>
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex items-center space-x-2">
-                                        <Users className="w-4 h-4 text-gray-500" />
-                                        <span className="text-sm text-gray-600 font-medium">
-                                            {studentData.classCode}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <BookOpen className="w-4 h-4 text-gray-500" />
-                                        <span className="text-sm text-gray-600">
-                                            {studentData.major}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-sm text-gray-500">
-                                Total Siswa
-                            </div>
-                            <div className="text-2xl font-bold text-blue-600">
-                                {studentData.students.length}
-                            </div>
-                        </div>
-                    </div>
+        <form onSubmit={handleSubmit}>
+            <div>
+                <BreadcrumbNav items={breadcrumbItems} />
 
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 my-6">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <div className="text-sm text-gray-500">Hadir</div>
-                            <div className="text-xl font-medium text-neutral-600">
-                                {summary.present}
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <div className="text-sm text-gray-500">Telat</div>
-                            <div className="text-xl font-medium text-neutralw-600">
-                                {summary.late}
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <div className="text-sm text-gray-500">Alfa</div>
-                            <div className="text-xl font-medium text-neutral600">
-                                {summary.sick + summary.permission}
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <div className="text-sm text-gray-500">Sakit</div>
-                            <div className="text-xl font-medium text-neutral600">
-                                {summary.sick}
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <div className="text-sm text-gray-500">Izin</div>
-                            <div className="text-xl font-medium text-neutral600">
-                                {summary.permission}
-                            </div>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <div className="text-sm text-gray-500">
-                                Tidak Hadir
-                            </div>
-                            <div className="text-xl font-medium text-neutral00">
-                                {summary.absent + summary.truant}
-                            </div>
-                        </div>
-                    </div>
+                <div className="px-3 md:px-7 -mt-20 pb-10">
+                    <div className="bg-white shadow-lg rounded-2xl p-4 md:p-8 flex flex-col space-y-6">
+                        <AbsensiHeader
+                            studentData={studentData}
+                            tanggalAbsen={tanggalAbsen}
+                            summary={summary}
+                        />
 
-                    {/* Attendance Table */}
-                    <div className="bg-white rounded-lg overflow-hidden">
-                        <div className="px-6 py-4 border-b border-gray-200">
-                            <h2 className="text-lg font-semibold text-gray-900">
-                                Daftar Kehadiran
-                            </h2>
+                        <div>
+                            <div className="px-1 py-4">
+                                <h2 className="text-lg text-neutral-800">
+                                    Daftar Kehadiran
+                                </h2>
+                            </div>
+
+                            <div className="hidden md:block">
+                                <AbsensiTable
+                                    students={studentData.students}
+                                    attendance={attendance}
+                                    onStatusChange={handleAttendanceChange}
+                                    statuses={attendanceStatuses}
+                                />
+                            </div>
+
+                            <div className="md:hidden">
+                                <AbesensiCard
+                                    students={studentData.students}
+                                    attendance={attendance}
+                                    onStatusChange={handleAttendanceChange}
+                                    statuses={attendanceStatuses}
+                                />
+                            </div>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            No
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Nama Siswa
-                                        </th>
-                                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status Kehadiran
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {studentData.students.map(
-                                        (student, index) => (
-                                            <tr
-                                                key={student}
-                                                className="hover:bg-gray-50 transition-colors duration-150"
-                                            >
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                                    {index + 1}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center">
-                                                        <div className="text-sm font-medium text-gray-900">
-                                                            {student}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex flex-wrap justify-center gap-2">
-                                                        {attendanceStatuses.map(
-                                                            ({
-                                                                key,
-                                                                label,
-                                                                color,
-                                                            }) => (
-                                                                <label
-                                                                    key={key}
-                                                                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 border ${
-                                                                        attendance[
-                                                                            student
-                                                                        ] ===
-                                                                        key
-                                                                            ? `${color} ring-2 ring-offset-1 ring-blue-300`
-                                                                            : "bg-gray-100 text-gray-500 border-gray-300 hover:bg-gray-200"
-                                                                    }`}
-                                                                >
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={
-                                                                            attendance[
-                                                                                student
-                                                                            ] ===
-                                                                            key
-                                                                        }
-                                                                        onChange={() =>
-                                                                            handleAttendanceChange(
-                                                                                student,
-                                                                                key
-                                                                            )
-                                                                        }
-                                                                        className="sr-only"
-                                                                    />
-                                                                    {attendance[
-                                                                        student
-                                                                    ] ===
-                                                                        key && (
-                                                                        <CheckCircle className="w-3 h-3 mr-1" />
-                                                                    )}
-                                                                    {label}
-                                                                </label>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        )
-                                    )}
-                                </tbody>
-                            </table>
+                        <div className="mt-6 flex items-center justify-end space-x-4">
+                            <Button
+                                as="link"
+                                variant="outline"
+                                href={route("absensi.month.show", {
+                                    tahun,
+                                    bulan,
+                                })}
+                            >
+                                <ArrowLeft size={16} className="mr-2" />
+                                Kembali
+                            </Button>
+
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                disabled={processing}
+                            >
+                                <Save className="w-4 h-4 mr-2" />
+                                {processing ? "Menyimpan..." : "Simpan"}
+                            </Button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     );
 };
 
