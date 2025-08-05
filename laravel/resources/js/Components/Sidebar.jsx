@@ -6,9 +6,9 @@ const Sidebar = ({ isOpen }) => {
     const menuItems = [
         {
             id: "data-siswa",
-            label: "Input Data Siswa",
+            label: "Data Siswa",
             icon: Users,
-            description: "Input kelas dan daftar siswa",
+            description: "Kelola data siswa",
             href: "/data-siswa",
         },
         {

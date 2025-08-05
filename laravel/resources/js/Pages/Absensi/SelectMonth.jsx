@@ -1,30 +1,43 @@
-import MainLayout from "@/Layouts/MainLayout";
-import { Link } from "@inertiajs/react";
-import { Calendar, ArrowLeft } from "lucide-react";
-import { TbCalendarCheck } from "react-icons/tb";
-import BreadcrumbNav from "../../Components/common/BreadcrumbNav";
-import Button from "../../Components/common/Button";
+// resources/js/Pages/Absensi/SelectMonth.jsx
 
-const SelectMonthPage = ({ months, tahun }) => {
+import React from "react";
+import { Link } from "@inertiajs/react";
+import MainLayout from "@/Layouts/MainLayout";
+import { Calendar, ArrowLeft } from "lucide-react";
+import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
+import Button from "@/Components/common/Button";
+
+const SelectMonth = ({ months, tahun, selectedClass }) => {
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
-        { label: tahun, href: route("absensi.index") },
+        {
+            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            href: route("absensi.index"),
+        },
+        {
+            label: tahun,
+            href: route("absensi.class.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+            }),
+        },
         { label: "Pilih Bulan", href: null },
     ];
 
     return (
         <div>
             <BreadcrumbNav items={breadcrumbItems} />
-
             <div className="px-3 md:px-7 -mt-20 pb-10">
                 <div className="bg-white shadow-lg rounded-2xl p-6 md:p-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {months.map((month) => (
+                        {months.map((month, index) => (
                             <Link
-                                key={month.slug}
+                                key={index}
                                 href={route("absensi.month.show", {
-                                    tahun: month.tahun,
-                                    bulan: month.slug,
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
+                                    tahun: tahun,
+                                    bulanSlug: month.slug,
                                 })}
                                 className="block group"
                             >
@@ -33,19 +46,18 @@ const SelectMonthPage = ({ months, tahun }) => {
                                     <h4 className="mt-4 text-lg font-medium text-neutral-700">
                                         {month.nama}
                                     </h4>
-                                    <p className="text-sm text-gray-500">
-                                        {month.tahun}
-                                    </p>
                                 </div>
                             </Link>
                         ))}
                     </div>
-
                     <div className="flex justify-start mt-8">
                         <Button
                             as="link"
                             variant="outline"
-                            href={route("absensi.index")}
+                            href={route("absensi.class.show", {
+                                kelas: selectedClass.kelas,
+                                jurusan: selectedClass.jurusan,
+                            })}
                         >
                             <ArrowLeft size={16} className="mr-2" />
                             Kembali
@@ -57,8 +69,8 @@ const SelectMonthPage = ({ months, tahun }) => {
     );
 };
 
-SelectMonthPage.layout = (page) => (
+SelectMonth.layout = (page) => (
     <MainLayout children={page} title={`Pilih Bulan - ${page.props.tahun}`} />
 );
 
-export default SelectMonthPage;
+export default SelectMonth;

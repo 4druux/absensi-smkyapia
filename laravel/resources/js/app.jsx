@@ -7,7 +7,6 @@ import { createRoot } from "react-dom/client";
 import { createInertiaApp } from "@inertiajs/react";
 import { Toaster } from "react-hot-toast";
 import MainLayout from "./Layouts/MainLayout";
-import { AppProvider } from "./Context/AppContext";
 
 const pageTitles = {
     "/": "Absensi SMK Yapia",
@@ -32,7 +31,7 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
         root.render(
-            <AppProvider>
+            <>
                 <App {...props} />
                 <Toaster
                     position="top-right"
@@ -40,7 +39,7 @@ createInertiaApp({
                     duration={5000}
                     toastOptions={{ className: "custom-toast" }}
                 />
-            </AppProvider>
+            </>
         );
     },
     progress: {

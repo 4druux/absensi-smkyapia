@@ -1,15 +1,22 @@
-import { useState } from "react";
-import MainLayout from "@/Layouts/MainLayout";
+import React, { useState } from "react";
 import { Link, router } from "@inertiajs/react";
-import { BsPlusLg } from "react-icons/bs";
-import { Calendar } from "lucide-react";
+import MainLayout from "@/Layouts/MainLayout";
+import { CalendarDays, ArrowLeft, PlusCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import BreadcrumbNav from "../../Components/common/BreadcrumbNav";
+import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
+import Button from "@/Components/common/Button";
 
-const SelectYearPage = ({ years }) => {
-    const breadcrumbItems = [{ label: "Absensi", href: null }];
-
+const SelectYear = ({ years, selectedClass }) => {
     const [processing, setProcessing] = useState(false);
+
+    const breadcrumbItems = [
+        { label: "Absensi", href: route("absensi.index") },
+        {
+            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            href: route("absensi.index"),
+        },
+        { label: "Pilih Tahun", href: null },
+    ];
 
     const handleAddYear = (e) => {
         e.preventDefault();
@@ -17,7 +24,10 @@ const SelectYearPage = ({ years }) => {
 
         router.post(
             route("absensi.year.store"),
-            {},
+            {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+            },
             {
                 onSuccess: () => {
                     toast.success("Tahun ajaran berhasil ditambahkan!");
@@ -36,44 +46,50 @@ const SelectYearPage = ({ years }) => {
     return (
         <div>
             <BreadcrumbNav items={breadcrumbItems} />
-
             <div className="px-3 md:px-7 -mt-20 pb-10">
                 <div className="bg-white shadow-lg rounded-2xl p-6 md:p-8">
+                    <div className="flex justify-end items-center mb-6">
+                        <Button
+                            onClick={handleAddYear}
+                            disabled={processing}
+                            variant="primary"
+                        >
+                            <PlusCircle className="w-4 h-4 mr-2" />
+                            <span>
+                                {processing ? "Menambahkan..." : "Tambah Tahun"}
+                            </span>
+                        </Button>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {years.map((year) => (
+                        {years.map((year, index) => (
                             <Link
-                                key={year.nomor}
+                                key={index}
                                 href={route("absensi.year.show", {
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
                                     tahun: year.nomor,
                                 })}
                                 className="block group"
                             >
-                                <div className="p-6 bg-slate-50 hover:bg-sky-100 border border-slate-200 hover:border-sky-300 rounded-xl transition-all duration-200 cursor-pointer text-center h-full flex flex-col justify-center items-center">
-                                    <Calendar className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
+                                <div className="p-6 bg-slate-50 hover:bg-sky-100 border border-slate-200 hover:border-sky-300 rounded-xl transition-all duration-200 cursor-pointer text-center">
+                                    <CalendarDays className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
                                     <h4 className="mt-4 text-xl font-medium text-neutral-700">
                                         {year.nomor}
                                     </h4>
                                 </div>
                             </Link>
                         ))}
-
-                        <Link
-                            href={route("absensi.year.store")}
-                            onClick={handleAddYear}
-                            as="button"
-                            type="button"
-                            disabled={processing}
-                            className="block group focus:outline-none"
+                    </div>
+                    <div className="flex justify-start mt-8">
+                        <Button
+                            as="link"
+                            variant="outline"
+                            href={route("absensi.index")}
                         >
-                            <div className="flex flex-col justify-center items-center p-6 bg-sky-50 hover:bg-sky-100 border-2 border-dashed border-sky-300 hover:border-sky-400 rounded-xl transition-all duration-200 text-center h-full cursor-pointer">
-                                <BsPlusLg className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
-                                <h4 className="mt-4 text-lg font-medium text-neutral-700">
-                                    {processing
-                                        ? "Menambahkan..."
-                                        : "Tambah Tahun"}
-                                </h4>
-                            </div>
-                        </Link>
+                            <ArrowLeft size={16} className="mr-2" />
+                            Kembali
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -81,8 +97,8 @@ const SelectYearPage = ({ years }) => {
     );
 };
 
-SelectYearPage.layout = (page) => (
+SelectYear.layout = (page) => (
     <MainLayout children={page} title="Pilih Tahun" />
 );
 
-export default SelectYearPage;
+export default SelectYear;

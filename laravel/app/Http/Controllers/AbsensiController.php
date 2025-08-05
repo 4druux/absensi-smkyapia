@@ -8,13 +8,13 @@ use App\Models\Absensi;
 use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use App\Models\AcademicYear; 
+use App\Models\AcademicYear;
 use Illuminate\Validation\ValidationException;
 
 
 class AbsensiController extends Controller
 {
-   private function getMonthNumberFromSlug($slug)
+    private function getMonthNumberFromSlug($slug)
     {
         $monthMap = [
             'januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4,
@@ -24,8 +24,16 @@ class AbsensiController extends Controller
         return $monthMap[strtolower($slug)] ?? null;
     }
 
+    public function selectClass()
+    {
+        $classes = Siswa::select('kelas', 'jurusan')->distinct()->get();
 
-     public function selectYear()
+        return Inertia::render('Absensi/SelectClass', [
+            'classes' => $classes,
+        ]);
+    }
+
+    public function selectYear($kelas, $jurusan)
     {
         $years = AcademicYear::orderBy('year', 'asc')->get();
 
@@ -37,27 +45,28 @@ class AbsensiController extends Controller
 
         return Inertia::render('Absensi/SelectYear', [
             'years' => $years->map(fn ($y) => ['nomor' => $y->year]),
+            'selectedClass' => ['kelas' => $kelas, 'jurusan' => $jurusan],
         ]);
     }
 
-     public function selectMonth($tahun)
+    public function selectMonth($kelas, $jurusan, $tahun)
     {
         $months = collect(range(1, 12))->map(function ($month) use ($tahun) {
             $date = Carbon::create($tahun, $month, 1);
             return [
                 'nama' => $date->translatedFormat('F'),
                 'slug' => strtolower($date->translatedFormat('F')),
-                'tahun' => $tahun,
             ];
         });
 
         return Inertia::render('Absensi/SelectMonth', [
             'months' => $months,
             'tahun' => $tahun,
+            'selectedClass' => ['kelas' => $kelas, 'jurusan' => $jurusan],
         ]);
     }
 
-    public function showMonth($tahun, $bulanSlug)
+    public function showMonth($kelas, $jurusan, $tahun, $bulanSlug)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
         if (!$monthNumber) {
@@ -68,19 +77,23 @@ class AbsensiController extends Controller
         $daysInMonth = $date->daysInMonth;
         $namaBulan = $date->translatedFormat('F');
 
+        $students = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
+
+        $absensiDays = Absensi::whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $monthNumber)
+            ->whereIn('siswa_id', $students->pluck('id'))
+            ->distinct()
+            ->pluck(DB::raw('DAY(tanggal)'));
+
         $days = collect(range(1, $daysInMonth))->map(function ($day) use ($tahun, $monthNumber) {
             return [
                 'nomor' => $day,
                 'nama_hari' => Carbon::create($tahun, $monthNumber, $day)->translatedFormat('l'),
             ];
         });
-        
-        $absensiDays = Absensi::whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $monthNumber)
-            ->distinct()
-            ->pluck(DB::raw('DAY(tanggal)'));
 
         return Inertia::render('Absensi/SelectDay', [
+            'selectedClass' => ['kelas' => $kelas, 'jurusan' => $jurusan],
             'tahun' => $tahun,
             'bulan' => $bulanSlug,
             'namaBulan' => $namaBulan,
@@ -89,7 +102,7 @@ class AbsensiController extends Controller
         ]);
     }
 
-    public function showDay($tahun, $bulanSlug, $tanggal)
+    public function showDay($kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
         if (!$monthNumber || !checkdate($monthNumber, $tanggal, $tahun)) {
@@ -97,15 +110,14 @@ class AbsensiController extends Controller
         }
 
         $targetDate = Carbon::create($tahun, $monthNumber, $tanggal);
-        $allStudents = Siswa::all();
+        $allStudents = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
         $studentData = null;
         $tanggalAbsen = null;
 
         if ($allStudents->isNotEmpty()) {
-            $firstStudent = $allStudents->first();
             $studentData = [
-                'classCode' => $firstStudent->kelas,
-                'major' => $firstStudent->jurusan,
+                'classCode' => $kelas,
+                'major' => $jurusan,
                 'students' => $allStudents->values()->all(),
             ];
         }
@@ -116,8 +128,8 @@ class AbsensiController extends Controller
 
         if ($existingAttendance->isNotEmpty()) {
             $tanggalAbsen = Carbon::parse($existingAttendance->first()->updated_at)
-                                      ->setTimezone('Asia/Jakarta')
-                                      ->translatedFormat('l, d F Y — H:i:s');
+                                ->setTimezone('Asia/Jakarta')
+                                ->translatedFormat('l, d F Y — H:i:s');
         }
 
         return Inertia::render('Absensi/AbsensiPage', [
@@ -128,62 +140,72 @@ class AbsensiController extends Controller
             'tahun' => $targetDate->year,
             'tanggalAbsen' => $tanggalAbsen,
             'existingAttendance' => $existingAttendance->pluck('status', 'siswa_id'),
+            'selectedClass' => ['kelas' => $kelas, 'jurusan' => $jurusan],
         ]);
     }
 
- public function store(Request $request, $tahun, $bulanSlug, $tanggal)
+    public function store(Request $request, $kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
+    {
+        $request->validate([
+            'attendance' => 'nullable|array',
+            'attendance.*.siswa_id' => 'required|exists:siswas,id',
+            'attendance.*.status' => 'required|string',
+            'all_student_ids' => 'required|array',
+            'all_student_ids.*' => 'exists:siswas,id',
+        ]);
+        
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $targetDate = Carbon::create($tahun, $monthNumber, $tanggal)->toDateString();
+
+        $allStudents = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
+        $existingAttendance = Absensi::where('tanggal', $targetDate)->whereIn('siswa_id', $allStudents->pluck('id'))->exists();
+        if ($existingAttendance) {
+            throw ValidationException::withMessages([
+                'absensi' => 'Absensi untuk hari ini sudah dicatat dan tidak bisa diubah.',
+            ]);
+        }
+
+        $allStudentIdsOnPage = collect($request->all_student_ids);
+        $notPresentData = collect($request->attendance ?? []);
+        $notPresentIds = $notPresentData->pluck('siswa_id');
+        $presentIds = $allStudentIdsOnPage->diff($notPresentIds);
+
+        DB::transaction(function () use ($notPresentData, $presentIds, $targetDate) {
+            
+            foreach ($notPresentData as $data) {
+                Absensi::create([
+                    'siswa_id' => $data['siswa_id'],
+                    'tanggal' => $targetDate,
+                    'status' => $data['status'],
+                ]);
+            }
+            
+            foreach ($presentIds as $studentId) {
+                Absensi::create([
+                    'siswa_id' => $studentId,
+                    'tanggal' => $targetDate,
+                    'status' => 'hadir',
+                ]);
+            }
+        });
+
+        return redirect()->route('absensi.day.show', ['kelas' => $kelas, 'jurusan' => $jurusan, 'tahun' => $tahun, 'bulanSlug' => $bulanSlug, 'tanggal' => $tanggal])->with('success', 'Absensi berhasil disimpan!');
+    }
+
+  public function storeYear(Request $request)
 {
     $request->validate([
-        'attendance' => 'nullable|array',
-        'attendance.*.siswa_id' => 'required|exists:siswas,id',
-        'attendance.*.status' => 'required|string',
-        'all_student_ids' => 'required|array',
-        'all_student_ids.*' => 'exists:siswas,id',
+        'kelas' => 'required|string',
+        'jurusan' => 'required|string',
     ]);
-    
-    $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
-    $targetDate = Carbon::create($tahun, $monthNumber, $tanggal)->toDateString();
 
-    $existingAttendance = Absensi::where('tanggal', $targetDate)->exists();
-    if ($existingAttendance) {
-        throw ValidationException::withMessages([
-            'absensi' => 'Absensi untuk hari ini sudah dicatat dan tidak bisa diubah.',
-        ]);
-    }
-
-    $allStudentIdsOnPage = collect($request->all_student_ids);
-    $notPresentData = collect($request->attendance ?? []);
-    $notPresentIds = $notPresentData->pluck('siswa_id');
-    $presentIds = $allStudentIdsOnPage->diff($notPresentIds);
-
-    DB::transaction(function () use ($notPresentData, $presentIds, $targetDate) {
-        
-        foreach ($notPresentData as $data) {
-            Absensi::create([
-                'siswa_id' => $data['siswa_id'],
-                'tanggal' => $targetDate,
-                'status' => $data['status'],
-            ]);
-        }
-        
-        foreach ($presentIds as $studentId) {
-            Absensi::create([
-                'siswa_id' => $studentId,
-                'tanggal' => $targetDate,
-                'status' => 'hadir',
-            ]);
-        }
-    });
-
-    return redirect()->route('absensi.day.show', [$tahun, $bulanSlug, $tanggal])->with('success', 'Absensi berhasil disimpan!');
-}
-
-public function storeYear()
-{
     $latestYear = AcademicYear::orderBy('year', 'desc')->first();
     $yearToAdd = $latestYear ? $latestYear->year + 1 : now()->year;
     AcademicYear::firstOrCreate(['year' => $yearToAdd]);
 
-    return redirect()->route('absensi.index')->with('success', 'Tahun ajaran berhasil ditambahkan!');
+    return redirect()->route('absensi.class.show', [
+        'kelas' => $request->kelas,
+        'jurusan' => $request->jurusan
+    ])->with('success', 'Tahun ajaran berhasil ditambahkan!');
 }
 }

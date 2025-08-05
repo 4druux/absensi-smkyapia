@@ -65,6 +65,8 @@ const StudentDataForm = () => {
                     row["NAMA SISWA"] ||
                     row["Nama Siswa"] ||
                     row["nama"] ||
+                    row["NAMA"] ||
+                    row["Nama"] ||
                     ""
                 )
                     .toString()
@@ -73,6 +75,7 @@ const StudentDataForm = () => {
                     row["NOMOR INDUK"] ||
                     row["Nomor Induk"] ||
                     row["nis"] ||
+                    row["NIS"] ||
                     ""
                 )
                     .toString()
@@ -253,10 +256,6 @@ const StudentDataForm = () => {
 
     return (
         <div>
-            <div className="px-3 md:px-7 h-[120px] bg-sky-500 rounded-b-4xl shadow-lg">
-                <h3 className="text-white">Data Siswa</h3>
-            </div>
-
             <div className="px-3 md:px-7 -mt-20 pb-10">
                 <div className="bg-white shadow-lg rounded-2xl p-4 md:p-8 flex flex-col space-y-6">
                     <div className="flex items-center space-x-3 mb-8">

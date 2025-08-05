@@ -17,6 +17,7 @@ const AttendancePage = ({
     tahun,
     initialAttendance = {},
     tanggalAbsen,
+    selectedClass,
 }) => {
     if (
         !studentData ||
@@ -25,10 +26,33 @@ const AttendancePage = ({
     ) {
         const breadcrumbItems = [
             { label: "Absensi", href: route("absensi.index") },
-            { label: tahun, href: route("absensi.year.show", { tahun }) },
             {
-                label: namaBulan,
-                href: route("absensi.month.show", { tahun, bulan }),
+                label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+                href: route("absensi.index"),
+            },
+            {
+                label: tahun,
+                href: route("absensi.class.show", {
+                    kelas: selectedClass.kelas,
+                    jurusan: selectedClass.jurusan,
+                }),
+            },
+            {
+                label: `${namaBulan}`,
+                href: route("absensi.year.show", {
+                    kelas: selectedClass.kelas,
+                    jurusan: selectedClass.jurusan,
+                    tahun: tahun,
+                }),
+            },
+            {
+                label: `${tanggal}`,
+                href: route("absensi.month.show", {
+                    kelas: selectedClass.kelas,
+                    jurusan: selectedClass.jurusan,
+                    tahun: tahun,
+                    bulanSlug: bulan,
+                }),
             },
             { label: "Data Tidak Ditemukan", href: null },
         ];
@@ -37,7 +61,7 @@ const AttendancePage = ({
             <AbsensiNotFound
                 breadcrumbItems={breadcrumbItems}
                 title="Data Siswa Kosong"
-                message="Tidak ditemukan data siswa untuk tanggal ini. Silakan input data siswa terlebih dahulu pada tab 'Input Data Siswa'."
+                message={`Tidak ditemukan data siswa untuk kelas ${selectedClass.kelas} - ${selectedClass.jurusan}. Silakan input data siswa terlebih dahulu.`}
             />
         );
     }
@@ -92,7 +116,13 @@ const AttendancePage = ({
             all_student_ids: allStudentIdsOnPage,
         };
         router.post(
-            route("absensi.day.store", { tahun, bulan, tanggal }),
+            route("absensi.day.store", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+                tahun,
+                bulanSlug: bulan,
+                tanggal,
+            }),
             payload,
             {
                 preserveState: true,
@@ -165,15 +195,35 @@ const AttendancePage = ({
 
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
-        { label: tahun, href: route("absensi.year.show", { tahun }) },
         {
-            label: namaBulan,
-            href: route("absensi.month.show", { tahun, bulan }),
+            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            href: route("absensi.index"),
         },
         {
-            label: "Presensi Harian",
-            href: null,
+            label: tahun,
+            href: route("absensi.class.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+            }),
         },
+        {
+            label: `${namaBulan}`,
+            href: route("absensi.year.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+                tahun: tahun,
+            }),
+        },
+        {
+            label: `${tanggal}`,
+            href: route("absensi.month.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+                tahun: tahun,
+                bulanSlug: bulan,
+            }),
+        },
+        { label: "Presensi Harian", href: null },
     ];
 
     return (
@@ -222,8 +272,10 @@ const AttendancePage = ({
                                 as="link"
                                 variant="outline"
                                 href={route("absensi.month.show", {
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
                                     tahun,
-                                    bulan,
+                                    bulanSlug: bulan,
                                 })}
                             >
                                 <ArrowLeft size={16} className="mr-2" />

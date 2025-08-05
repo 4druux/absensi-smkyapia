@@ -1,16 +1,38 @@
+// resources/js/Pages/Absensi/SelectDay.jsx
 import MainLayout from "@/Layouts/MainLayout";
 import { Link } from "@inertiajs/react";
 import { ArrowLeft, CheckCircle } from "lucide-react";
-import BreadcrumbNav from "../../Components/common/BreadcrumbNav";
-import Button from "../../Components/common/Button";
+import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
+import Button from "@/Components/common/Button";
 
-const SelectDayPage = ({ tahun, bulan, namaBulan, days, absensiDays }) => {
+const SelectDayPage = ({
+    tahun,
+    bulan,
+    namaBulan,
+    days,
+    absensiDays,
+    selectedClass,
+}) => {
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
-        { label: tahun, href: route("absensi.year.show", { tahun }) },
         {
-            label: namaBulan,
-            href: route("absensi.year.show", { tahun, bulan }),
+            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            href: route("absensi.index"),
+        },
+        {
+            label: tahun,
+            href: route("absensi.class.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+            }),
+        },
+        {
+            label: `${namaBulan}`,
+            href: route("absensi.year.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+                tahun: tahun,
+            }),
         },
         { label: "Pilih Tanggal", href: null },
     ];
@@ -30,8 +52,10 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, days, absensiDays }) => {
                             <Link
                                 key={day.nomor}
                                 href={route("absensi.day.show", {
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
                                     tahun,
-                                    bulan,
+                                    bulanSlug: bulan,
                                     tanggal: day.nomor,
                                 })}
                                 className="block group"
@@ -75,7 +99,11 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, days, absensiDays }) => {
                         <Button
                             as="link"
                             variant="outline"
-                            href={route("absensi.year.show", { tahun })}
+                            href={route("absensi.year.show", {
+                                kelas: selectedClass.kelas,
+                                jurusan: selectedClass.jurusan,
+                                tahun,
+                            })}
                         >
                             <ArrowLeft size={16} className="mr-2" />
                             Kembali

@@ -9,6 +9,7 @@ const AbsensiPage = ({
     tahun,
     existingAttendance,
     tanggalAbsen,
+    selectedClass,
 }) => {
     return (
         <AttendancePage
@@ -19,6 +20,7 @@ const AbsensiPage = ({
             tahun={tahun}
             initialAttendance={existingAttendance}
             tanggalAbsen={tanggalAbsen}
+            selectedClass={selectedClass}
         />
     );
 };
