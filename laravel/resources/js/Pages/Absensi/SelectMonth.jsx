@@ -27,7 +27,7 @@ const SelectMonth = ({ months, tahun, selectedClass }) => {
     return (
         <div>
             <BreadcrumbNav items={breadcrumbItems} />
-            <div className="px-3 md:px-7 -mt-20 pb-10">
+            <div className="px-3 md:px-7 -mt-16 md:-mt-20 pb-10">
                 <div className="bg-white shadow-lg rounded-2xl p-6 md:p-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {months.map((month, index) => (
@@ -43,7 +43,7 @@ const SelectMonth = ({ months, tahun, selectedClass }) => {
                             >
                                 <div className="p-6 bg-slate-50 hover:bg-sky-100 border border-slate-200 hover:border-sky-300 rounded-xl transition-all duration-200 cursor-pointer text-center">
                                     <Calendar className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
-                                    <h4 className="mt-4 text-lg font-medium text-neutral-700">
+                                    <h4 className="mt-4 text-md md:text-lg font-medium text-neutral-700">
                                         {month.nama}
                                     </h4>
                                 </div>

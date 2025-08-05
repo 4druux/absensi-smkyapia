@@ -29,7 +29,7 @@ const SelectClass = ({ classes }) => {
                                 >
                                     <div className="p-6 bg-slate-50 hover:bg-sky-100 border border-slate-200 hover:border-sky-300 rounded-xl transition-all duration-200 cursor-pointer text-center">
                                         <School className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
-                                        <h4 className="mt-4 text-xl font-medium text-neutral-700">
+                                        <h4 className="mt-2 md:mt-4 text-lg md:text-xl font-medium text-neutral-700">
                                             {c.kelas}
                                         </h4>
                                         <p className="text-sm text-gray-500">

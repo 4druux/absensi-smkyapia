@@ -3,7 +3,7 @@ import { ClipboardCheck, Users, School, BookOpen } from "lucide-react";
 const AbsensiHeader = ({ studentData, tanggalAbsen, summary }) => {
     return (
         <>
-            <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+            <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
                 <div className="flex items-center space-x-3">
                     <div className="p-3 rounded-lg bg-sky-100">
                         <ClipboardCheck className="w-5 h-5 text-sky-600 md:w-6 md:h-6" />

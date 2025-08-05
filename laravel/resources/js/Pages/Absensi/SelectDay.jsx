@@ -45,9 +45,9 @@ const SelectDayPage = ({
         <div>
             <BreadcrumbNav items={breadcrumbItems} />
 
-            <div className="px-3 md:px-7 -mt-20 pb-10">
+            <div className="px-3 md:px-7 -mt-16 md:-mt-20 pb-10">
                 <div className="bg-white shadow-lg rounded-2xl p-6 md:p-8">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4">
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4">
                         {days.map((day) => (
                             <Link
                                 key={day.nomor}
@@ -73,7 +73,7 @@ const SelectDayPage = ({
                                         </div>
                                     )}
                                     <p
-                                        className={`text-3xl font-bold transition-transform ${
+                                        className={`text-2xl md:text-3xl font-bold transition-transform ${
                                             hasAbsensi(day.nomor)
                                                 ? "text-green-600"
                                                 : "text-sky-600"

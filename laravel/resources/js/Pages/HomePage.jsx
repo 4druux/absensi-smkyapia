@@ -1,6 +1,4 @@
-import React from "react";
 import MainLayout from "@/Layouts/MainLayout";
-import StudentDataForm from "@/Components/StudentDataForm";
 import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
 
 const InputData = () => {
@@ -13,7 +11,7 @@ const InputData = () => {
         <div>
             <BreadcrumbNav items={breadcrumbItems} />
             <div className="px-3 md:px-7 -mt-20 pb-10">
-                <StudentDataForm />
+                <h3>HomePage</h3>
             </div>
         </div>
     );

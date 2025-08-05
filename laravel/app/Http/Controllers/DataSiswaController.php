@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Log; // <-- Tambahkan baris ini
 
 
 class DataSiswaController extends Controller
@@ -41,7 +42,7 @@ class DataSiswaController extends Controller
 
     
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $request->validate([
             'kelas' => 'required|string|max:255',
@@ -53,37 +54,28 @@ class DataSiswaController extends Controller
 
         $kelas = trim($request->kelas);
         $jurusan = trim($request->jurusan);
-        $allNis = collect($request->students)->pluck('nis')->map(fn($nis) => trim($nis));
 
-        if ($allNis->duplicates()->isNotEmpty()) {
+        // Validasi duplikasi NIS dalam satu form yang sama
+        $allNisInForm = collect($request->students)->pluck('nis')->map(fn($nis) => trim($nis));
+        if ($allNisInForm->duplicates()->isNotEmpty()) {
             throw ValidationException::withMessages([
                 'students' => 'Terdapat duplikasi NIS dalam form. Mohon periksa kembali.',
             ]);
         }
-
-        foreach ($request->students as $index => $studentData) {
-            $namaSiswa = trim($studentData['nama']);
-            $nisSiswa = trim($studentData['nis']);
-
-            if (Siswa::where('nis', $nisSiswa)->exists()) {
-                 throw ValidationException::withMessages([
-                    "students.{$index}.nis" => "NIS '{$nisSiswa}' sudah terdaftar.",
-                ]);
-            }
-
-            $isDuplicate = Siswa::where('nama', $namaSiswa)
-                ->where('nis', $nisSiswa)
-                ->where('kelas', $kelas)
-                ->where('jurusan', $jurusan)
-                ->exists();
-
-            if ($isDuplicate) {
-                throw ValidationException::withMessages([
-                    'students' => "Data untuk siswa '{$namaSiswa}' ({$nisSiswa}) di kelas & jurusan ini sudah ada.",
-                ]);
-            }
-        }
         
+        // Cek duplikasi siswa yang sudah ada di kelas yang sama
+        $duplicates = Siswa::where('kelas', $kelas)
+            ->where('jurusan', $jurusan)
+            ->whereIn('nis', $allNisInForm)
+            ->get();
+
+        if ($duplicates->isNotEmpty()) {
+            $duplicateNis = $duplicates->pluck('nis')->implode(', ');
+            throw ValidationException::withMessages([
+                'students' => "NIS ({$duplicateNis}) sudah terdaftar di kelas {$kelas} - {$jurusan} ini.",
+            ]);
+        }
+
         foreach ($request->students as $studentData) {
             Siswa::create([
                 'nama' => trim($studentData['nama']),
@@ -98,21 +90,27 @@ class DataSiswaController extends Controller
 
     public function destroyClass($kelas, $jurusan)
 {
-    Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->delete();
+    $deletedCount = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->delete();
+
+    if ($deletedCount > 0) {
+        Log::info("Kelas {$kelas} - {$jurusan} berhasil dihapus. Total siswa dihapus: {$deletedCount}");
+    } else {
+        Log::warning("Gagal menghapus kelas {$kelas} - {$jurusan}. Data tidak ditemukan.");
+    }
 
     return redirect()->route('data-siswa.index')->with('success', "Kelas {$kelas} - {$jurusan} beserta semua siswanya berhasil dihapus!");
 }
 
-    public function updateStudent(Request $request, $id)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'nis' => 'required|string|max:20|unique:siswas,nis,'.$id,
-            'kelas' => 'required|string|max:255',
-            'jurusan' => 'required|string|max:255',
-        ]);
+ public function updateStudent(Request $request, $id)
+{
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'nis' => 'required|string|max:20|unique:siswas,nis,'.$id,
+        'kelas' => 'required|string|max:255',
+        'jurusan' => 'required|string|max:255',
+    ]);
 
-         $student = Siswa::findOrFail($id);
+    $student = Siswa::findOrFail($id);
     $student->update($request->all());
 
     return Redirect::route('data-siswa.class.show', [
@@ -123,16 +121,29 @@ class DataSiswaController extends Controller
 
 public function destroyStudent($id)
 {
-    $student = Siswa::findOrFail($id);
-    $kelas = $student->kelas;
-    $jurusan = $student->jurusan;
-    
-    Siswa::destroy($id);
+    try {
+        $student = Siswa::findOrFail($id);
+        $kelas = $student->kelas;
+        $jurusan = $student->jurusan;
 
-    return Redirect::route('data-siswa.class.show', [
-        'kelas' => $kelas,
-        'jurusan' => $jurusan,
-    ])->with('success', 'Data siswa berhasil dihapus!');
+        // Hapus siswa
+        $deleted = $student->delete();
+
+        // Log untuk debugging
+        if ($deleted) {
+            Log::info("Siswa dengan ID {$id} berhasil dihapus.");
+        } else {
+            Log::warning("Gagal menghapus siswa dengan ID {$id}. Operasi delete gagal.");
+        }
+
+        return Redirect::route('data-siswa.class.show', [
+            'kelas' => $kelas,
+            'jurusan' => $jurusan,
+        ])->with('success', 'Data siswa berhasil dihapus!');
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        Log::warning("Siswa dengan ID {$id} tidak ditemukan.");
+        return Redirect::back()->with('error', 'Siswa tidak ditemukan.');
+    }
 }
 
 }

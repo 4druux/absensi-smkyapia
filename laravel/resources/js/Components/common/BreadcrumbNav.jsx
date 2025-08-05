@@ -2,11 +2,10 @@ import React from "react";
 import { Link } from "@inertiajs/react";
 import { ChevronRight } from "lucide-react";
 
-// Hapus 'pageTitle' dari props
 const BreadcrumbNav = ({ items }) => {
     return (
         <div className="px-3 md:px-7 h-[120px] bg-sky-500 rounded-b-4xl shadow-lg flex items-start">
-            <nav className="flex items-center space-x-1 md:space-x-2 text-white text-sm">
+            <nav className="flex flex-wrap items-center gap-1 md:gap-2 text-white text-sm">
                 {items.map((item, index) => (
                     <React.Fragment key={index}>
                         {item.href ? (

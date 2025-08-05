@@ -7,7 +7,7 @@ const variants = cva(
     {
         variants: {
             variant: {
-                primary: "bg-sky-600 text-white hover:bg-sky-700 shadow-md",
+                primary: "bg-sky-500 text-white hover:bg-sky-600 shadow-md",
                 outline:
                     "border border-sky-600 text-sky-600 bg-transparent hover:bg-sky-600 hover:text-white",
                 ghost: "hover:bg-sky-100 hover:text-sky-900",

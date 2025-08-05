@@ -1,9 +1,10 @@
 import React from "react";
 import { Link, router } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
-import { School, PlusCircle, Trash2 } from "lucide-react";
+import { School, PlusCircle, Trash2, AlertTriangle } from "lucide-react";
 import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
 import toast from "react-hot-toast";
+import Button from "../../Components/common/Button";
 
 const AllClasses = ({ classes }) => {
     const breadcrumbItems = [
@@ -17,8 +18,11 @@ const AllClasses = ({ classes }) => {
                 `Apakah Anda yakin ingin menghapus kelas ${kelas} - ${jurusan} beserta semua data siswanya?`
             )
         ) {
-            router.delete(
+            router.post(
                 route("data-siswa.class.destroy", { kelas, jurusan }),
+                {
+                    _method: "delete",
+                },
                 {
                     onSuccess: () => {
                         toast.success(
@@ -38,18 +42,20 @@ const AllClasses = ({ classes }) => {
         <div>
             <BreadcrumbNav items={breadcrumbItems} />
             <div className="px-3 md:px-7 -mt-20 pb-10">
-                <div className="bg-white shadow-lg rounded-2xl p-6 md:p-8">
+                <div className="bg-white shadow-lg rounded-2xl p-4 md:p-8">
                     <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-medium text-neutral-700">
+                        <h3 className="text-lg md:text-xl font-medium text-neutral-700">
                             Daftar Kelas
                         </h3>
-                        <Link
+
+                        <Button
+                            as="link"
                             href={route("data-siswa.input")}
-                            className="inline-flex items-center space-x-2 text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 px-4 py-2 rounded-full transition-colors"
+                            variant="primary"
                         >
-                            <PlusCircle size={16} />
-                            <span>Tambah Data Baru</span>
-                        </Link>
+                            <PlusCircle className="w-5 h-5 mr-1" />
+                            <span>Tambah Data </span>
+                        </Button>
                     </div>
                     {classes.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -64,7 +70,7 @@ const AllClasses = ({ classes }) => {
                                     >
                                         <div className="p-6 bg-slate-50 hover:bg-sky-100 border border-slate-200 hover:border-sky-300 rounded-xl transition-all duration-200 cursor-pointer text-center">
                                             <School className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
-                                            <h4 className="mt-4 text-xl font-medium text-neutral-700">
+                                            <h4 className="mt-2 md:mt-4 text-lg md:text-xl font-medium text-neutral-700">
                                                 {c.kelas}
                                             </h4>
                                             <p className="text-sm text-gray-500">
@@ -72,25 +78,34 @@ const AllClasses = ({ classes }) => {
                                             </p>
                                         </div>
                                     </Link>
-                                    <button
+
+                                    <Button
+                                        size="sm"
+                                        variant="primary"
+                                        aria-label={`Hapus kelas ${c.kelas}-${c.jurusan}`}
+                                        className="absolute top-2 right-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200"
                                         onClick={() =>
                                             handleDeleteClass(
                                                 c.kelas,
                                                 c.jurusan
                                             )
                                         }
-                                        className="absolute top-2 right-2 p-2 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                        aria-label={`Hapus kelas ${c.kelas}-${c.jurusan}`}
                                     >
                                         <Trash2 size={16} />
-                                    </button>
+                                    </Button>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-10 text-neutral-500">
-                            Belum ada data kelas. Silakan tambahkan data siswa
-                            terlebih dahulu.
+                        <div className="flex flex-col items-center justify-center p-4 py-20 space-y-2">
+                            <AlertTriangle className="w-12 h-12 mx-auto text-yellow-400" />
+                            <h3 className="mt-2 text-lg font-medium text-neutral-700">
+                                Daftar Kelas Kosong
+                            </h3>
+                            <p className="px-4 text-sm text-center text-neutral-500">
+                                Belum ada data kelas. Silakan tambahkan data
+                                siswa terlebih dahulu.
+                            </p>
                         </div>
                     )}
                 </div>
