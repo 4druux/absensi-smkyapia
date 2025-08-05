@@ -1,6 +1,16 @@
 import { CheckCircle } from "lucide-react";
 
-const AbsensiCard = ({ students, attendance, onStatusChange, statuses }) => {
+const AbsensiCard = ({
+    students,
+    attendance,
+    onStatusChange,
+    statuses,
+    isReadOnly,
+}) => {
+    const selectableStatuses = isReadOnly
+        ? statuses
+        : statuses.filter((status) => status.key !== "hadir");
+
     return (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {students.map((student, index) => (
@@ -29,29 +39,60 @@ const AbsensiCard = ({ students, attendance, onStatusChange, statuses }) => {
                             Status Kehadiran:
                         </p>
                         <div className="flex flex-wrap gap-2">
-                            {statuses.map(({ key, label, color }) => (
-                                <label
-                                    key={key}
-                                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 border ${
-                                        attendance[student.id] === key
-                                            ? `${color}`
-                                            : "bg-neutral-100 text-neutral-500 border-neutral-300 hover:bg-neutral-200"
+                            {isReadOnly ? (
+                                <div
+                                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                                        attendance[student.id]
+                                            ? statuses.find(
+                                                  (s) =>
+                                                      s.key ===
+                                                      attendance[student.id]
+                                              )?.color
+                                            : "bg-green-100 text-green-800 border-green-300"
                                     }`}
                                 >
-                                    <input
-                                        type="checkbox"
-                                        checked={attendance[student.id] === key}
-                                        onChange={() =>
-                                            onStatusChange(student.id, key)
-                                        }
-                                        className="sr-only"
-                                    />
-                                    {attendance[student.id] === key && (
-                                        <CheckCircle className="w-3 h-3 mr-1.5" />
-                                    )}
-                                    {label}
-                                </label>
-                            ))}
+                                    <CheckCircle className="w-3 h-3 mr-1.5" />
+                                    {attendance[student.id]
+                                        ? statuses.find(
+                                              (s) =>
+                                                  s.key ===
+                                                  attendance[student.id]
+                                          )?.label
+                                        : "Hadir"}
+                                </div>
+                            ) : (
+                                selectableStatuses.map(
+                                    ({ key, label, color }) => (
+                                        <label
+                                            key={key}
+                                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 border ${
+                                                attendance[student.id] === key
+                                                    ? `${color}`
+                                                    : "bg-neutral-100 text-neutral-500 border-neutral-300 hover:bg-neutral-200"
+                                            }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    attendance[student.id] ===
+                                                    key
+                                                }
+                                                onChange={() =>
+                                                    onStatusChange(
+                                                        student.id,
+                                                        key
+                                                    )
+                                                }
+                                                className="sr-only"
+                                            />
+                                            {attendance[student.id] === key && (
+                                                <CheckCircle className="w-3 h-3 mr-1.5" />
+                                            )}
+                                            {label}
+                                        </label>
+                                    )
+                                )
+                            )}
                         </div>
                     </div>
                 </div>

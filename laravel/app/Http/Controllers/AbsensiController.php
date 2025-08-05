@@ -9,6 +9,7 @@ use Inertia\Inertia;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\AcademicYear; 
+use Illuminate\Validation\ValidationException;
 
 
 class AbsensiController extends Controller
@@ -73,12 +74,18 @@ class AbsensiController extends Controller
                 'nama_hari' => Carbon::create($tahun, $monthNumber, $day)->translatedFormat('l'),
             ];
         });
+        
+        $absensiDays = Absensi::whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $monthNumber)
+            ->distinct()
+            ->pluck(DB::raw('DAY(tanggal)'));
 
         return Inertia::render('Absensi/SelectDay', [
             'tahun' => $tahun,
             'bulan' => $bulanSlug,
             'namaBulan' => $namaBulan,
             'days' => $days,
+            'absensiDays' => $absensiDays,
         ]);
     }
 
@@ -109,6 +116,7 @@ class AbsensiController extends Controller
 
         if ($existingAttendance->isNotEmpty()) {
             $tanggalAbsen = Carbon::parse($existingAttendance->first()->updated_at)
+                                      ->setTimezone('Asia/Jakarta')
                                       ->translatedFormat('l, d F Y — H:i:s');
         }
 
@@ -136,22 +144,20 @@ class AbsensiController extends Controller
     $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
     $targetDate = Carbon::create($tahun, $monthNumber, $tanggal)->toDateString();
 
+    $existingAttendance = Absensi::where('tanggal', $targetDate)->exists();
+    if ($existingAttendance) {
+        throw ValidationException::withMessages([
+            'absensi' => 'Absensi untuk hari ini sudah dicatat dan tidak bisa diubah.',
+        ]);
+    }
+
     $allStudentIdsOnPage = collect($request->all_student_ids);
     $notPresentData = collect($request->attendance ?? []);
     $notPresentIds = $notPresentData->pluck('siswa_id');
     $presentIds = $allStudentIdsOnPage->diff($notPresentIds);
 
-    // PERBAIKAN DI SINI: Tambahkan $notPresentIds ke dalam 'use'
-    DB::transaction(function () use ($notPresentData, $presentIds, $targetDate, $notPresentIds) {
+    DB::transaction(function () use ($notPresentData, $presentIds, $targetDate) {
         
-        // Hapus semua absensi yang sudah ada untuk tanggal ini dan siswa di kelas ini
-        // agar tidak ada duplikasi data atau status yang tertinggal.
-        $allStudentIds = $presentIds->merge($notPresentIds);
-        Absensi::where('tanggal', $targetDate)
-               ->whereIn('siswa_id', $allStudentIds)
-               ->delete();
-
-        // Insert data yang tidak hadir (sakit, izin, alfa, dll)
         foreach ($notPresentData as $data) {
             Absensi::create([
                 'siswa_id' => $data['siswa_id'],
@@ -160,7 +166,6 @@ class AbsensiController extends Controller
             ]);
         }
         
-        // Insert data yang dianggap 'hadir'
         foreach ($presentIds as $studentId) {
             Absensi::create([
                 'siswa_id' => $studentId,
@@ -171,5 +176,14 @@ class AbsensiController extends Controller
     });
 
     return redirect()->route('absensi.day.show', [$tahun, $bulanSlug, $tanggal])->with('success', 'Absensi berhasil disimpan!');
+}
+
+public function storeYear()
+{
+    $latestYear = AcademicYear::orderBy('year', 'desc')->first();
+    $yearToAdd = $latestYear ? $latestYear->year + 1 : now()->year;
+    AcademicYear::firstOrCreate(['year' => $yearToAdd]);
+
+    return redirect()->route('absensi.index')->with('success', 'Tahun ajaran berhasil ditambahkan!');
 }
 }

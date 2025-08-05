@@ -1,10 +1,10 @@
 import MainLayout from "@/Layouts/MainLayout";
 import { Link } from "@inertiajs/react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import BreadcrumbNav from "../../Components/common/BreadcrumbNav";
 import Button from "../../Components/common/Button";
 
-const SelectDayPage = ({ tahun, bulan, namaBulan, days }) => {
+const SelectDayPage = ({ tahun, bulan, namaBulan, days, absensiDays }) => {
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
         { label: tahun, href: route("absensi.year.show", { tahun }) },
@@ -14,6 +14,10 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, days }) => {
         },
         { label: "Pilih Tanggal", href: null },
     ];
+
+    const hasAbsensi = (day) => {
+        return absensiDays.includes(day);
+    };
 
     return (
         <div>
@@ -32,11 +36,34 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, days }) => {
                                 })}
                                 className="block group"
                             >
-                                <div className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-sky-100 border border-slate-200 hover:border-sky-300 rounded-xl transition-all duration-200 cursor-pointer aspect-square">
-                                    <p className="text-3xl font-bold text-sky-600 group-hover:scale-110 transition-transform">
+                                <div
+                                    className={`relative flex flex-col items-center justify-center p-4 rounded-xl transition-all duration-200 cursor-pointer aspect-square ${
+                                        hasAbsensi(day.nomor)
+                                            ? "bg-green-100 border-green-300"
+                                            : "bg-slate-50 hover:bg-sky-100 border-slate-200 hover:border-sky-300"
+                                    }`}
+                                >
+                                    {hasAbsensi(day.nomor) && (
+                                        <div className="absolute top-2 right-2">
+                                            <CheckCircle className="w-5 h-5 text-green-600" />
+                                        </div>
+                                    )}
+                                    <p
+                                        className={`text-3xl font-bold transition-transform ${
+                                            hasAbsensi(day.nomor)
+                                                ? "text-green-600"
+                                                : "text-sky-600"
+                                        } group-hover:scale-110`}
+                                    >
                                         {day.nomor}
                                     </p>
-                                    <p className="text-sm text-gray-500">
+                                    <p
+                                        className={`text-sm ${
+                                            hasAbsensi(day.nomor)
+                                                ? "text-green-600"
+                                                : "text-gray-500"
+                                        }`}
+                                    >
                                         {day.nama_hari}
                                     </p>
                                 </div>

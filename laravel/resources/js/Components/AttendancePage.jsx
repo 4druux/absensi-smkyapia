@@ -44,6 +44,7 @@ const AttendancePage = ({
 
     const [attendance, setAttendance] = useState({});
     const [processing, setProcessing] = useState(false);
+    const hasAttendanceBeenSaved = !!tanggalAbsen;
 
     useEffect(() => {
         const initialState = {};
@@ -57,6 +58,10 @@ const AttendancePage = ({
     }, [studentData, initialAttendance]);
 
     const handleAttendanceChange = (studentId, status) => {
+        if (hasAttendanceBeenSaved) {
+            return;
+        }
+
         setAttendance((prev) => {
             const newAttendance = { ...prev };
             newAttendance[studentId] =
@@ -67,6 +72,13 @@ const AttendancePage = ({
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (hasAttendanceBeenSaved) {
+            toast.error(
+                "Absensi untuk hari ini sudah dicatat dan tidak bisa diubah."
+            );
+            return;
+        }
         const allStudentIdsOnPage = studentData.students.map(
             (student) => student.id
         );
@@ -90,40 +102,36 @@ const AttendancePage = ({
                     toast.success("Absensi berhasil disimpan!");
                 },
                 onError: (errors) => {
-                    console.error(errors);
-                    toast.error("Gagal menyimpan. Periksa error di console.");
+                    if (errors.absensi) {
+                        toast.error(errors.absensi);
+                    } else {
+                        console.error(errors);
+                        toast.error(
+                            "Gagal menyimpan. Periksa error di console."
+                        );
+                    }
                 },
             }
         );
     };
 
     const attendanceStatuses = [
-        {
-            key: "telat",
-            label: "Telat",
-            color: "bg-yellow-100 text-yellow-800 border-yellow-300",
-        },
-        {
-            key: "sakit",
-            label: "Sakit",
-            color: "bg-blue-100 text-blue-800 border-blue-300",
-        },
-        {
-            key: "izin",
-            label: "Izin",
-            color: "bg-green-100 text-green-800 border-green-300",
-        },
-        {
-            key: "alfa",
-            label: "Alfa",
-            color: "bg-red-100 text-red-800 border-red-300",
-        },
-        {
-            key: "bolos",
-            label: "Bolos",
-            color: "bg-purple-100 text-purple-800 border-purple-300",
-        },
-    ];
+        "hadir",
+        "telat",
+        "sakit",
+        "izin",
+        "alfa",
+        "bolos",
+    ].map((status) => {
+        const isPresent = status === "hadir";
+        return {
+            key: status,
+            label: status.charAt(0).toUpperCase() + status.slice(1),
+            color: isPresent
+                ? "bg-green-100 text-green-800 border-green-300"
+                : "bg-red-100 text-red-800 border-red-300",
+        };
+    });
 
     const getAttendanceSummary = () => {
         const summary = {
@@ -194,6 +202,7 @@ const AttendancePage = ({
                                     attendance={attendance}
                                     onStatusChange={handleAttendanceChange}
                                     statuses={attendanceStatuses}
+                                    isReadOnly={hasAttendanceBeenSaved}
                                 />
                             </div>
 
@@ -203,6 +212,7 @@ const AttendancePage = ({
                                     attendance={attendance}
                                     onStatusChange={handleAttendanceChange}
                                     statuses={attendanceStatuses}
+                                    isReadOnly={hasAttendanceBeenSaved}
                                 />
                             </div>
                         </div>

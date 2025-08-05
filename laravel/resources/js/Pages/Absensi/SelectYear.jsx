@@ -1,12 +1,38 @@
+import { useState } from "react";
 import MainLayout from "@/Layouts/MainLayout";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import { BsPlusLg } from "react-icons/bs";
 import { Calendar } from "lucide-react";
-
+import toast from "react-hot-toast";
 import BreadcrumbNav from "../../Components/common/BreadcrumbNav";
 
 const SelectYearPage = ({ years }) => {
     const breadcrumbItems = [{ label: "Absensi", href: null }];
+
+    const [processing, setProcessing] = useState(false);
+
+    const handleAddYear = (e) => {
+        e.preventDefault();
+        setProcessing(true);
+
+        router.post(
+            route("absensi.year.store"),
+            {},
+            {
+                onSuccess: () => {
+                    toast.success("Tahun ajaran berhasil ditambahkan!");
+                },
+                onError: (errors) => {
+                    console.error("Gagal menambahkan tahun:", errors);
+                    toast.error("Gagal menambahkan tahun. Terjadi kesalahan.");
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                },
+            }
+        );
+    };
+
     return (
         <div>
             <BreadcrumbNav items={breadcrumbItems} />
@@ -33,14 +59,18 @@ const SelectYearPage = ({ years }) => {
 
                         <Link
                             href={route("absensi.year.store")}
-                            method="post"
+                            onClick={handleAddYear}
                             as="button"
+                            type="button"
+                            disabled={processing}
                             className="block group focus:outline-none"
                         >
                             <div className="flex flex-col justify-center items-center p-6 bg-sky-50 hover:bg-sky-100 border-2 border-dashed border-sky-300 hover:border-sky-400 rounded-xl transition-all duration-200 text-center h-full cursor-pointer">
                                 <BsPlusLg className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
                                 <h4 className="mt-4 text-lg font-medium text-neutral-700">
-                                    Tambah Tahun
+                                    {processing
+                                        ? "Menambahkan..."
+                                        : "Tambah Tahun"}
                                 </h4>
                             </div>
                         </Link>
