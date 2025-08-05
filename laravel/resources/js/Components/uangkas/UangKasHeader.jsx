@@ -1,16 +1,24 @@
-import { ClipboardCheck, Users, School, BookOpen } from "lucide-react";
+import { FaMoneyBillWave } from "react-icons/fa6";
+import { Users, School, BookOpen } from "lucide-react";
 
-const AbsensiHeader = ({ studentData, tanggalAbsen, summary }) => {
+const UangKasHeader = ({
+    studentData,
+    summary,
+    nominal,
+    onNominalChange,
+    isReadOnly,
+    formatRupiah,
+}) => {
     return (
         <>
             <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
                 <div className="flex items-center space-x-3">
                     <div className="p-3 rounded-lg bg-sky-100">
-                        <ClipboardCheck className="w-5 h-5 text-sky-600 md:w-6 md:h-6" />
+                        <FaMoneyBillWave className="w-5 h-5 text-sky-600 md:w-6 md:h-6" />
                     </div>
                     <div>
                         <h3 className="text-lg font-medium text-neutral-700">
-                            Absensi Siswa
+                            Pembayaran Uang Kas
                         </h3>
                         <div className="flex flex-row gap-2 mt-1 md:items-center">
                             <div className="flex items-center space-x-1 md:space-x-2">
@@ -40,49 +48,63 @@ const AbsensiHeader = ({ studentData, tanggalAbsen, summary }) => {
                         </div>
                     </div>
                 </div>
-
-                {tanggalAbsen && (
-                    <p className="mt-1 text-xs font-semibold md:text-sm text-sky-600">
-                        Tercatat pada: {tanggalAbsen}
-                    </p>
-                )}
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 mt-6">
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
-                    <div className="text-sm text-neutral-500">Hadir</div>
+                    <div className="text-sm text-neutral-500">Total Siswa</div>
                     <div className="text-xl text-neutral-800">
-                        {summary.present}
+                        {summary.totalStudents}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
-                    <div className="text-sm text-neutral-500">Telat</div>
+                    <div className="text-sm text-neutral-500">Sudah Bayar</div>
                     <div className="text-xl text-neutral-800">
-                        {summary.telat}
+                        {summary.paidStudents}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
-                    <div className="text-sm text-neutral-500">Sakit</div>
+                    <div className="text-sm text-neutral-500">Belum Bayar</div>
                     <div className="text-xl text-neutral-800">
-                        {summary.sakit}
+                        {summary.unpaidStudents}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
-                    <div className="text-sm text-neutral-500">Izin</div>
+                    <div className="text-sm text-neutral-500">Nominal Kas</div>
                     <div className="text-xl text-neutral-800">
-                        {summary.izin}
+                        {isReadOnly ? (
+                            <span className="text-sm">
+                                {formatRupiah(nominal)}
+                            </span>
+                        ) : (
+                            <input
+                                type="number"
+                                min="0"
+                                value={nominal}
+                                onChange={(e) =>
+                                    onNominalChange(e.target.value)
+                                }
+                                placeholder="0"
+                                disabled={isReadOnly}
+                                className="w-full text-center p-1 bg-white rounded-full focus:outline-none border border-slate-100/80 focus:border-sky-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                            />
+                        )}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
-                    <div className="text-sm text-neutral-500">Alfa</div>
+                    <div className="text-sm text-neutral-500">
+                        Total Terkumpul
+                    </div>
                     <div className="text-xl text-neutral-800">
-                        {summary.alfa}
+                        <span className="text-sm">Rp </span>
+                        {summary.totalCollected.toLocaleString("id-ID")}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
-                    <div className="text-sm text-neutral-500">Bolos</div>
+                    <div className="text-sm text-neutral-500">Target</div>
                     <div className="text-xl text-neutral-800">
-                        {summary.bolos}
+                        <span className="text-sm">Rp </span>
+                        {summary.target.toLocaleString("id-ID")}
                     </div>
                 </div>
             </div>
@@ -90,4 +112,4 @@ const AbsensiHeader = ({ studentData, tanggalAbsen, summary }) => {
     );
 };
 
-export default AbsensiHeader;
+export default UangKasHeader;

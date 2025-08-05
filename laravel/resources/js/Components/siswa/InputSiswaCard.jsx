@@ -1,4 +1,3 @@
-import React from "react";
 import { Trash2 } from "lucide-react";
 import Button from "@/Components/common/Button";
 
@@ -13,7 +12,7 @@ const InputSiswaCard = ({
             {students.map((student, index) => (
                 <div
                     key={student.id}
-                    className="flex flex-col gap-3 p-4 border rounded-xl border-neutral-300"
+                    className="flex flex-col gap-3 p-4 border rounded-xl border-slate-300"
                 >
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium text-neutral-800">
@@ -52,7 +51,7 @@ const InputSiswaCard = ({
                                 className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none placeholder:text-sm ${
                                     displayErrors[`students.${index}.nama`]
                                         ? "border-red-500"
-                                        : "border-neutral-300 focus:border-sky-500"
+                                        : "border-slate-300 focus:border-sky-500"
                                 }`}
                             />
                             {displayErrors[`students.${index}.nama`] && (
@@ -84,7 +83,7 @@ const InputSiswaCard = ({
                                 className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none placeholder:text-sm ${
                                     displayErrors[`students.${index}.nis`]
                                         ? "border-red-500"
-                                        : "border-neutral-300 focus:border-sky-500"
+                                        : "border-slate-300 focus:border-sky-500"
                                 }`}
                             />
                             {displayErrors[`students.${index}.nis`] && (

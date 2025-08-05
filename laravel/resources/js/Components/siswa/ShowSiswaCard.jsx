@@ -16,7 +16,7 @@ const ShowSiswaCard = ({
             {students.map((student, index) => (
                 <div
                     key={student.id}
-                    className="p-4 space-y-3 border rounded-xl border-neutral-300"
+                    className="p-4 space-y-3 border rounded-xl border-slate-300"
                 >
                     <div className="flex items-start justify-between">
                         <div className="flex items-start gap-2">
@@ -28,13 +28,14 @@ const ShowSiswaCard = ({
                                     {student.nama}
                                 </p>
                                 <p className="text-sm font-medium text-neutral-800">
+                                    <span className="font-normal">NIS: </span>
                                     {student.nis}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="pt-3 border-t border-neutral-300">
+                    <div className="pt-3 border-t border-slate-300">
                         {editingId === student.id ? (
                             <div className="flex flex-col gap-3">
                                 <label className="block">
@@ -46,7 +47,7 @@ const ShowSiswaCard = ({
                                         name="nama"
                                         value={editData.nama}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 mt-1 text-base border border-neutral-300 focus:border-sky-300 rounded-xl focus:outline-none"
+                                        className="w-full p-2 mt-1 text-base border border-slate-300 focus:border-sky-300 rounded-xl focus:outline-none"
                                     />
                                 </label>
                                 <label className="block">
@@ -58,7 +59,7 @@ const ShowSiswaCard = ({
                                         name="nis"
                                         value={editData.nis}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 mt-1 text-base border border-neutral-300 focus:border-sky-300 rounded-xl focus:outline-none"
+                                        className="w-full p-2 mt-1 text-base border border-slate-300 focus:border-sky-300 rounded-xl focus:outline-none"
                                     />
                                 </label>
                                 <div className="flex justify-end gap-2 mt-4">

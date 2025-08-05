@@ -4,9 +4,9 @@ import { router } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import Button from "@/Components/common/Button";
-import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
 import ShowSiswaTable from "@/Components/siswa/ShowSiswaTable";
 import ShowSiswaCard from "@/Components/siswa/ShowSiswaCard";
+import PageContent from "@/Components/common/PageContent";
 
 const ShowClass = ({ students, selectedClass }) => {
     const [editingId, setEditingId] = useState(null);
@@ -90,56 +90,51 @@ const ShowClass = ({ students, selectedClass }) => {
     };
 
     return (
-        <div>
-            <BreadcrumbNav items={breadcrumbItems} />
-            <div className="px-3 md:px-7 -mt-20 pb-10">
-                <div className="bg-white shadow-lg rounded-2xl p-4 md:p-8">
-                    <div className="px-1 py-4">
-                        <h2 className="text-lg text-neutral-800">
-                            Daftar Siswa Kelas {selectedClass.kelas} -{" "}
-                            {selectedClass.jurusan}
-                        </h2>
-                    </div>
-
-                    <div className="hidden lg:block">
-                        <ShowSiswaTable
-                            students={students}
-                            editingId={editingId}
-                            editData={editData}
-                            handleEditClick={handleEditClick}
-                            handleUpdate={handleUpdate}
-                            handleDelete={handleDelete}
-                            handleCancelEdit={handleCancelEdit}
-                            handleInputChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div className="lg:hidden">
-                        <ShowSiswaCard
-                            students={students}
-                            editingId={editingId}
-                            editData={editData}
-                            handleEditClick={handleEditClick}
-                            handleUpdate={handleUpdate}
-                            handleDelete={handleDelete}
-                            handleCancelEdit={handleCancelEdit}
-                            handleInputChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div className="mt-6 flex justify-start">
-                        <Button
-                            as="link"
-                            variant="outline"
-                            href={route("data-siswa.index")}
-                        >
-                            <ArrowLeft size={16} className="mr-2" />
-                            Kembali
-                        </Button>
-                    </div>
-                </div>
+        <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
+            <div className="px-1 py-4">
+                <h2 className="text-lg text-neutral-800">
+                    Daftar Siswa Kelas {selectedClass.kelas} -{" "}
+                    {selectedClass.jurusan}
+                </h2>
             </div>
-        </div>
+
+            <div className="hidden lg:block">
+                <ShowSiswaTable
+                    students={students}
+                    editingId={editingId}
+                    editData={editData}
+                    handleEditClick={handleEditClick}
+                    handleUpdate={handleUpdate}
+                    handleDelete={handleDelete}
+                    handleCancelEdit={handleCancelEdit}
+                    handleInputChange={handleInputChange}
+                />
+            </div>
+
+            <div className="lg:hidden">
+                <ShowSiswaCard
+                    students={students}
+                    editingId={editingId}
+                    editData={editData}
+                    handleEditClick={handleEditClick}
+                    handleUpdate={handleUpdate}
+                    handleDelete={handleDelete}
+                    handleCancelEdit={handleCancelEdit}
+                    handleInputChange={handleInputChange}
+                />
+            </div>
+
+            <div className="mt-6 flex justify-start">
+                <Button
+                    as="link"
+                    variant="outline"
+                    href={route("data-siswa.index")}
+                >
+                    <ArrowLeft size={16} className="mr-2" />
+                    Kembali
+                </Button>
+            </div>
+        </PageContent>
     );
 };
 

@@ -14,7 +14,7 @@ const ShowSiswaTable = ({
     return (
         <div className="overflow-x-auto">
             <table className="w-full">
-                <thead className="bg-neutral-50">
+                <thead className="bg-slate-50">
                     <tr>
                         <th className="w-16 px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-neutral-500">
                             No
@@ -30,11 +30,11 @@ const ShowSiswaTable = ({
                         </th>
                     </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-neutral-200">
+                <tbody className="bg-white divide-y divide-slate-200">
                     {students.map((student, index) => (
                         <tr
                             key={student.id}
-                            className="even:bg-neutral-50 hover:bg-neutral-100"
+                            className="even:bg-slate-50 hover:bg-slate-100"
                         >
                             <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-neutral-800">
                                 {index + 1}.
@@ -46,7 +46,7 @@ const ShowSiswaTable = ({
                                         name="nama"
                                         value={editData.nama}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 text-sm border border-neutral-300 focus:border-sky-300 rounded-xl focus:outline-none"
+                                        className="w-full p-2 text-sm border border-slate-300 focus:border-sky-300 rounded-xl focus:outline-none"
                                     />
                                 ) : (
                                     <div className="text-sm font-medium text-neutral-800">
@@ -61,7 +61,7 @@ const ShowSiswaTable = ({
                                         name="nis"
                                         value={editData.nis}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 text-sm border border-neutral-300 focus:border-sky-300 rounded-xl focus:outline-none"
+                                        className="w-full p-2 text-sm border border-slate-300 focus:border-sky-300 rounded-xl focus:outline-none"
                                     />
                                 ) : (
                                     <div className="text-sm font-medium text-neutral-800">

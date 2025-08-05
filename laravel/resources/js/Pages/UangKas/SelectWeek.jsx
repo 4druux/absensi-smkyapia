@@ -1,43 +1,44 @@
+import React from "react";
 import MainLayout from "@/Layouts/MainLayout";
-import { ArrowLeft, CheckCircle } from "lucide-react";
+import { ArrowLeft, CalendarDays, CheckCircle } from "lucide-react";
 import Button from "@/Components/common/Button";
 import PageContent from "@/Components/common/PageContent";
 import ContentCard from "@/Components/common/ContentCard";
 
-const SelectDayPage = ({
+const SelectWeek = ({
+    minggu,
     tahun,
-    bulan,
+    bulanSlug,
     namaBulan,
-    days,
-    absensiDays,
     selectedClass,
+    paidWeeks,
 }) => {
     const breadcrumbItems = [
-        { label: "Absensi", href: route("absensi.index") },
+        { label: "Uang Kas", href: route("uang-kas.index") },
         {
             label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
-            href: route("absensi.index"),
+            href: route("uang-kas.index"),
         },
         {
             label: tahun,
-            href: route("absensi.class.show", {
+            href: route("uang-kas.class.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
             }),
         },
         {
-            label: `${namaBulan}`,
-            href: route("absensi.year.show", {
+            label: namaBulan,
+            href: route("uang-kas.year.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
                 tahun: tahun,
             }),
         },
-        { label: "Pilih Tanggal", href: null },
+        { label: "Pilih Minggu", href: null },
     ];
 
-    const hasAbsensi = (day) => {
-        return absensiDays.includes(day);
+    const isFullyPaid = (weekId) => {
+        return paidWeeks.includes(weekId);
     };
 
     return (
@@ -46,25 +47,26 @@ const SelectDayPage = ({
             pageClassName="-mt-16 md:-mt-20"
         >
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Hari ({namaBulan} {tahun})
+                Pilih Minggu ({namaBulan} {tahun})
             </h3>
-            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4">
-                {days.map((day) => (
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {minggu.map((week) => (
                     <ContentCard
-                        key={day.nomor}
-                        href={route("absensi.day.show", {
+                        key={week.id}
+                        href={route("uang-kas.week.show", {
                             kelas: selectedClass.kelas,
                             jurusan: selectedClass.jurusan,
                             tahun,
-                            bulanSlug: bulan,
-                            tanggal: day.nomor,
+                            bulanSlug: bulanSlug,
+                            minggu: week.id,
                         })}
-                        variant={hasAbsensi(day.nomor) ? "success" : "default"}
-                        title={day.nomor}
-                        subtitle={day.nama_hari}
+                        variant={isFullyPaid(week.id) ? "success" : "default"}
+                        title={week.label}
+                        subtitle={`${week.start_date} s.d. ${week.end_date}`}
                     >
-                        {hasAbsensi(day.nomor) && (
-                            <div className="absolute -top-4 -right-3">
+                        {isFullyPaid(week.id) && (
+                            <div className="absolute -top-3 -right-3">
                                 <CheckCircle className="w-5 h-5 text-green-600" />
                             </div>
                         )}
@@ -76,7 +78,7 @@ const SelectDayPage = ({
                 <Button
                     as="link"
                     variant="outline"
-                    href={route("absensi.year.show", {
+                    href={route("uang-kas.year.show", {
                         kelas: selectedClass.kelas,
                         jurusan: selectedClass.jurusan,
                         tahun,
@@ -90,11 +92,11 @@ const SelectDayPage = ({
     );
 };
 
-SelectDayPage.layout = (page) => (
+SelectWeek.layout = (page) => (
     <MainLayout
         children={page}
-        title={`Pilih Tanggal - ${page.props.namaBulan}`}
+        title={`Pilih Minggu - ${page.props.namaBulan}`}
     />
 );
 
-export default SelectDayPage;
+export default SelectWeek;

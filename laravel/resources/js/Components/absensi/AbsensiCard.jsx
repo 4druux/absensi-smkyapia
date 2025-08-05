@@ -16,7 +16,7 @@ const AbsensiCard = ({
             {students.map((student, index) => (
                 <div
                     key={student.id}
-                    className="p-4 space-y-3 border rounded-xl border-neutral-300"
+                    className="p-4 space-y-3 border rounded-xl border-slate-300"
                 >
                     <div className="flex items-start justify-between">
                         <div className="flex items-start gap-2">
@@ -28,13 +28,13 @@ const AbsensiCard = ({
                                     {student.nama}
                                 </p>
                                 <p className="text-sm font-medium text-neutral-800">
-                                    {student.nis}
+                                    <span className="font-normal">NIS: </span> {student.nis}
                                 </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="pt-3 border-t border-neutral-300">
+                    <div className="pt-3 border-t border-slate-300">
                         <p className="mb-2 text-xs font-medium text-neutral-600">
                             Status Kehadiran:
                         </p>
@@ -68,7 +68,7 @@ const AbsensiCard = ({
                                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 border ${
                                                 attendance[student.id] === key
                                                     ? `${color}`
-                                                    : "bg-neutral-100 text-neutral-500 border-neutral-300 hover:bg-neutral-200"
+                                                    : "bg-slate-100 text-neutral-500 border-slate-300 hover:bg-slate-200"
                                             }`}
                                         >
                                             <input

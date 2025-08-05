@@ -1,4 +1,3 @@
-import React from "react";
 import { Users, ClipboardCheck } from "lucide-react";
 import { Link } from "@inertiajs/react";
 
@@ -6,9 +5,9 @@ const Sidebar = ({ isOpen }) => {
     const menuItems = [
         {
             id: "data-siswa",
-            label: "Data Siswa",
+            label: "Data Kelas & Siswa",
             icon: Users,
-            description: "Kelola data siswa",
+            description: "Kelola data kelas & siswa",
             href: "/data-siswa",
         },
         {
@@ -18,18 +17,24 @@ const Sidebar = ({ isOpen }) => {
             description: "Kelola absensi siswa",
             href: "/absensi",
         },
+        {
+            id: "uang-kas",
+            label: "Uang Kas",
+            icon: ClipboardCheck,
+            description: "Kelola uang kas",
+            href: "/uang-kas",
+        },
     ];
 
     return (
         <aside
             className={`
-                fixed top-0 left-0 h-screen bg-white shadow-lg rounded-r-2xl xl:rounded-none transition-transform duration-300 ease-in-outm z-50
+                fixed top-0 left-0 h-screen bg-white shadow-lg rounded-r-2xl xl:rounded-none transition-transform duration-300 ease-in-out z-50
                 ${isOpen ? "translate-x-0" : "-translate-x-full"}
             `}
         >
             <div className="xl:w-80 h-full flex flex-col">
-                {/* Header */}
-                <div className="py-6 px-4 md:p-6 border-b border-neutral-200">
+                <div className="py-6 px-4 md:p-6 border-b border-slate-200">
                     <div className="flex items-center gap-2 md:gap-4">
                         <img
                             src="/images/logo-smk.png"
@@ -37,11 +42,11 @@ const Sidebar = ({ isOpen }) => {
                             className="w-10 md:w-14 object-cover"
                         />
                         <div>
-                            <h1 className="text-md md:text-lg uppercase font-semibold text-neutral-700">
-                                Sistem Absensi
+                            <h1 className="text-md md:text-lg uppercase font-medium text-neutral-700">
+                                Smk Yapia Parung
                             </h1>
                             <p className="text-xs md:text-sm text-neutral-600">
-                                Kelola kehadiran siswa
+                                Manajemen Siswa
                             </p>
                         </div>
                     </div>
@@ -52,7 +57,7 @@ const Sidebar = ({ isOpen }) => {
                         {menuItems.map((item) => {
                             const Icon = item.icon;
                             const isActive =
-                                window.location.pathname === item.href;
+                                window.location.pathname.startsWith(item.href);
 
                             return (
                                 <li key={item.id}>
@@ -99,7 +104,7 @@ const Sidebar = ({ isOpen }) => {
                 </nav>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-neutral-200">
+                <div className="p-4 border-t border-slate-200">
                     <div className="text-xs text-neutral-500 text-center">
                         Sistem Absensi v1.0
                     </div>

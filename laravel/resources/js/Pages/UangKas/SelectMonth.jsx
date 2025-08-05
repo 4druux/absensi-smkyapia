@@ -1,19 +1,20 @@
 import MainLayout from "@/Layouts/MainLayout";
-import { CalendarDays, ArrowLeft } from "lucide-react";
-import Button from "@/Components/common/Button";
+import { ArrowLeft, CalendarDays } from "lucide-react";
 import PageContent from "@/Components/common/PageContent";
-import ContentCard from "../../Components/common/ContentCard";
+import ContentCard from "@/Components/common/ContentCard";
+import Button from "@/Components/common/Button";
 
 const SelectMonth = ({ months, tahun, selectedClass }) => {
     const breadcrumbItems = [
-        { label: "Absensi", href: route("absensi.index") },
+        { label: "Uang Kas", href: route("uang-kas.index") },
         {
             label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
-            href: route("absensi.index"),
+            href: route("uang-kas.index"),
         },
+
         {
             label: tahun,
-            href: route("absensi.class.show", {
+            href: route("uang-kas.class.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
             }),
@@ -29,26 +30,28 @@ const SelectMonth = ({ months, tahun, selectedClass }) => {
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
                 Pilih Bulan ({tahun})
             </h3>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {months.map((month, index) => (
+                {months.map((month) => (
                     <ContentCard
-                        key={index}
-                        href={route("absensi.month.show", {
+                        key={month.id}
+                        href={route("uang-kas.month.show", {
                             kelas: selectedClass.kelas,
                             jurusan: selectedClass.jurusan,
-                            tahun: tahun,
+                            tahun,
                             bulanSlug: month.slug,
                         })}
                         icon={CalendarDays}
-                        title={month.nama}
+                        title={month.label}
                     />
                 ))}
             </div>
+
             <div className="flex justify-start mt-8">
                 <Button
                     as="link"
                     variant="outline"
-                    href={route("absensi.class.show", {
+                    href={route("uang-kas.class.show", {
                         kelas: selectedClass.kelas,
                         jurusan: selectedClass.jurusan,
                     })}

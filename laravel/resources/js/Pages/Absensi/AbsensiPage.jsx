@@ -3,12 +3,12 @@ import { router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 import { Save, ArrowLeft } from "lucide-react";
 import MainLayout from "@/Layouts/MainLayout";
-import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
+import PageContent from "@/Components/common/PageContent";
 import AbsensiTable from "@/Components/absensi/AbsensiTable";
 import AbesensiCard from "@/Components/absensi/AbsensiCard";
 import AbsensiHeader from "@/Components/absensi/AbsensiHeader";
-import AbsensiNotFound from "@/Components/absensi/AbsensiNotFound";
 import Button from "@/Components/common/Button";
+import DataNotFound from "../../Components/common/DataNotFound";
 
 const AbsensiPage = ({
     studentData,
@@ -25,7 +25,7 @@ const AbsensiPage = ({
         !studentData.students ||
         studentData.students.length === 0
     ) {
-        const breadcrumbItems = [
+        const notFoundBreadcrumb = [
             { label: "Absensi", href: route("absensi.index") },
             {
                 label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
@@ -59,11 +59,15 @@ const AbsensiPage = ({
         ];
 
         return (
-            <AbsensiNotFound
-                breadcrumbItems={breadcrumbItems}
-                title="Data Siswa Kosong"
-                message={`Tidak ditemukan data siswa untuk kelas ${selectedClass.kelas} - ${selectedClass.jurusan}. Silakan input data siswa terlebih dahulu.`}
-            />
+            <PageContent
+                breadcrumbItems={notFoundBreadcrumb}
+                pageClassName="-mt-16 md:-mt-20"
+            >
+                <DataNotFound
+                    title="Data Siswa Kosong"
+                    message={`Tidak ditemukan data siswa untuk kelas ${selectedClass.kelas} - ${selectedClass.jurusan}. Silakan input data siswa terlebih dahulu.`}
+                />
+            </PageContent>
         );
     }
 
@@ -229,72 +233,69 @@ const AbsensiPage = ({
 
     return (
         <form onSubmit={handleSubmit}>
-            <div>
-                <BreadcrumbNav items={breadcrumbItems} />
+            <PageContent
+                breadcrumbItems={breadcrumbItems}
+                pageClassName="-mt-16 md:-mt-20"
+            >
+                <AbsensiHeader
+                    studentData={studentData}
+                    tanggalAbsen={tanggalAbsen}
+                    summary={summary}
+                />
 
-                <div className="px-3 md:px-7 -mt-16 md:-mt-20 pb-10">
-                    <div className="bg-white shadow-lg rounded-2xl p-4 md:p-8 flex flex-col space-y-6">
-                        <AbsensiHeader
-                            studentData={studentData}
-                            tanggalAbsen={tanggalAbsen}
-                            summary={summary}
+                <div>
+                    <div className="px-1 py-4">
+                        <h2 className="text-lg text-neutral-800">
+                            Daftar Kehadiran
+                        </h2>
+                    </div>
+
+                    <div className="hidden lg:block">
+                        <AbsensiTable
+                            students={studentData.students}
+                            attendance={attendance}
+                            onStatusChange={handleAttendanceChange}
+                            statuses={attendanceStatuses}
+                            isReadOnly={hasAttendanceBeenSaved}
                         />
+                    </div>
 
-                        <div>
-                            <div className="px-1 py-4">
-                                <h2 className="text-lg text-neutral-800">
-                                    Daftar Kehadiran
-                                </h2>
-                            </div>
-
-                            <div className="hidden lg:block">
-                                <AbsensiTable
-                                    students={studentData.students}
-                                    attendance={attendance}
-                                    onStatusChange={handleAttendanceChange}
-                                    statuses={attendanceStatuses}
-                                    isReadOnly={hasAttendanceBeenSaved}
-                                />
-                            </div>
-
-                            <div className="lg:hidden">
-                                <AbesensiCard
-                                    students={studentData.students}
-                                    attendance={attendance}
-                                    onStatusChange={handleAttendanceChange}
-                                    statuses={attendanceStatuses}
-                                    isReadOnly={hasAttendanceBeenSaved}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex items-center justify-end space-x-4">
-                            <Button
-                                as="link"
-                                variant="outline"
-                                href={route("absensi.month.show", {
-                                    kelas: selectedClass.kelas,
-                                    jurusan: selectedClass.jurusan,
-                                    tahun,
-                                    bulanSlug: bulan,
-                                })}
-                            >
-                                <ArrowLeft size={16} className="mr-2" />
-                                Kembali
-                            </Button>
-
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                disabled={processing}
-                            >
-                                <Save className="w-4 h-4 mr-2" />
-                                {processing ? "Menyimpan..." : "Simpan"}
-                            </Button>
-                        </div>
+                    <div className="lg:hidden">
+                        <AbesensiCard
+                            students={studentData.students}
+                            attendance={attendance}
+                            onStatusChange={handleAttendanceChange}
+                            statuses={attendanceStatuses}
+                            isReadOnly={hasAttendanceBeenSaved}
+                        />
                     </div>
                 </div>
-            </div>
+
+                <div className="mt-6 flex items-center justify-end space-x-4">
+                    <Button
+                        as="link"
+                        variant="outline"
+                        href={route("absensi.month.show", {
+                            kelas: selectedClass.kelas,
+                            jurusan: selectedClass.jurusan,
+                            tahun,
+                            bulanSlug: bulan,
+                        })}
+                    >
+                        <ArrowLeft size={16} className="mr-2" />
+                        Kembali
+                    </Button>
+
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={processing}
+                    >
+                        <Save className="w-4 h-4 mr-2" />
+                        {processing ? "Menyimpan..." : "Simpan"}
+                    </Button>
+                </div>
+            </PageContent>
         </form>
     );
 };

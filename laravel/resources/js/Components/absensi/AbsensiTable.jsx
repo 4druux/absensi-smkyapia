@@ -14,7 +14,7 @@ const AbsensiTable = ({
     return (
         <div className="overflow-x-auto">
             <table className="w-full">
-                <thead className="bg-neutral-50">
+                <thead className="bg-slate-50">
                     <tr>
                         <th className="w-16 px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-neutral-500">
                             No
@@ -30,11 +30,11 @@ const AbsensiTable = ({
                         </th>
                     </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-neutral-200">
+                <tbody className="bg-white divide-y divide-slate-200">
                     {students.map((student, index) => (
                         <tr
                             key={student.id}
-                            className="transition-colors duration-150 even:bg-neutral-50 hover:bg-neutral-100"
+                            className="transition-colors duration-150 even:bg-slate-50 hover:bg-slate-100"
                         >
                             <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-neutral-800">
                                 {index + 1}.
@@ -84,7 +84,7 @@ const AbsensiTable = ({
                                                             student.id
                                                         ] === key
                                                             ? `${color}`
-                                                            : "bg-neutral-100 text-neutral-500 border-neutral-300 hover:bg-neutral-200"
+                                                            : "bg-slate-50 text-slate-500 border-slate-300 hover:bg-slate-200"
                                                     }`}
                                                 >
                                                     <input

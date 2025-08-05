@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { router } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
-import { CalendarDays, ArrowLeft, PlusCircle } from "lucide-react";
-import toast from "react-hot-toast";
+import { ArrowLeft, CalendarDays, PlusCircle } from "lucide-react";
+import PageContent from "@/Components/common/PageContent";
+import ContentCard from "@/Components/common/ContentCard";
 import Button from "@/Components/common/Button";
 import DataNotFound from "@/Components/common/DataNotFound";
-import PageContent from "@/Components/common/PageContent";
-import ContentCard from "../../Components/common/ContentCard";
+import toast from "react-hot-toast";
 
-const SelectYear = ({ years, selectedClass }) => {
+const SelectYear = ({ academicYears, selectedClass }) => {
     const [processing, setProcessing] = useState(false);
 
     const breadcrumbItems = [
-        { label: "Absensi", href: route("absensi.index") },
+        { label: "Uang Kas", href: route("uang-kas.index") },
         {
             label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
-            href: route("absensi.index"),
+            href: route("uang-kas.index"),
         },
         { label: "Pilih Tahun", href: null },
     ];
@@ -24,19 +24,29 @@ const SelectYear = ({ years, selectedClass }) => {
         e.preventDefault();
         setProcessing(true);
 
+        const latestYear =
+            academicYears.length > 0
+                ? parseInt(academicYears[0].year)
+                : new Date().getFullYear();
+        const newYear = (latestYear + 1).toString();
+
         router.post(
-            route("absensi.year.store"),
-            {
-                kelas: selectedClass.kelas,
-                jurusan: selectedClass.jurusan,
-            },
+            route("uang-kas.year.store"),
+            { year: newYear },
             {
                 onSuccess: () => {
-                    toast.success("Tahun ajaran berhasil ditambahkan!");
+                    toast.success(
+                        `Tahun ajaran ${newYear} berhasil ditambahkan!`
+                    );
                 },
                 onError: (errors) => {
-                    console.error("Gagal menambahkan tahun:", errors);
-                    toast.error("Gagal menambahkan tahun. Terjadi kesalahan.");
+                    if (errors.year) {
+                        toast.error(errors.year);
+                    } else {
+                        toast.error(
+                            "Gagal menambahkan tahun. Terjadi kesalahan."
+                        );
+                    }
                 },
                 onFinish: () => {
                     setProcessing(false);
@@ -44,6 +54,10 @@ const SelectYear = ({ years, selectedClass }) => {
             }
         );
     };
+
+    const sortedYears = [...academicYears].sort((a, b) =>
+        b.year.localeCompare(a.year)
+    );
 
     return (
         <PageContent
@@ -66,18 +80,19 @@ const SelectYear = ({ years, selectedClass }) => {
                     </span>
                 </Button>
             </div>
-            {years.length > 0 ? (
+
+            {sortedYears.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {years.map((year, index) => (
+                    {sortedYears.map((year) => (
                         <ContentCard
-                            key={index}
-                            href={route("absensi.year.show", {
+                            key={year.id}
+                            href={route("uang-kas.year.show", {
                                 kelas: selectedClass.kelas,
                                 jurusan: selectedClass.jurusan,
-                                tahun: year.nomor,
+                                tahun: year.year,
                             })}
                             icon={CalendarDays}
-                            title={year.nomor}
+                            title={year.year}
                         />
                     ))}
                 </div>
@@ -92,7 +107,7 @@ const SelectYear = ({ years, selectedClass }) => {
                 <Button
                     as="link"
                     variant="outline"
-                    href={route("absensi.index")}
+                    href={route("uang-kas.index")}
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
@@ -103,7 +118,10 @@ const SelectYear = ({ years, selectedClass }) => {
 };
 
 SelectYear.layout = (page) => (
-    <MainLayout children={page} title="Pilih Tahun" />
+    <MainLayout
+        children={page}
+        title={`Pilih Tahun - ${page.props.selectedClass.kelas} ${page.props.selectedClass.jurusan}`}
+    />
 );
 
 export default SelectYear;

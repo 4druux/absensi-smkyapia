@@ -1,9 +1,8 @@
-// resources/js/Pages/Absensi/SelectClass.jsx
-import React from "react";
-import { Link } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
 import { School } from "lucide-react";
-import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
+import PageContent from "@/Components/common/PageContent";
+import DataNotFound from "../../Components/common/DataNotFound";
+import ContentCard from "../../Components/common/ContentCard";
 
 const SelectClass = ({ classes }) => {
     const breadcrumbItems = [
@@ -12,42 +11,32 @@ const SelectClass = ({ classes }) => {
     ];
 
     return (
-        <div>
-            <BreadcrumbNav items={breadcrumbItems} />
-            <div className="px-3 md:px-7 -mt-20 pb-10">
-                <div className="bg-white shadow-lg rounded-2xl p-6 md:p-8">
-                    {classes.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {classes.map((c, index) => (
-                                <Link
-                                    key={index}
-                                    href={route("absensi.class.show", {
-                                        kelas: c.kelas,
-                                        jurusan: c.jurusan,
-                                    })}
-                                    className="block group"
-                                >
-                                    <div className="p-6 bg-slate-50 hover:bg-sky-100 border border-slate-200 hover:border-sky-300 rounded-xl transition-all duration-200 cursor-pointer text-center">
-                                        <School className="w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105" />
-                                        <h4 className="mt-2 md:mt-4 text-lg md:text-xl font-medium text-neutral-700">
-                                            {c.kelas}
-                                        </h4>
-                                        <p className="text-sm text-gray-500">
-                                            {c.jurusan}
-                                        </p>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-10 text-neutral-500">
-                            Belum ada data kelas. Silakan tambahkan data siswa
-                            terlebih dahulu.
-                        </div>
-                    )}
+        <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
+            <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
+                Pilih Kelas
+            </h3>
+            {classes.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {classes.map((c, index) => (
+                        <ContentCard
+                            key={index}
+                            href={route("absensi.class.show", {
+                                kelas: c.kelas,
+                                jurusan: c.jurusan,
+                            })}
+                            icon={School}
+                            title={c.kelas}
+                            subtitle={c.jurusan}
+                        />
+                    ))}
                 </div>
-            </div>
-        </div>
+            ) : (
+                <DataNotFound
+                    title="Data Kelas Kosong"
+                    message="Belum ada data kelas. Silakan tambahkan data siswa terlebih dahulu."
+                />
+            )}
+        </PageContent>
     );
 };
 

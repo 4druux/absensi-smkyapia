@@ -5,6 +5,7 @@ import { Save, Users, PlusCircle, Trash2, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import Button from "@/Components/common/Button";
 import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
+import PageContent from "@/Components/common/PageContent";
 import InputSiswaTable from "@/Components/siswa/InputSiswaTable";
 import InputSiswaCard from "@/Components/siswa/InputSiswaCard";
 
@@ -264,169 +265,156 @@ const InputData = () => {
     const displayErrors = { ...pageErrors, ...clientErrors };
 
     return (
-        <div>
-            <BreadcrumbNav items={breadcrumbItems} />
-            <div className="px-3 md:px-7 -mt-20 pb-10">
-                <div className="bg-white shadow-lg rounded-2xl p-4 md:p-8 flex flex-col space-y-6">
-                    <div className="flex items-center space-x-3 mb-8">
-                        <div className="p-3 bg-sky-100 rounded-lg">
-                            <Users className="w-6 h-6 text-sky-600" />
-                        </div>
-                        <div>
-                            <h3 className="text-md md:text-lg font-medium text-neutral-700">
-                                Input Data Kelas & Siswa
-                            </h3>
-                            <p className="text-xs md:text-sm text-neutral-500">
-                                Masukkan informasi kelas dan daftar siswa di
-                                bawah ini.
-                            </p>
-                        </div>
-                    </div>
-
-                    <form
-                        ref={formRef}
-                        onSubmit={handleSubmit}
-                        className="space-y-6"
-                        noValidate
-                    >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label
-                                    htmlFor="kelas"
-                                    className="block text-sm font-medium text-neutral-700 mb-2"
-                                >
-                                    Kode Kelas{" "}
-                                    <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="kelas"
-                                    value={data.kelas}
-                                    onChange={(e) =>
-                                        setData("kelas", e.target.value)
-                                    }
-                                    placeholder="XI-TKJ-1"
-                                    className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
-                                        displayErrors.kelas
-                                            ? "border-red-400"
-                                            : "border-neutral-300 focus:border-sky-500"
-                                    }`}
-                                />
-                                {displayErrors.kelas && (
-                                    <p className="mt-1 text-xs text-red-600">
-                                        {displayErrors.kelas}
-                                    </p>
-                                )}
-                            </div>
-                            <div>
-                                <label
-                                    htmlFor="jurusan"
-                                    className="block text-sm font-medium text-neutral-700 mb-2"
-                                >
-                                    Jurusan{" "}
-                                    <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    id="jurusan"
-                                    value={data.jurusan}
-                                    onChange={(e) =>
-                                        setData("jurusan", e.target.value)
-                                    }
-                                    placeholder="Rekayasa Perangkat Lunak"
-                                    className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
-                                        displayErrors.jurusan
-                                            ? "border-red-400"
-                                            : "border-neutral-300 focus:border-sky-500"
-                                    }`}
-                                />
-                                {displayErrors.jurusan && (
-                                    <p className="mt-1 text-xs text-red-600">
-                                        {displayErrors.jurusan}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="border-t border-neutral-200 pt-6">
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                                <label className="block text-sm font-medium text-neutral-700">
-                                    Daftar Siswa{" "}
-                                    <span className="text-red-600">*</span>
-                                </label>
-                                <div className="flex items-center justify-end space-x-2">
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleFileChange}
-                                        style={{ display: "none" }}
-                                        accept=".csv, .xlsx, .xls"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleImportClick}
-                                        className="flex items-center space-x-2 text-xs font-medium text-sky-600 bg-sky-100 hover:bg-sky-200 p-2 md:px-3 md:py-2 rounded-lg transition-colors cursor-pointer"
-                                    >
-                                        <Upload size={16} />
-                                        <span>Import Data</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={addStudentRow}
-                                        className="flex items-center space-x-2 text-xs font-medium text-green-600 bg-green-100 hover:bg-green-200 p-2 md:px-3 md:py-2 rounded-lg transition-colors cursor-pointer"
-                                    >
-                                        <PlusCircle size={16} />
-                                        <span>Tambah Siswa</span>
-                                    </button>
-                                </div>
-                            </div>
-                            {importError && (
-                                <div className="text-center bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4 w-fit">
-                                    {importError}
-                                </div>
-                            )}
-                            {displayErrors.students && (
-                                <div
-                                    id="students-list-error"
-                                    className="text-center bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4 w-fit"
-                                >
-                                    {displayErrors.students}
-                                </div>
-                            )}
-
-                            <div className="hidden lg:block">
-                                <InputSiswaTable
-                                    students={data.students}
-                                    handleStudentChange={handleStudentChange}
-                                    removeStudentRow={removeStudentRow}
-                                    displayErrors={displayErrors}
-                                />
-                            </div>
-
-                            <div className="lg:hidden">
-                                <InputSiswaCard
-                                    students={data.students}
-                                    handleStudentChange={handleStudentChange}
-                                    removeStudentRow={removeStudentRow}
-                                    displayErrors={displayErrors}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="pt-6 flex justify-end border-t border-neutral-200">
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                disabled={processing}
-                            >
-                                <Save className="w-4 h-4 mr-2" />
-                                {processing ? "Menyimpan..." : "Simpan"}
-                            </Button>
-                        </div>
-                    </form>
+        <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
+            <div className="flex items-center space-x-3 mb-8">
+                <div className="p-3 bg-sky-100 rounded-lg">
+                    <Users className="w-6 h-6 text-sky-600" />
+                </div>
+                <div>
+                    <h3 className="text-md md:text-lg font-medium text-neutral-700">
+                        Input Data Kelas & Siswa
+                    </h3>
+                    <p className="text-xs md:text-sm text-neutral-500">
+                        Masukkan informasi kelas dan daftar siswa di bawah ini.
+                    </p>
                 </div>
             </div>
-        </div>
+
+            <form
+                ref={formRef}
+                onSubmit={handleSubmit}
+                className="space-y-6"
+                noValidate
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label
+                            htmlFor="kelas"
+                            className="block text-sm font-medium text-neutral-700 mb-2"
+                        >
+                            Kode Kelas <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="kelas"
+                            value={data.kelas}
+                            onChange={(e) => setData("kelas", e.target.value)}
+                            placeholder="XI-TKJ-1"
+                            className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
+                                displayErrors.kelas
+                                    ? "border-red-400"
+                                    : "border-slate-300 focus:border-sky-500"
+                            }`}
+                        />
+                        {displayErrors.kelas && (
+                            <p className="mt-1 text-xs text-red-600">
+                                {displayErrors.kelas}
+                            </p>
+                        )}
+                    </div>
+                    <div>
+                        <label
+                            htmlFor="jurusan"
+                            className="block text-sm font-medium text-neutral-700 mb-2"
+                        >
+                            Jurusan <span className="text-red-600">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="jurusan"
+                            value={data.jurusan}
+                            onChange={(e) => setData("jurusan", e.target.value)}
+                            placeholder="Rekayasa Perangkat Lunak"
+                            className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
+                                displayErrors.jurusan
+                                    ? "border-red-400"
+                                    : "border-slate-300 focus:border-sky-500"
+                            }`}
+                        />
+                        {displayErrors.jurusan && (
+                            <p className="mt-1 text-xs text-red-600">
+                                {displayErrors.jurusan}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="border-t border-neutral-200 pt-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                        <label className="block text-sm font-medium text-neutral-700">
+                            Daftar Siswa <span className="text-red-600">*</span>
+                        </label>
+                        <div className="flex items-center justify-end space-x-2">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                style={{ display: "none" }}
+                                accept=".csv, .xlsx, .xls"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleImportClick}
+                                className="flex items-center space-x-2 text-xs font-medium text-sky-600 bg-sky-100 hover:bg-sky-200 p-2 md:px-3 md:py-2 rounded-lg transition-colors cursor-pointer"
+                            >
+                                <Upload size={16} />
+                                <span>Import Data</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={addStudentRow}
+                                className="flex items-center space-x-2 text-xs font-medium text-green-600 bg-green-100 hover:bg-green-200 p-2 md:px-3 md:py-2 rounded-lg transition-colors cursor-pointer"
+                            >
+                                <PlusCircle size={16} />
+                                <span>Tambah Siswa</span>
+                            </button>
+                        </div>
+                    </div>
+                    {importError && (
+                        <div className="text-center bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4 w-fit">
+                            {importError}
+                        </div>
+                    )}
+                    {displayErrors.students && (
+                        <div
+                            id="students-list-error"
+                            className="text-center bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4 w-fit"
+                        >
+                            {displayErrors.students}
+                        </div>
+                    )}
+
+                    <div className="hidden lg:block">
+                        <InputSiswaTable
+                            students={data.students}
+                            handleStudentChange={handleStudentChange}
+                            removeStudentRow={removeStudentRow}
+                            displayErrors={displayErrors}
+                        />
+                    </div>
+
+                    <div className="lg:hidden">
+                        <InputSiswaCard
+                            students={data.students}
+                            handleStudentChange={handleStudentChange}
+                            removeStudentRow={removeStudentRow}
+                            displayErrors={displayErrors}
+                        />
+                    </div>
+                </div>
+
+                <div className="mt-6 flex justify-end">
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={processing}
+                    >
+                        <Save className="w-4 h-4 mr-2" />
+                        {processing ? "Menyimpan..." : "Simpan"}
+                    </Button>
+                </div>
+            </form>
+        </PageContent>
     );
 };
 
