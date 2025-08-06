@@ -24,20 +24,15 @@ const SelectYear = ({ academicYears, selectedClass }) => {
         e.preventDefault();
         setProcessing(true);
 
-        const latestYear =
-            academicYears.length > 0
-                ? parseInt(academicYears[0].year)
-                : new Date().getFullYear();
-        const newYear = (latestYear + 1).toString();
-
         router.post(
             route("uang-kas.year.store"),
-            { year: newYear },
+            {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+            },
             {
                 onSuccess: () => {
-                    toast.success(
-                        `Tahun ajaran ${newYear} berhasil ditambahkan!`
-                    );
+                    toast.success("Tahun ajaran berhasil ditambahkan!");
                 },
                 onError: (errors) => {
                     if (errors.year) {
@@ -54,10 +49,6 @@ const SelectYear = ({ academicYears, selectedClass }) => {
             }
         );
     };
-
-    const sortedYears = [...academicYears].sort((a, b) =>
-        b.year.localeCompare(a.year)
-    );
 
     return (
         <PageContent
@@ -81,9 +72,9 @@ const SelectYear = ({ academicYears, selectedClass }) => {
                 </Button>
             </div>
 
-            {sortedYears.length > 0 ? (
+            {academicYears.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {sortedYears.map((year) => (
+                    {academicYears.map((year) => (
                         <ContentCard
                             key={year.id}
                             href={route("uang-kas.year.show", {

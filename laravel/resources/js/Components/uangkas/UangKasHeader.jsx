@@ -1,5 +1,6 @@
 import { FaMoneyBillWave } from "react-icons/fa6";
 import { Users, School, BookOpen } from "lucide-react";
+import { formatRupiah } from "@/Utils/formatRupiah";
 
 const UangKasHeader = ({
     studentData,
@@ -7,7 +8,6 @@ const UangKasHeader = ({
     nominal,
     onNominalChange,
     isReadOnly,
-    formatRupiah,
 }) => {
     return (
         <>
@@ -53,58 +53,63 @@ const UangKasHeader = ({
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 mt-6">
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Total Siswa</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.totalStudents}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.totalStudents === 0
+                            ? "-"
+                            : summary.totalStudents}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Sudah Bayar</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.paidStudents}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.paidStudents === 0
+                            ? "-"
+                            : summary.paidStudents}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Belum Bayar</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.unpaidStudents}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.unpaidStudents === 0
+                            ? "-"
+                            : summary.unpaidStudents}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Nominal Kas</div>
-                    <div className="text-xl text-neutral-800">
-                        {isReadOnly ? (
-                            <span className="text-sm">
-                                {formatRupiah(nominal)}
-                            </span>
-                        ) : (
-                            <input
-                                type="number"
-                                min="0"
-                                value={nominal}
-                                onChange={(e) =>
-                                    onNominalChange(e.target.value)
-                                }
-                                placeholder="0"
-                                disabled={isReadOnly}
-                                className="w-full text-center p-1 bg-white rounded-full focus:outline-none border border-slate-100/80 focus:border-sky-300 disabled:bg-neutral-100 disabled:cursor-not-allowed"
-                            />
-                        )}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        <input
+                            type="text"
+                            value={formatRupiah(nominal)}
+                            onChange={(e) => {
+                                const rawValue = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                );
+                                onNominalChange(rawValue);
+                            }}
+                            placeholder="Rp 0"
+                            disabled={isReadOnly}
+                            className="w-full text-center p-1 bg-white rounded-full focus:outline-none border border-slate-100/80 focus:border-sky-300 disabled:bg-slate-100/80 disabled:border-none disabled:cursor-not-allowed"
+                        />
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">
                         Total Terkumpul
                     </div>
-                    <div className="text-xl text-neutral-800">
-                        <span className="text-sm">Rp </span>
-                        {summary.totalCollected.toLocaleString("id-ID")}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.totalCollected === 0
+                            ? "-"
+                            : formatRupiah(summary.totalCollected)}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Target</div>
-                    <div className="text-xl text-neutral-800">
-                        <span className="text-sm">Rp </span>
-                        {summary.target.toLocaleString("id-ID")}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.target === 0
+                            ? "-"
+                            : formatRupiah(summary.target)}
                     </div>
                 </div>
             </div>

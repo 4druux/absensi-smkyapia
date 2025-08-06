@@ -1,9 +1,8 @@
-import React from "react";
 import MainLayout from "@/Layouts/MainLayout";
-import { Link } from "@inertiajs/react";
-import { School } from "lucide-react";
 import PageContent from "@/Components/common/PageContent";
 import ContentCard from "@/Components/common/ContentCard";
+import DataNotFound from "@/Components/common/DataNotFound";
+import { School } from "lucide-react";
 
 const SelectClass = ({ classes }) => {
     const breadcrumbItems = [
@@ -17,20 +16,27 @@ const SelectClass = ({ classes }) => {
                 Pilih Kelas
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {classes.map((c, index) => (
-                    <ContentCard
-                        key={index}
-                        href={route("uang-kas.class.show", {
-                            kelas: c.kelas,
-                            jurusan: c.jurusan,
-                        })}
-                        icon={School}
-                        title={c.kelas}
-                        subtitle={c.jurusan}
-                    />
-                ))}
-            </div>
+            {classes.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {classes.map((c, index) => (
+                        <ContentCard
+                            key={index}
+                            href={route("uang-kas.class.show", {
+                                kelas: c.kelas,
+                                jurusan: c.jurusan,
+                            })}
+                            icon={School}
+                            title={c.kelas}
+                            subtitle={c.jurusan}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <DataNotFound
+                    title="Data Kelas Kosong"
+                    message="Belum ada data kelas. Silakan tambahkan data siswa terlebih dahulu."
+                />
+            )}
         </PageContent>
     );
 };

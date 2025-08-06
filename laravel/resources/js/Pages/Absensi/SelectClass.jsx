@@ -1,8 +1,8 @@
 import MainLayout from "@/Layouts/MainLayout";
-import { School } from "lucide-react";
 import PageContent from "@/Components/common/PageContent";
-import DataNotFound from "../../Components/common/DataNotFound";
-import ContentCard from "../../Components/common/ContentCard";
+import ContentCard from "@/Components/common/ContentCard";
+import DataNotFound from "@/Components/common/DataNotFound";
+import { School } from "lucide-react";
 
 const SelectClass = ({ classes }) => {
     const breadcrumbItems = [

@@ -7,9 +7,13 @@ use App\Models\Siswa;
 use App\Models\Absensi;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Holiday;
 use Illuminate\Support\Facades\DB;
 use App\Models\AcademicYear;
 use Illuminate\Validation\ValidationException;
+use App\Exports\AbsensiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class AbsensiController extends Controller
@@ -23,7 +27,7 @@ class AbsensiController extends Controller
         ];
         return $monthMap[strtolower($slug)] ?? null;
     }
-
+    
     public function selectClass()
     {
         $classes = Siswa::select('kelas', 'jurusan')->distinct()->get();
@@ -66,6 +70,7 @@ class AbsensiController extends Controller
         ]);
     }
 
+
     public function showMonth($kelas, $jurusan, $tahun, $bulanSlug)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
@@ -84,13 +89,64 @@ class AbsensiController extends Controller
             ->whereIn('siswa_id', $students->pluck('id'))
             ->distinct()
             ->pluck(DB::raw('DAY(tanggal)'));
+        
+        $dbHolidays = Holiday::whereYear('date', $tahun)
+            ->whereMonth('date', $monthNumber)
+            ->get()
+            ->pluck('date')
+            ->map(fn($date) => Carbon::parse($date)->day);
+        
+        $days = collect();
+        $firstDayOfMonth = Carbon::create($tahun, $monthNumber, 1);
+        $startDayOfWeek = $firstDayOfMonth->dayOfWeek; 
 
-        $days = collect(range(1, $daysInMonth))->map(function ($day) use ($tahun, $monthNumber) {
+        $paddingDaysCount = $startDayOfWeek;
+        if ($paddingDaysCount > 0) {
+            $lastDayOfPrevMonth = $firstDayOfMonth->copy()->subDay();
+            for ($i = $paddingDaysCount - 1; $i >= 0; $i--) {
+                $prevDate = $lastDayOfPrevMonth->copy()->subDays($i);
+                $days->push([
+                    'nomor' => $prevDate->day,
+                    'nama_hari' => $prevDate->translatedFormat('l'),
+                    'is_weekend' => $prevDate->isWeekend(),
+                    'is_outside_month' => true,
+                ]);
+            }
+        }
+        
+        $realDays = collect(range(1, $daysInMonth))->map(function ($day) use ($tahun, $monthNumber) {
+            $date = Carbon::create($tahun, $monthNumber, $day);
             return [
                 'nomor' => $day,
-                'nama_hari' => Carbon::create($tahun, $monthNumber, $day)->translatedFormat('l'),
+                'nama_hari' => $date->translatedFormat('l'),
+                'is_weekend' => $date->isWeekend(),
+                'is_outside_month' => false,
             ];
         });
+
+        $days = $days->merge($realDays);
+
+        $lastDayOfMonth = Carbon::create($tahun, $monthNumber, $daysInMonth);
+        $endDayOfWeek = $lastDayOfMonth->dayOfWeek;
+        $paddingEndDaysCount = 6 - $endDayOfWeek;
+        if ($paddingEndDaysCount > 0) {
+            $firstDayOfNextMonth = $lastDayOfMonth->copy()->addDay();
+            for ($i = 0; $i < $paddingEndDaysCount; $i++) {
+                $nextDate = $firstDayOfNextMonth->copy()->addDays($i);
+                $days->push([
+                    'nomor' => $nextDate->day,
+                    'nama_hari' => $nextDate->translatedFormat('l'),
+                    'is_weekend' => $nextDate->isWeekend(),
+                    'is_outside_month' => true,
+                ]);
+            }
+        }
+
+        $allHolidays = $days->filter(fn($day) => $day['is_weekend'] && !$day['is_outside_month'])
+                            ->pluck('nomor')
+                            ->filter()
+                            ->merge($dbHolidays)
+                            ->unique();
 
         return Inertia::render('Absensi/SelectDay', [
             'selectedClass' => ['kelas' => $kelas, 'jurusan' => $jurusan],
@@ -99,13 +155,14 @@ class AbsensiController extends Controller
             'namaBulan' => $namaBulan,
             'days' => $days,
             'absensiDays' => $absensiDays,
+            'holidays' => $allHolidays, 
         ]);
     }
 
     public function showDay($kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
-        if (!$monthNumber || !checkdate($monthNumber, $tanggal, $tahun)) {
+        if (!$monthNumber || !checkdate($monthNumber, (int) $tanggal, $tahun)) {
             abort(404);
         }
 
@@ -128,8 +185,8 @@ class AbsensiController extends Controller
 
         if ($existingAttendance->isNotEmpty()) {
             $tanggalAbsen = Carbon::parse($existingAttendance->first()->updated_at)
-                                ->setTimezone('Asia/Jakarta')
-                                ->translatedFormat('l, d F Y — H:i:s');
+                ->setTimezone('Asia/Jakarta')
+                ->translatedFormat('d-m-Y H:i:s');
         }
 
         return Inertia::render('Absensi/AbsensiPage', [
@@ -192,20 +249,91 @@ class AbsensiController extends Controller
         return redirect()->route('absensi.day.show', ['kelas' => $kelas, 'jurusan' => $jurusan, 'tahun' => $tahun, 'bulanSlug' => $bulanSlug, 'tanggal' => $tanggal])->with('success', 'Absensi berhasil disimpan!');
     }
 
-  public function storeYear(Request $request)
-{
-    $request->validate([
-        'kelas' => 'required|string',
-        'jurusan' => 'required|string',
-    ]);
+    public function storeYear(Request $request)
+    {
+        $request->validate([
+            'kelas' => 'required|string',
+            'jurusan' => 'required|string',
+        ]);
 
-    $latestYear = AcademicYear::orderBy('year', 'desc')->first();
-    $yearToAdd = $latestYear ? $latestYear->year + 1 : now()->year;
-    AcademicYear::firstOrCreate(['year' => $yearToAdd]);
+        $latestYear = AcademicYear::orderBy('year', 'desc')->first();
+        $yearToAdd = $latestYear ? $latestYear->year + 1 : now()->year;
+        AcademicYear::firstOrCreate(['year' => $yearToAdd]);
 
-    return redirect()->route('absensi.class.show', [
-        'kelas' => $request->kelas,
-        'jurusan' => $request->jurusan
-    ])->with('success', 'Tahun ajaran berhasil ditambahkan!');
-}
+        return redirect()->route('absensi.class.show', [
+            'kelas' => $request->kelas,
+            'jurusan' => $request->jurusan
+        ])->with('success', 'Tahun ajaran berhasil ditambahkan!');
+    }
+
+    public function storeHoliday($kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
+    {
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $holidayDate = Carbon::create($tahun, $monthNumber, $tanggal)->toDateString();
+
+        $existingHoliday = Holiday::where('date', $holidayDate)->exists();
+        if ($existingHoliday) {
+            return redirect()->back()->with('error', 'Tanggal ini sudah terdaftar sebagai hari libur.');
+        }
+
+        Holiday::create([
+            'date' => $holidayDate,
+            'description' => 'Hari Libur Tambahan',
+        ]);
+        
+        return redirect()->back()->with('success', 'Tanggal berhasil ditetapkan sebagai hari libur.');
+    }
+
+    public function exportMonthExcel($kelas, $jurusan, $tahun, $bulanSlug)
+    {
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $students = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->pluck('id');
+        $absensiCount = Absensi::whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $monthNumber)
+            ->whereIn('siswa_id', $students)
+            ->count();
+        
+        if ($absensiCount === 0) {
+            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+            return response()->json(['error' => "Tidak ada data absensi untuk bulan {$namaBulan} {$tahun}."], 404);
+        }
+
+        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+        $fileName = "Absensi-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.xlsx";
+
+        return Excel::download(new AbsensiExport($kelas, $jurusan, $tahun, $bulanSlug), $fileName);
+    }
+
+    public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
+    {
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $students = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
+        $absensiCount = Absensi::whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $monthNumber)
+            ->whereIn('siswa_id', $students->pluck('id'))
+            ->count();
+
+        if ($absensiCount === 0) {
+            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+            return response()->json(['error' => "Tidak ada data absensi untuk bulan {$namaBulan} {$tahun}."], 404);
+        }
+
+        $daysInMonth = Carbon::createFromDate($tahun, $monthNumber)->daysInMonth;
+        $absensiData = Absensi::whereIn('siswa_id', $students->pluck('id'))
+            ->whereYear('tanggal', $tahun)
+            ->whereMonth('tanggal', $monthNumber)
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [
+                    $item->siswa_id . '_' . Carbon::parse($item->tanggal)->day => $item->status,
+                ];
+            });
+
+        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+        $fileName = "Absensi-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.pdf";
+
+        $pdf = Pdf::loadView('exports.absensi', compact('students', 'kelas', 'jurusan', 'namaBulan', 'tahun', 'daysInMonth', 'absensiData'));
+        
+        return $pdf->download($fileName);
+    }
 }

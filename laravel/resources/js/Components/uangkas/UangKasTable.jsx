@@ -5,9 +5,9 @@ const UangKasTable = ({
     students,
     payments,
     onPaymentChange,
-    isReadOnly,
     onSelectAllChange,
     existingPayments,
+    allStudentsPaidFromDb,
 }) => {
     const allSelected = students.every(
         (student) => payments[student.id]?.status === "paid"
@@ -30,20 +30,17 @@ const UangKasTable = ({
                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase text-neutral-500">
                             <div className="flex items-center justify-center space-x-2">
                                 <span>Status Bayar</span>
-                                {!isReadOnly && (
-                                    <label className="inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={allSelected}
-                                            onChange={(e) =>
-                                                onSelectAllChange(
-                                                    e.target.checked
-                                                )
-                                            }
-                                            className="form-checkbox h-4 w-4 text-sky-600 rounded focus:ring-sky-500"
-                                        />
-                                    </label>
-                                )}
+                                <label className="inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={allSelected}
+                                        onChange={(e) =>
+                                            onSelectAllChange(e.target.checked)
+                                        }
+                                        disabled={allStudentsPaidFromDb}
+                                        className="form-checkbox h-4 w-4 text-sky-600 rounded focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    />
+                                </label>
                             </div>
                         </th>
                     </tr>
@@ -89,7 +86,7 @@ const UangKasTable = ({
                                                             : "unpaid"
                                                     )
                                                 }
-                                                disabled={isReadOnly}
+                                                disabled={false}
                                                 className="form-checkbox h-5 w-5 text-sky-600 rounded focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                             />
                                         </label>

@@ -77,10 +77,11 @@ const UangKasPage = ({
     const [fixedNominal, setFixedNominal] = useState(0);
     const [processing, setProcessing] = useState(false);
 
+    const hasAnyPaymentBeenSaved = Object.keys(existingPayments).length > 0;
+    const isReadOnly = hasAnyPaymentBeenSaved;
     const allStudentsPaidFromDb = studentData.students.every(
         (student) => existingPayments[student.id]?.status === "paid"
     );
-    const isReadOnly = allStudentsPaidFromDb;
 
     useEffect(() => {
         const initialState = {};
@@ -102,7 +103,7 @@ const UangKasPage = ({
     }, [studentData, existingPayments]);
 
     const handlePaymentChange = (studentId, field, value) => {
-        if (isReadOnly) {
+        if (existingPayments[studentId]?.status === "paid") {
             return;
         }
 
@@ -118,7 +119,15 @@ const UangKasPage = ({
     const handleSelectAllChange = (checked) => {
         const newPayments = {};
         studentData.students.forEach((student) => {
-            newPayments[student.id] = { status: checked ? "paid" : "unpaid" };
+            const existingStatus =
+                existingPayments[student.id]?.status || "unpaid";
+            if (existingStatus === "paid") {
+                newPayments[student.id] = { status: "paid" };
+            } else {
+                newPayments[student.id] = {
+                    status: checked ? "paid" : "unpaid",
+                };
+            }
         });
         setPayments(newPayments);
     };
@@ -176,27 +185,39 @@ const UangKasPage = ({
         );
     };
 
-    const getPaymentSummary = () => {
-        const paidStudentsCount = Object.values(payments).filter(
+    const getDbSummary = () => {
+        const paidStudentsCount = Object.values(existingPayments).filter(
             (payment) => payment.status === "paid"
         ).length;
 
+        const nominalFromDb = Object.values(existingPayments)[0]?.nominal || 0;
+
         const totalCollected =
-            paidStudentsCount * (parseInt(fixedNominal) || 0);
-        const target =
-            studentData.students.length * (parseInt(fixedNominal) || 0);
+            paidStudentsCount * (parseInt(nominalFromDb) || 0);
 
         return {
             totalStudents: studentData.students.length,
             paidStudents: paidStudentsCount,
             unpaidStudents: studentData.students.length - paidStudentsCount,
             totalCollected: totalCollected,
-            target: target,
+            target:
+                studentData.students.length * (parseInt(nominalFromDb) || 0),
         };
     };
 
-    const summary = getPaymentSummary();
-    
+    const hasChanges = () => {
+        for (const student of studentData.students) {
+            const currentStatus = payments[student.id]?.status || "unpaid";
+            const existingStatus =
+                existingPayments[student.id]?.status || "unpaid";
+            if (currentStatus !== existingStatus) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    const dbSummary = getDbSummary();
 
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
@@ -246,7 +267,7 @@ const UangKasPage = ({
                         classCode: selectedClass.kelas,
                         major: selectedClass.jurusan,
                     }}
-                    summary={summary}
+                    summary={dbSummary}
                     nominal={fixedNominal}
                     onNominalChange={handleNominalChange}
                     isReadOnly={isReadOnly}
@@ -265,7 +286,7 @@ const UangKasPage = ({
                             payments={payments}
                             existingPayments={existingPayments}
                             onPaymentChange={handlePaymentChange}
-                            isReadOnly={isReadOnly}
+                            allStudentsPaidFromDb={allStudentsPaidFromDb}
                             onSelectAllChange={handleSelectAllChange}
                         />
                     </div>
@@ -276,7 +297,7 @@ const UangKasPage = ({
                             payments={payments}
                             existingPayments={existingPayments}
                             onPaymentChange={handlePaymentChange}
-                            isReadOnly={isReadOnly}
+                            allStudentsPaidFromDb={allStudentsPaidFromDb}
                             onSelectAllChange={handleSelectAllChange}
                         />
                     </div>
@@ -300,12 +321,12 @@ const UangKasPage = ({
                     <Button
                         type="submit"
                         variant="primary"
-                        disabled={processing || isReadOnly}
+                        disabled={processing || !hasChanges()}
                     >
                         <Save className="w-4 h-4 mr-2" />
                         {processing
                             ? "Menyimpan..."
-                            : isReadOnly
+                            : !hasChanges()
                             ? "Disimpan"
                             : "Simpan"}
                     </Button>

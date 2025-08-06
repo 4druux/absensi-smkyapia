@@ -3,15 +3,18 @@ import { cva } from "class-variance-authority";
 import { clsx } from "clsx";
 
 const cardVariants = cva(
-    "p-6 border rounded-xl transition-all duration-200 cursor-pointer text-center group",
+    "p-6 border rounded-xl transition-all duration-200 text-center group",
     {
         variants: {
             variant: {
                 default:
-                    "bg-slate-50 hover:bg-sky-100 border-slate-200 hover:border-sky-300",
-                active: "bg-sky-100 border-sky-300",
-                success: "bg-green-100 border-green-300",
-                warning: "bg-yellow-100 border-yellow-300",
+                    "bg-slate-50 hover:bg-sky-100 border-slate-200 hover:border-sky-300 cursor-pointer",
+                active: "bg-sky-100 border-sky-300 cursor-pointer",
+                success:
+                    "bg-green-50 hover:bg-green-100 border-green-300 hover:border-green-400 cursor-pointer",
+                warning:
+                    "bg-yellow-50 hover:bg-yellow-100 border-yellow-300 hover:border-yellow-400 cursor-pointer",
+                error: "bg-red-100 border-red-300 hover:border-red-400 cursor-not-allowed",
             },
         },
         defaultVariants: {
@@ -42,9 +45,17 @@ const ContentCard = ({
         : "text-md md:text-lg";
 
     const titleTextColor =
-        variant === "success" ? "text-green-600" : "text-sky-600";
+        variant === "success"
+            ? "text-green-600"
+            : variant === "error"
+            ? "text-red-600"
+            : "text-sky-600";
     const subtitleTextColor =
-        variant === "success" ? "text-green-600" : "text-gray-500";
+        variant === "success"
+            ? "text-green-600"
+            : variant === "error"
+            ? "text-red-600"
+            : "text-gray-500";
 
     return (
         <Component

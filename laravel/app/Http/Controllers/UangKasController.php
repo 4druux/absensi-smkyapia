@@ -9,9 +9,23 @@ use App\Models\AcademicYear;
 use App\Models\UangKasPayment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Exports\UangKasExport;
+use App\Models\Holiday;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UangKasController extends Controller
 {
+    private function getMonthNumberFromSlug($slug)
+    {
+        $monthMap = [
+            'januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4,
+            'mei' => 5, 'juni' => 6, 'juli' => 7, 'agustus' => 8,
+            'september' => 9, 'oktober' => 10, 'november' => 11, 'desember' => 12,
+        ];
+        return $monthMap[strtolower($slug)] ?? null;
+    }
+
     public function index()
     {
         $classes = Siswa::select('kelas', 'jurusan')
@@ -60,54 +74,64 @@ class UangKasController extends Controller
 
     public function showMonth($kelas, $jurusan, $tahun, $bulanSlug)
     {
-        $monthNumber = array_search($bulanSlug, [
-            'januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli',
-            'agustus', 'september', 'oktober', 'november', 'desember',
-        ]) + 1;
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        if (!$monthNumber) {
+            abort(404);
+        }
 
-        $startDate = new \DateTime("$tahun-$monthNumber-01");
-        $endDate = clone $startDate;
-        $endDate->modify('last day of this month');
+        $firstDayOfMonth = Carbon::create($tahun, $monthNumber, 1);
+        $daysInMonth = $firstDayOfMonth->daysInMonth;
+        $namaBulan = $firstDayOfMonth->translatedFormat('F');
 
-        $minggu = [];
-        $currentDate = clone $startDate;
+        $weeks = [];
         $weekNumber = 1;
 
-        while ($currentDate <= $endDate) {
-            $startOfWeek = clone $currentDate;
-            while ($startOfWeek->format('N') != 1) { // Cari hari Senin
-                $startOfWeek->modify('-1 day');
-            }
-            $endOfWeek = clone $startOfWeek;
-            $endOfWeek->modify('+6 days');
+        $startOfWeek = $firstDayOfMonth->copy();
+        if ($startOfWeek->dayOfWeek !== Carbon::SUNDAY) {
+            $startOfWeek->startOfWeek(Carbon::SUNDAY);
+        }
+        
+        $lastDayOfMonth = $firstDayOfMonth->copy()->endOfMonth();
 
-            $displayEndOfWeek = clone $endOfWeek;
-            if ($displayEndOfWeek > $endDate) {
-                $displayEndOfWeek = clone $endDate;
-            }
-
-            $displayStartOfWeek = clone $startOfWeek;
-            if ($displayStartOfWeek < $startDate) {
-                $displayStartOfWeek = clone $startDate;
-            }
-
-            if ($displayStartOfWeek <= $endDate && $displayEndOfWeek >= $startDate) {
-                $minggu[] = [
-                    'id' => $weekNumber,
-                    'label' => "Minggu ke-$weekNumber",
-                    'start_date' => $displayStartOfWeek->format('Y-m-d'),
-                    'end_date' => $displayEndOfWeek->format('Y-m-d'),
-                ];
+        while ($startOfWeek <= $lastDayOfMonth) {
+            $endOfWeek = $startOfWeek->copy()->addDays(6);
+            
+            $weeks[] = [
+                'id' => $weekNumber,
+                'label' => "Minggu ke-$weekNumber",
+                'start_date' => $startOfWeek->format('d-m-Y'),
+                'end_date' => $endOfWeek->format('d-m-Y'),
+            ];
+            $weekNumber++;
+            $startOfWeek->addWeeks();
+        }
+        
+        $reindexedMinggu = array_values($weeks);
+        
+        foreach ($reindexedMinggu as $index => $week) {
+            $weekStart = Carbon::createFromFormat('d-m-Y', $week['start_date']);
+            $weekEnd = Carbon::createFromFormat('d-m-Y', $week['end_date']);
+            
+            $displayStart = $weekStart->copy();
+            if ($displayStart->month !== $monthNumber) {
+                $displayStart = $firstDayOfMonth->copy();
             }
             
-            $currentDate->modify('+7 days');
-            $weekNumber++;
+            $displayEnd = $weekEnd->copy();
+            if ($displayEnd->month !== $monthNumber) {
+                $displayEnd = $lastDayOfMonth->copy();
+            }
+
+            if ($displayStart->day == $displayEnd->day) {
+                $reindexedMinggu[$index]['display_date'] = $displayStart->format('d-m-Y');
+            } else {
+                $reindexedMinggu[$index]['display_date_range'] = $displayStart->format('d-m-Y') . ' s.d. ' . $displayEnd->format('d-m-Y');
+            }
         }
         
         $siswaIds = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->pluck('id');
         $totalSiswa = count($siswaIds);
 
-        // Perbaikan: Ambil jumlah siswa yang sudah bayar per minggu
         $paidStudentsCountByWeek = UangKasPayment::whereIn('siswa_id', $siswaIds)
             ->where('tahun', $tahun)
             ->where('bulan_slug', $bulanSlug)
@@ -117,23 +141,59 @@ class UangKasController extends Controller
             ->pluck('paid_count', 'minggu')
             ->toArray();
 
-        // Perbaikan: Tentukan minggu yang sudah lunas
         $fullyPaidWeeks = collect($paidStudentsCountByWeek)
             ->filter(fn($count) => $count === $totalSiswa)
             ->keys()
             ->toArray();
+        
+        $dbHolidays = Holiday::whereYear('date', $tahun)
+            ->whereMonth('date', $monthNumber)
+            ->get()
+            ->pluck('date')->toArray();
 
+        $finalMinggu = [];
+        foreach($reindexedMinggu as $week) {
+            $weekStart = Carbon::createFromFormat('d-m-Y', $week['start_date']);
+            $weekEnd = Carbon::createFromFormat('d-m-Y', $week['end_date']);
+            
+            $isPaid = in_array($week['id'], $fullyPaidWeeks);
+
+            $isHoliday = true;
+            $currentDate = $weekStart->copy();
+            while($currentDate <= $weekEnd) {
+                // Check if the current date is within the selected month before checking for holiday status
+                if ($currentDate->month !== $monthNumber) {
+                     $currentDate->addDay();
+                     continue;
+                }
+                if (!in_array($currentDate->format('Y-m-d'), $dbHolidays) && !$currentDate->isWeekend()) {
+                    $isHoliday = false;
+                    break;
+                }
+                $currentDate->addDay();
+            }
+
+            $finalMinggu[] = [
+                'id' => $week['id'],
+                'label' => $week['label'],
+                'start_date' => $week['start_date'],
+                'end_date' => $week['end_date'],
+                'display_date' => $week['display_date'] ?? null,
+                'display_date_range' => $week['display_date_range'] ?? null,
+                'is_paid' => $isPaid,
+                'is_holiday' => $isHoliday,
+            ];
+        }
 
         return Inertia::render('UangKas/SelectWeek', [
             'selectedClass' => (object) ['kelas' => $kelas, 'jurusan' => $jurusan],
             'tahun' => $tahun,
             'bulanSlug' => $bulanSlug,
-            'namaBulan' => Carbon::createFromDate($tahun, $monthNumber, 1)->translatedFormat('F'),
-            'minggu' => $minggu,
-            'paidWeeks' => $fullyPaidWeeks, // Mengirimkan minggu yang sudah LUNAS
+            'namaBulan' => $namaBulan,
+            'minggu' => $finalMinggu,
         ]);
     }
-
+    
     public function showWeek($kelas, $jurusan, $tahun, $bulanSlug, $minggu)
     {
         $siswa = Siswa::where('kelas', $kelas)
@@ -182,17 +242,15 @@ class UangKasController extends Controller
         ]);
 
         $fixedNominal = $request->input('fixed_nominal');
-            
+        
         $paidSiswaIds = collect($request->payments)->where('status', 'paid')->pluck('siswa_id');
 
-        // Hapus data pembayaran yang diubah menjadi 'unpaid'
         UangKasPayment::where('tahun', $tahun)
             ->where('bulan_slug', $bulanSlug)
             ->where('minggu', $minggu)
             ->whereNotIn('siswa_id', $paidSiswaIds)
             ->delete();
 
-        // Simpan atau perbarui pembayaran yang 'paid'
         foreach ($request->payments as $paymentData) {
             if ($paymentData['status'] === 'paid') {
                 UangKasPayment::updateOrCreate(
@@ -223,13 +281,89 @@ class UangKasController extends Controller
     public function storeYear(Request $request)
     {
         $request->validate([
-            'year' => 'required|unique:academic_years,year',
+            'kelas' => 'required|string',
+            'jurusan' => 'required|string',
         ]);
 
-        AcademicYear::create([
-            'year' => $request->input('year'),
+        $latestYear = AcademicYear::orderBy('year', 'desc')->first();
+        $yearToAdd = $latestYear ? $latestYear->year + 1 : now()->year;
+        AcademicYear::firstOrCreate(['year' => $yearToAdd]);
+
+        return redirect()->route('uang-kas.class.show', [
+            'kelas' => $request->kelas,
+            'jurusan' => $request->jurusan
+        ])->with('success', 'Tahun ajaran berhasil ditambahkan!');
+    }
+
+    public function storeHoliday($kelas, $jurusan, $tahun, $bulanSlug, $minggu)
+    {
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $startOfMonth = Carbon::createFromDate($tahun, $monthNumber, 1);
+        $targetWeek = $startOfMonth->addWeeks($minggu - 1)->startOfWeek(Carbon::MONDAY);
+        
+        $holidayDate = $targetWeek->format('d-m-Y');
+
+        $existingHoliday = Holiday::where('date', $holidayDate)->first();
+
+        if ($existingHoliday) {
+            return redirect()->back()->with('error', 'Minggu ini sudah terdaftar sebagai hari libur.');
+        }
+
+        Holiday::create([
+            'date' => $holidayDate,
+            'description' => "Hari Libur Uang Kas Minggu ke-{$minggu}",
         ]);
 
-        return back()->with('success', 'Tahun ajaran berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Minggu berhasil ditetapkan sebagai hari libur.');
+    }
+    
+    public function exportMonthExcel($kelas, $jurusan, $tahun, $bulanSlug)
+    {
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        
+        $siswaIds = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->pluck('id');
+        $uangKasCount = UangKasPayment::whereIn('siswa_id', $siswaIds)
+            ->where('tahun', $tahun)
+            ->where('bulan_slug', $bulanSlug)
+            ->count();
+        
+        if ($uangKasCount === 0) {
+            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan}."], 404);
+        }
+
+        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+        $fileName = "UangKas-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.xlsx";
+
+        return Excel::download(new UangKasExport($kelas, $jurusan, $tahun, $bulanSlug), $fileName);
+    }
+    
+    public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
+    {
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        
+        $siswaIds = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->pluck('id');
+        $uangKasCount = UangKasPayment::whereIn('siswa_id', $siswaIds)
+            ->where('tahun', $tahun)
+            ->where('bulan_slug', $bulanSlug)
+            ->count();
+
+        if ($uangKasCount === 0) {
+            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan}."], 404);
+        }
+        
+        $students = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
+        $uangKasData = UangKasPayment::whereIn('siswa_id', $students->pluck('id'))
+            ->where('tahun', $tahun)
+            ->where('bulan_slug', $bulanSlug)
+            ->get();
+        
+        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+        $fileName = "UangKas-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.pdf";
+
+        $pdf = Pdf::loadView('exports.uangkas', compact('students', 'kelas', 'jurusan', 'namaBulan', 'tahun', 'uangKasData'));
+        
+        return $pdf->download($fileName);
     }
 }

@@ -51,38 +51,38 @@ const AbsensiHeader = ({ studentData, tanggalAbsen, summary }) => {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 mt-6">
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Hadir</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.present}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.present === 0 ? "-" : summary.present}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Telat</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.telat}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.telat === 0 ? "-" : summary.telat}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Sakit</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.sakit}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.sakit === 0 ? "-" : summary.sakit}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Izin</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.izin}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.izin === 0 ? "-" : summary.izin}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Alfa</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.alfa}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.alfa === 0 ? "-" : summary.alfa}
                     </div>
                 </div>
                 <div className="p-3 flex flex-col justify-center text-center gap-1 rounded-lg bg-slate-100/80">
                     <div className="text-sm text-neutral-500">Bolos</div>
-                    <div className="text-xl text-neutral-800">
-                        {summary.bolos}
+                    <div className="text-md md:text-lg text-neutral-800">
+                        {summary.bolos === 0 ? "-" : summary.bolos}
                     </div>
                 </div>
             </div>

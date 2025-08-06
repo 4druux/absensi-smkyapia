@@ -1,5 +1,7 @@
 import { Users, ClipboardCheck } from "lucide-react";
+import { CiBank } from "react-icons/ci";
 import { Link } from "@inertiajs/react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Sidebar = ({ isOpen }) => {
     const menuItems = [
@@ -20,11 +22,54 @@ const Sidebar = ({ isOpen }) => {
         {
             id: "uang-kas",
             label: "Uang Kas",
-            icon: ClipboardCheck,
+            icon: CiBank,
             description: "Kelola uang kas",
             href: "/uang-kas",
         },
     ];
+
+    const listVariants = {
+        visible: {
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2,
+            },
+        },
+        hidden: {},
+    };
+
+    const itemVariants = {
+        visible: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                type: "spring",
+                stiffness: 100,
+                damping: 12,
+            },
+        },
+        hidden: {
+            opacity: 0,
+            x: -20,
+        },
+    };
+
+    const footerVariants = {
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                stiffness: 100,
+                damping: 12,
+                delay: 0.5, 
+            },
+        },
+        hidden: {
+            opacity: 0,
+            y: 20,
+        },
+    };
 
     return (
         <aside
@@ -52,63 +97,88 @@ const Sidebar = ({ isOpen }) => {
                     </div>
                 </div>
 
-                <nav className="flex-1 p-3 md:p-5">
-                    <ul className="space-y-2">
-                        {menuItems.map((item) => {
-                            const Icon = item.icon;
-                            const isActive =
-                                window.location.pathname.startsWith(item.href);
+                <nav className="flex-1 p-3 md:p-5 overflow-hidden">
+                    <AnimatePresence>
+                        {isOpen && (
+                            <motion.ul
+                                className="space-y-2"
+                                initial="hidden"
+                                animate="visible"
+                                exit="hidden"
+                                variants={listVariants}
+                            >
+                                {menuItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const isActive =
+                                        window.location.pathname.startsWith(
+                                            item.href
+                                        );
 
-                            return (
-                                <li key={item.id}>
-                                    <Link
-                                        href={item.href}
-                                        className={`w-full flex items-center space-x-2 md:space-x-3 p-4 rounded-2xl transition-all duration-200 text-left cursor-pointer ${
-                                            isActive
-                                                ? "bg-sky-100"
-                                                : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
-                                        }`}
-                                    >
-                                        <Icon
-                                            className={`w-5 h-5 ${
-                                                isActive
-                                                    ? "text-sky-600"
-                                                    : "text-neutral-500"
-                                            }`}
-                                        />
-                                        <div className="flex-1">
-                                            <div
-                                                className={`font-medium text-sm ${
+                                    return (
+                                        <motion.li
+                                            key={item.id}
+                                            variants={itemVariants}
+                                        >
+                                            <Link
+                                                href={item.href}
+                                                className={`w-full flex items-center space-x-2 md:space-x-3 p-4 rounded-2xl transition-all duration-200 text-left cursor-pointer group ${
                                                     isActive
-                                                        ? "text-sky-600"
-                                                        : ""
+                                                        ? "bg-sky-100"
+                                                        : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-800"
                                                 }`}
                                             >
-                                                {item.label}
-                                            </div>
-                                            <div
-                                                className={`text-xs ${
-                                                    isActive
-                                                        ? "text-sky-600"
-                                                        : "text-neutral-500"
-                                                }`}
-                                            >
-                                                {item.description}
-                                            </div>
-                                        </div>
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                                                <Icon
+                                                    className={`w-8 h-8 ${
+                                                        isActive
+                                                            ? "text-sky-600"
+                                                            : "text-neutral-600"
+                                                    }`}
+                                                />
+                                                <div className="flex-1">
+                                                    <div
+                                                        className={`font-medium text-sm ${
+                                                            isActive
+                                                                ? "text-sky-600"
+                                                                : ""
+                                                        }`}
+                                                    >
+                                                        {item.label}
+                                                    </div>
+                                                    <div
+                                                        className={`text-xs ${
+                                                            isActive
+                                                                ? "text-sky-600"
+                                                                : "text-neutral-500 hover:text-neutral-800"
+                                                        }`}
+                                                    >
+                                                        {item.description}
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        </motion.li>
+                                    );
+                                })}
+                            </motion.ul>
+                        )}
+                    </AnimatePresence>
                 </nav>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-slate-200">
-                    <div className="text-xs text-neutral-500 text-center">
-                        Sistem Absensi v1.0
-                    </div>
-                </div>
+                <AnimatePresence>
+                    {isOpen && (
+                        <div className="p-4 border-t border-slate-200">
+                            <motion.div
+                                initial="hidden"
+                                animate="visible"
+                                exit="hidden"
+                                variants={footerVariants}
+                                className="text-xs uppercase text-neutral-500 text-center"
+                            >
+                                Smk Yapia Parung &copy;{" "}
+                                {new Date().getFullYear()}
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
         </aside>
     );

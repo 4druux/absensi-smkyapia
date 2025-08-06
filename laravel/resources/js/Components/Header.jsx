@@ -1,7 +1,31 @@
-import React from "react";
-import { Menu, User } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Menu, User, Settings, LogOut } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Header = ({ onMenuClick }) => {
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    const dropdownVariants = {
+        hidden: { opacity: 0, y: -5, scale: 0.98 },
+        visible: { opacity: 1, y: 0, scale: 1 },
+    };
+
     return (
         <header className="bg-sky-500 text-white sticky top-0 z-30">
             <div className="flex items-center justify-between py-4 md:p-4">
@@ -18,13 +42,53 @@ const Header = ({ onMenuClick }) => {
                     </h1>
                 </div>
 
-                <div className="flex items-center">
+                <div ref={dropdownRef} className="relative flex items-center">
                     <button
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         className="p-2 rounded-full hover:bg-sky-400/40 focus:outline-none cursor-pointer"
                         aria-label="User Profile"
                     >
                         <User className="w-6 h-6" />
                     </button>
+
+                    <AnimatePresence>
+                        {isDropdownOpen && (
+                            <motion.div
+                                initial="hidden"
+                                animate="visible"
+                                exit="hidden"
+                                variants={dropdownVariants}
+                                transition={{
+                                    duration: 0.15,
+                                    ease: "easeInOut",
+                                }}
+                                className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200"
+                            >
+                                <div
+                                    className="py-1 px-2"
+                                    role="menu"
+                                    aria-orientation="vertical"
+                                >
+                                    <a
+                                        href="#"
+                                        className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-slate-100 rounded-md"
+                                        role="menuitem"
+                                    >
+                                        <Settings className="w-4 h-4 text-gray-500" />
+                                        <span>Pengaturan Akun</span>
+                                    </a>
+                                    <a
+                                        href="#"
+                                        className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md"
+                                        role="menuitem"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        <span>Keluar</span>
+                                    </a>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </header>

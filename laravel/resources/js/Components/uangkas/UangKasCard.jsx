@@ -5,9 +5,9 @@ const UangKasCard = ({
     students,
     payments,
     onPaymentChange,
-    isReadOnly,
     onSelectAllChange,
     existingPayments,
+    allStudentsPaidFromDb,
 }) => {
     const allSelected = students.every(
         (student) => payments[student.id]?.status === "paid"
@@ -15,30 +15,29 @@ const UangKasCard = ({
 
     return (
         <div className="grid grid-cols-1 gap-4">
-            <div className="p-4 border rounded-xl border-neutral-300 bg-slate-50">
+            <div className="p-4 border rounded-xl border-slate-300">
                 <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-neutral-700">
                         Pilih Semua
                     </p>
-                    {!isReadOnly && (
-                        <label className="inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                checked={allSelected}
-                                onChange={(e) =>
-                                    onSelectAllChange(e.target.checked)
-                                }
-                                className="form-checkbox h-5 w-5 text-sky-600 rounded focus:ring-sky-500"
-                            />
-                        </label>
-                    )}
+                    <label className="inline-flex items-center cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={(e) =>
+                                onSelectAllChange(e.target.checked)
+                            }
+                            disabled={allStudentsPaidFromDb}
+                            className="form-checkbox h-4 w-4 text-sky-600 rounded focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        />
+                    </label>
                 </div>
             </div>
 
             {students.map((student, index) => (
                 <div
                     key={student.id}
-                    className="p-4 space-y-3 border rounded-xl border-neutral-300"
+                    className="p-4 space-y-3 border rounded-xl border-slate-300"
                 >
                     <div className="flex items-center justify-between">
                         <div className="flex items-start justify-between">
@@ -80,8 +79,8 @@ const UangKasCard = ({
                                                     : "unpaid"
                                             )
                                         }
-                                        disabled={isReadOnly}
-                                        className="form-checkbox h-5 w-5 text-sky-600 rounded focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        disabled={false}
+                                        className="form-checkbox h-4 w-4 text-sky-600 rounded focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                     />
                                 </label>
                             )}

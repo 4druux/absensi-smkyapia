@@ -1,18 +1,47 @@
-import React from "react";
+// resources/js/Pages/UangKas/SelectWeek.jsx
+
+import { useEffect } from "react";
 import MainLayout from "@/Layouts/MainLayout";
-import { ArrowLeft, CalendarDays, CheckCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import Button from "@/Components/common/Button";
 import PageContent from "@/Components/common/PageContent";
 import ContentCard from "@/Components/common/ContentCard";
+import { usePage } from "@inertiajs/react";
+import toast from "react-hot-toast";
 
-const SelectWeek = ({
-    minggu,
+const SelectWeekPage = ({
     tahun,
     bulanSlug,
     namaBulan,
+    minggu,
     selectedClass,
     paidWeeks,
+    holidays,
 }) => {
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        if (flash && flash.success) {
+            toast.success(flash.success);
+        }
+        if (flash && flash.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
+    const isPaid = (weekId) => {
+        return paidWeeks.includes(weekId);
+    };
+
+    const isHoliday = (week) => {
+        const weekDates = week.days.map((day) => {
+            const date = `${tahun}-${bulanSlug}-${day.nomor}`;
+            return date;
+        });
+
+        return weekDates.every((date) => holidays.includes(date));
+    };
+
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
         {
@@ -37,10 +66,6 @@ const SelectWeek = ({
         { label: "Pilih Minggu", href: null },
     ];
 
-    const isFullyPaid = (weekId) => {
-        return paidWeeks.includes(weekId);
-    };
-
     return (
         <PageContent
             breadcrumbItems={breadcrumbItems}
@@ -49,25 +74,40 @@ const SelectWeek = ({
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
                 Pilih Minggu ({namaBulan} {tahun})
             </h3>
-
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {minggu.map((week) => (
                     <ContentCard
                         key={week.id}
-                        href={route("uang-kas.week.show", {
-                            kelas: selectedClass.kelas,
-                            jurusan: selectedClass.jurusan,
-                            tahun,
-                            bulanSlug: bulanSlug,
-                            minggu: week.id,
-                        })}
-                        variant={isFullyPaid(week.id) ? "success" : "default"}
+                        href={
+                            week.is_paid || week.is_holiday
+                                ? null
+                                : route("uang-kas.week.show", {
+                                      kelas: selectedClass.kelas,
+                                      jurusan: selectedClass.jurusan,
+                                      tahun,
+                                      bulanSlug: bulanSlug,
+                                      minggu: week.id,
+                                  })
+                        }
+                        variant={
+                            week.is_paid
+                                ? "success"
+                                : week.is_holiday
+                                ? "error"
+                                : "default"
+                        }
                         title={week.label}
-                        subtitle={`${week.start_date} s.d. ${week.end_date}`}
+                        // PERUBAHAN: Menggunakan logika baru untuk subtitle
+                        subtitle={week.display_date_range || week.display_date}
                     >
-                        {isFullyPaid(week.id) && (
-                            <div className="absolute -top-3 -right-3">
+                        {week.is_paid && (
+                            <div className="absolute -top-4 -right-3">
                                 <CheckCircle className="w-5 h-5 text-green-600" />
+                            </div>
+                        )}
+                        {week.is_holiday && (
+                            <div className="absolute -top-4 -right-4 text-sm font-semibold text-red-600">
+                                LIBUR
                             </div>
                         )}
                     </ContentCard>
@@ -81,7 +121,7 @@ const SelectWeek = ({
                     href={route("uang-kas.year.show", {
                         kelas: selectedClass.kelas,
                         jurusan: selectedClass.jurusan,
-                        tahun,
+                        tahun: tahun,
                     })}
                 >
                     <ArrowLeft size={16} className="mr-2" />
@@ -92,11 +132,11 @@ const SelectWeek = ({
     );
 };
 
-SelectWeek.layout = (page) => (
+SelectWeekPage.layout = (page) => (
     <MainLayout
         children={page}
         title={`Pilih Minggu - ${page.props.namaBulan}`}
     />
 );
 
-export default SelectWeek;
+export default SelectWeekPage;

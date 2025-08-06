@@ -29,7 +29,13 @@ Route::controller(AbsensiController::class)->prefix('absensi')->name('absensi.')
     Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}', 'showMonth')->name('month.show');
     Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{tanggal}', 'showDay')->name('day.show');
     Route::post('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{tanggal}', 'store')->name('day.store');
-    Route::post('/year', 'storeYear')->name('year.store'); 
+    Route::post('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{tanggal}/holiday', 'storeHoliday')->name('holiday.store');
+    Route::post('/year', 'storeYear')->name('year.store');
+
+    // eksport
+    Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/excel', 'exportMonthExcel')->name('month.export.excel');
+    Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/pdf', 'exportMonthPdf')->name('month.export.pdf');
+
 });
 
 
@@ -41,5 +47,11 @@ Route::controller(UangKasController::class)->prefix('uang-kas')->name('uang-kas.
     Route::get('/kelas/{kelas}/{jurusan}/{tahun}/{bulanSlug}', 'showMonth')->name('month.show');
     Route::get('/kelas/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}', 'showWeek')->name('week.show');
     Route::post('/kelas/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}', 'store')->name('week.store');
+    Route::post('/kelas/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}/holiday', 'storeHoliday')->name('holiday.store');
     Route::post('/year', 'storeYear')->name('year.store');
+
+    // eksport
+    Route::get('/kelas/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/excel', 'exportMonthExcel')->name('month.export.excel');
+    Route::get('/kelas/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/pdf', 'exportMonthPdf')->name('month.export.pdf');
+  
 });
