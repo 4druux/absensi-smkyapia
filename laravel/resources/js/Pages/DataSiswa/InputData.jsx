@@ -1,10 +1,9 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import MainLayout from "@/Layouts/MainLayout";
 import { useForm, usePage } from "@inertiajs/react";
-import { Save, Users, PlusCircle, Trash2, Upload } from "lucide-react";
+import { Save, Users, PlusCircle, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import Button from "@/Components/common/Button";
-import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
 import PageContent from "@/Components/common/PageContent";
 import InputSiswaTable from "@/Components/siswa/InputSiswaTable";
 import InputSiswaCard from "@/Components/siswa/InputSiswaCard";
@@ -91,7 +90,8 @@ const InputData = () => {
                     .toString()
                     .trim(),
             }))
-            .filter((s) => s.nis && s.nama);
+            .filter((s) => s.nis && s.nama)
+            .sort((a, b) => a.nama.localeCompare(b.nama));
 
         if (newStudents.length > 0) {
             toast.success(`${newStudents.length} data siswa berhasil diimpor.`);

@@ -72,13 +72,16 @@ const InputSiswaCard = ({
                                 type="text"
                                 id={`student-nis-${index}`}
                                 value={student.nis}
-                                onChange={(e) =>
-                                    handleStudentChange(
-                                        index,
-                                        "nis",
-                                        e.target.value
-                                    )
-                                }
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (/^\d*$/.test(value)) {
+                                        handleStudentChange(
+                                            index,
+                                            "nis",
+                                            value
+                                        );
+                                    }
+                                }}
                                 placeholder="Nomor Induk Siswa"
                                 className={`w-full px-4 py-2.5 rounded-xl border focus:outline-none placeholder:text-sm ${
                                     displayErrors[`students.${index}.nis`]

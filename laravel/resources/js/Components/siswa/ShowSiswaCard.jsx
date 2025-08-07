@@ -58,7 +58,12 @@ const ShowSiswaCard = ({
                                         type="text"
                                         name="nis"
                                         value={editData.nis}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (/^\d*$/.test(value)) {
+                                                handleInputChange(e);
+                                            }
+                                        }}
                                         className="w-full p-2 mt-1 text-base border border-slate-300 focus:border-sky-300 rounded-xl focus:outline-none"
                                     />
                                 </label>

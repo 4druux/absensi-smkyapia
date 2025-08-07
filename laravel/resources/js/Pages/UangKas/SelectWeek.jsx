@@ -1,5 +1,3 @@
-// resources/js/Pages/UangKas/SelectWeek.jsx
-
 import { useEffect } from "react";
 import MainLayout from "@/Layouts/MainLayout";
 import { ArrowLeft, CheckCircle } from "lucide-react";
@@ -97,7 +95,6 @@ const SelectWeekPage = ({
                                 : "default"
                         }
                         title={week.label}
-                        // PERUBAHAN: Menggunakan logika baru untuk subtitle
                         subtitle={week.display_date_range || week.display_date}
                     >
                         {week.is_paid && (

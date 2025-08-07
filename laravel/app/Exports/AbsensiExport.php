@@ -281,7 +281,8 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
                 }
 
                 $sheet->getStyle('A' . $headerStartRow . ':' . $lastCol . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
-                $sheet->getStyle('B' . $headerStartRow . ':' . 'B' . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                $sheet->getStyle('B' . $headerStartRow . ':B' . $headerEndRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('B' . ($headerEndRow + 1) . ':B' . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
                 for ($row = $firstDataRow; $row <= $lastDataRow; $row++) {
                     $dateOffset = 2;
@@ -317,7 +318,7 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
                     ['I', 'Izin'],
                     ['A', 'Alfa'],
                     ['B', 'Bolos'],
-                    ['Libur', 'Hari Libur / Akhir Pekan'],
+                    ['', 'Hari Libur / Akhir Pekan'],
                 ];
 
                 $statusColWidth = 10;

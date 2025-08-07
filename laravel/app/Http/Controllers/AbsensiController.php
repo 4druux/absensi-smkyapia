@@ -304,36 +304,60 @@ class AbsensiController extends Controller
         return Excel::download(new AbsensiExport($kelas, $jurusan, $tahun, $bulanSlug), $fileName);
     }
 
-    public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
-    {
-        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
-        $students = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
-        $absensiCount = Absensi::whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $monthNumber)
-            ->whereIn('siswa_id', $students->pluck('id'))
-            ->count();
-
-        if ($absensiCount === 0) {
-            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
-            return response()->json(['error' => "Tidak ada data absensi untuk bulan {$namaBulan} {$tahun}."], 404);
-        }
-
-        $daysInMonth = Carbon::createFromDate($tahun, $monthNumber)->daysInMonth;
-        $absensiData = Absensi::whereIn('siswa_id', $students->pluck('id'))
-            ->whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $monthNumber)
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [
-                    $item->siswa_id . '_' . Carbon::parse($item->tanggal)->day => $item->status,
-                ];
-            });
-
-        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
-        $fileName = "Absensi-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.pdf";
-
-        $pdf = Pdf::loadView('exports.absensi', compact('students', 'kelas', 'jurusan', 'namaBulan', 'tahun', 'daysInMonth', 'absensiData'));
-        
-        return $pdf->download($fileName);
+  public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
+{
+    $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+    if (!$monthNumber) {
+        return response()->json(['error' => 'Bulan tidak valid.'], 404);
     }
+    
+    $students = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
+    
+    if ($students->isEmpty()) {
+        return response()->json(['error' => "Tidak ada siswa di kelas {$kelas} {$jurusan}."], 404);
+    }
+
+    $absensiCount = Absensi::whereYear('tanggal', $tahun)
+        ->whereMonth('tanggal', $monthNumber)
+        ->whereIn('siswa_id', $students->pluck('id'))
+        ->count();
+
+    if ($absensiCount === 0) {
+        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+        return response()->json(['error' => "Tidak ada data absensi untuk bulan {$namaBulan} {$tahun}."], 404);
+    }
+
+    $daysInMonth = Carbon::createFromDate($tahun, $monthNumber)->daysInMonth;
+    $absensiData = Absensi::whereIn('siswa_id', $students->pluck('id'))
+        ->whereYear('tanggal', $tahun)
+        ->whereMonth('tanggal', $monthNumber)
+        ->get()
+        ->mapWithKeys(function ($item) {
+            return [
+                $item->siswa_id . '_' . Carbon::parse($item->tanggal)->day => $item->status,
+            ];
+        });
+
+    $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+    $fileName = "Absensi-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.pdf";
+
+    $dbHolidays = Holiday::whereYear('date', $tahun)
+        ->whereMonth('date', $monthNumber)
+        ->pluck('date');
+    $weekends = collect();
+    $date = Carbon::create($tahun, $monthNumber, 1);
+    for ($i = 0; $i < $daysInMonth; $i++) {
+        if ($date->isWeekend()) {
+            $weekends->push($date->format('Y-m-d'));
+        }
+        $date->addDay();
+    }
+    $allHolidays = $dbHolidays->merge($weekends)->unique()->map(fn($date) => Carbon::parse($date)->day);
+
+    $logoPath = 'images/logo-smk.png'; 
+    
+    $pdf = Pdf::loadView('exports.absensi', compact('students', 'kelas', 'jurusan', 'namaBulan', 'tahun', 'daysInMonth', 'absensiData', 'allHolidays', 'monthNumber', 'logoPath'));
+    
+    return $pdf->download($fileName);
+}
 }

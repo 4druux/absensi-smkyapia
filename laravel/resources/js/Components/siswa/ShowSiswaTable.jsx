@@ -60,7 +60,12 @@ const ShowSiswaTable = ({
                                         type="text"
                                         name="nis"
                                         value={editData.nis}
-                                        onChange={handleInputChange}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (/^\d*$/.test(value)) {
+                                                handleInputChange(e);
+                                            }
+                                        }}
                                         className="w-full p-2 text-sm border border-slate-300 focus:border-sky-300 rounded-xl focus:outline-none"
                                     />
                                 ) : (

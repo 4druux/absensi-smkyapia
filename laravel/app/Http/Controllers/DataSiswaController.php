@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Log; // <-- Tambahkan baris ini
+use Illuminate\Support\Facades\Log; 
 
 
 class DataSiswaController extends Controller
@@ -22,18 +22,21 @@ class DataSiswaController extends Controller
         ]);
     }
 
-    public function showClass($kelas, $jurusan)
-    {
-        $students = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->get();
+  public function showClass($kelas, $jurusan)
+{
+    $students = Siswa::where('kelas', $kelas)
+                     ->where('jurusan', $jurusan)
+                     ->orderBy('nama')
+                     ->get();
 
-        return Inertia::render('DataSiswa/ShowClass', [
-            'selectedClass' => [
-                'kelas' => $kelas,
-                'jurusan' => $jurusan
-            ],
-            'students' => $students,
-        ]);
-    }
+    return Inertia::render('DataSiswa/ShowClass', [
+        'selectedClass' => [
+            'kelas' => $kelas,
+            'jurusan' => $jurusan
+        ],
+        'students' => $students,
+    ]);
+}
     
     public function create()
     {
@@ -52,10 +55,9 @@ class DataSiswaController extends Controller
             'students.*.nis' => 'required|string|max:20',
         ]);
 
-        $kelas = trim($request->kelas);
-        $jurusan = trim($request->jurusan);
+        $kelas = strtoupper(trim($request->kelas));
+        $jurusan = strtoupper(trim($request->jurusan));
 
-        // Validasi duplikasi NIS dalam satu form yang sama
         $allNisInForm = collect($request->students)->pluck('nis')->map(fn($nis) => trim($nis));
         if ($allNisInForm->duplicates()->isNotEmpty()) {
             throw ValidationException::withMessages([
@@ -63,7 +65,6 @@ class DataSiswaController extends Controller
             ]);
         }
         
-        // Cek duplikasi siswa yang sudah ada di kelas yang sama
         $duplicates = Siswa::where('kelas', $kelas)
             ->where('jurusan', $jurusan)
             ->whereIn('nis', $allNisInForm)
@@ -126,10 +127,8 @@ public function destroyStudent($id)
         $kelas = $student->kelas;
         $jurusan = $student->jurusan;
 
-        // Hapus siswa
         $deleted = $student->delete();
 
-        // Log untuk debugging
         if ($deleted) {
             Log::info("Siswa dengan ID {$id} berhasil dihapus.");
         } else {
