@@ -1,29 +1,50 @@
-import { useState, useEffect } from "react";
-import { router } from "@inertiajs/react";
-import toast from "react-hot-toast";
-import { Save, ArrowLeft } from "lucide-react";
-import MainLayout from "@/Layouts/MainLayout";
-import PageContent from "@/Components/common/PageContent";
-import AbsensiTable from "@/Components/absensi/AbsensiTable";
-import AbesensiCard from "@/Components/absensi/AbsensiCard";
-import AbsensiHeader from "@/Components/absensi/AbsensiHeader";
-import Button from "@/Components/common/Button";
-import DataNotFound from "../../Components/common/DataNotFound";
+import { useEffect } from "react";
 
-const AbsensiPage = ({
-    studentData,
-    tanggal,
-    bulan,
-    namaBulan,
-    tahun,
-    existingAttendance,
-    tanggalAbsen,
-    selectedClass,
-}) => {
+import toast from "react-hot-toast";
+import { usePage } from "@inertiajs/react";
+import { Save, ArrowLeft } from "lucide-react";
+
+// Components
+import MainLayout from "@/Layouts/MainLayout";
+import AbsensiTable from "@/Components/absensi/absensi-table";
+import AbsensiCard from "@/Components/absensi/absensi-card";
+import AbsensiHeader from "@/Components/absensi/absensi-header";
+import Button from "@/Components/common/button";
+import DataNotFound from "@/Components/ui/data-not-found";
+import DotLoader from "@/Components/ui/dot-loader";
+import PageContent from "@/Components/ui/page-content";
+import { useDailyAttendance } from "@/hooks/absensi/use-daily-attendance";
+
+const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
+    const {
+        attendanceData,
+        isLoading,
+        error,
+        isProcessing,
+        hasAttendanceBeenSaved,
+        attendance,
+        attendanceStatuses,
+        summary,
+        handleAttendanceChange,
+        handleSubmit,
+    } = useDailyAttendance(
+        selectedClass.kelas,
+        selectedClass.jurusan,
+        tahun,
+        bulan,
+        tanggal
+    );
+
+    const { props } = usePage();
+    useEffect(() => {
+        if (props.flash?.success) toast.success(props.flash.success);
+        if (props.flash?.error) toast.error(props.flash.error);
+    }, [props.flash]);
+
     if (
-        !studentData ||
-        !studentData.students ||
-        studentData.students.length === 0
+        !attendanceData ||
+        !attendanceData.students ||
+        attendanceData.students.length === 0
     ) {
         const notFoundBreadcrumb = [
             { label: "Absensi", href: route("absensi.index") },
@@ -71,132 +92,21 @@ const AbsensiPage = ({
         );
     }
 
-    const [attendance, setAttendance] = useState({});
-    const [processing, setProcessing] = useState(false);
-    const hasAttendanceBeenSaved = !!tanggalAbsen;
-
-    useEffect(() => {
-        const initialState = {};
-        if (studentData?.students) {
-            studentData.students.forEach((student) => {
-                initialState[student.id] =
-                    existingAttendance[student.id] || null;
-            });
-        }
-        setAttendance(initialState);
-    }, [studentData, existingAttendance]);
-
-    const handleAttendanceChange = (studentId, status) => {
-        if (hasAttendanceBeenSaved) {
-            return;
-        }
-
-        setAttendance((prev) => {
-            const newAttendance = { ...prev };
-            newAttendance[studentId] =
-                newAttendance[studentId] === status ? null : status;
-            return newAttendance;
-        });
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (hasAttendanceBeenSaved) {
-            toast.error(
-                "Absensi untuk hari ini sudah dicatat dan tidak bisa diubah."
-            );
-            return;
-        }
-        const allStudentIdsOnPage = studentData.students.map(
-            (student) => student.id
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <DotLoader text="Memuat daftar siswa..." />
+            </div>
         );
-        const payload = {
-            attendance: Object.entries(attendance)
-                .filter(([, status]) => status !== null)
-                .map(([siswa_id, status]) => ({
-                    siswa_id,
-                    status,
-                })),
-            all_student_ids: allStudentIdsOnPage,
-        };
-        router.post(
-            route("absensi.day.store", {
-                kelas: selectedClass.kelas,
-                jurusan: selectedClass.jurusan,
-                tahun,
-                bulanSlug: bulan,
-                tanggal,
-            }),
-            payload,
-            {
-                preserveState: true,
-                onStart: () => setProcessing(true),
-                onFinish: () => setProcessing(false),
-                onSuccess: () => {
-                    toast.success("Absensi berhasil disimpan!");
-                },
-                onError: (errors) => {
-                    if (errors.absensi) {
-                        toast.error(errors.absensi);
-                    } else {
-                        console.error(errors);
-                        toast.error(
-                            "Gagal menyimpan. Periksa error di console."
-                        );
-                    }
-                },
-            }
+    }
+
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                Gagal memuat data absensi.
+            </div>
         );
-    };
-
-    const attendanceStatuses = [
-        "hadir",
-        "telat",
-        "sakit",
-        "izin",
-        "alfa",
-        "bolos",
-    ].map((status) => {
-        const isPresent = status === "hadir";
-        return {
-            key: status,
-            label: status.charAt(0).toUpperCase() + status.slice(1),
-            color: isPresent
-                ? "bg-green-100 text-green-800 border-green-300"
-                : "bg-red-100 text-red-800 border-red-300",
-        };
-    });
-
-    const getAttendanceSummary = () => {
-        const summary = {
-            present: 0,
-            telat: 0,
-            sakit: 0,
-            izin: 0,
-            alfa: 0,
-            bolos: 0,
-            notMarked: 0,
-        };
-        const totalStudents = studentData.students.length;
-
-        Object.values(attendance).forEach((status) => {
-            if (status === null) summary.notMarked++;
-            else if (summary.hasOwnProperty(status)) summary[status]++;
-        });
-
-        summary.present =
-            totalStudents -
-            (summary.telat +
-                summary.sakit +
-                summary.izin +
-                summary.alfa +
-                summary.bolos +
-                summary.notMarked);
-        return summary;
-    };
-
-    const summary = getAttendanceSummary();
+    }
 
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
@@ -231,17 +141,29 @@ const AbsensiPage = ({
         { label: "Presensi Harian", href: null },
     ];
 
+    const studentData = attendanceData;
+    const tanggalAbsen = attendanceData.tanggalAbsen;
+    const absenHeaderData = {
+        studentData,
+        tanggalAbsen,
+        summary,
+        selectedClass,
+    };
+    const absenDataProps = {
+        students: studentData.students,
+        attendance,
+        onStatusChange: handleAttendanceChange,
+        statuses: attendanceStatuses,
+        isReadOnly: hasAttendanceBeenSaved,
+    };
+
     return (
         <form onSubmit={handleSubmit}>
             <PageContent
                 breadcrumbItems={breadcrumbItems}
                 pageClassName="-mt-16 md:-mt-20"
             >
-                <AbsensiHeader
-                    studentData={studentData}
-                    tanggalAbsen={tanggalAbsen}
-                    summary={summary}
-                />
+                <AbsensiHeader {...absenHeaderData} />
 
                 <div>
                     <div className="px-1 py-4">
@@ -251,23 +173,11 @@ const AbsensiPage = ({
                     </div>
 
                     <div className="hidden lg:block">
-                        <AbsensiTable
-                            students={studentData.students}
-                            attendance={attendance}
-                            onStatusChange={handleAttendanceChange}
-                            statuses={attendanceStatuses}
-                            isReadOnly={hasAttendanceBeenSaved}
-                        />
+                        <AbsensiTable {...absenDataProps} />
                     </div>
 
                     <div className="lg:hidden">
-                        <AbesensiCard
-                            students={studentData.students}
-                            attendance={attendance}
-                            onStatusChange={handleAttendanceChange}
-                            statuses={attendanceStatuses}
-                            isReadOnly={hasAttendanceBeenSaved}
-                        />
+                        <AbsensiCard {...absenDataProps} />
                     </div>
                 </div>
 
@@ -289,10 +199,10 @@ const AbsensiPage = ({
                     <Button
                         type="submit"
                         variant="primary"
-                        disabled={processing}
+                        disabled={isProcessing || hasAttendanceBeenSaved}
                     >
                         <Save className="w-4 h-4 mr-2" />
-                        {processing ? "Menyimpan..." : "Simpan"}
+                        {isProcessing ? "Menyimpan..." : "Simpan"}
                     </Button>
                 </div>
             </PageContent>

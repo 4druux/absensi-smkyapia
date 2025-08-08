@@ -5,6 +5,7 @@ namespace App\Exports;
 use App\Models\Siswa;
 use App\Models\Absensi;
 use App\Models\Holiday;
+use App\Models\Kelas; // Tambahkan import model Kelas
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -19,8 +20,8 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class AbsensiExport implements FromCollection, WithStyles, WithEvents
 {
-    protected $kelas;
-    protected $jurusan;
+    protected $kelasNama;
+    protected $jurusanNama;
     protected $tahun;
     protected $bulanSlug;
     protected $bulanNumber;
@@ -31,8 +32,8 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
 
     public function __construct($kelas, $jurusan, $tahun, $bulanSlug)
     {
-        $this->kelas = $kelas;
-        $this->jurusan = $jurusan;
+        $this->kelasNama = $kelas;
+        $this->jurusanNama = $jurusan;
         $this->tahun = $tahun;
         $this->bulanSlug = $bulanSlug;
         $this->bulanNumber = $this->getMonthNumberFromSlug($bulanSlug);
@@ -65,10 +66,11 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
 
     public function collection()
     {
-        $students = Siswa::where('kelas', $this->kelas)
-            ->where('jurusan', $this->jurusan)
-            ->orderBy('nama')
-            ->get();
+        $selectedKelas = Kelas::whereHas('jurusan', function($query) {
+            $query->where('nama_jurusan', $this->jurusanNama);
+        })->where('nama_kelas', $this->kelasNama)->firstOrFail();
+        
+        $students = $selectedKelas->siswas()->orderBy('nama')->get();
         
         $absensiData = Absensi::whereIn('siswa_id', $students->pluck('id'))
             ->whereYear('tanggal', $this->tahun)
@@ -85,7 +87,7 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
         $namaBulan = Carbon::createFromDate($this->tahun, $this->bulanNumber, 1)->translatedFormat('F');
         $exportData->push(['SMK YAPIA PARUNG']);
         $exportData->push(['LAPORAN ABSENSI SISWA/I']);
-        $exportData->push(["Kelas {$this->kelas} {$this->jurusan}"]);
+        $exportData->push(["Kelas {$this->kelasNama} {$this->jurusanNama}"]);
         $exportData->push(["Periode {$namaBulan} {$this->tahun}"]);
         $exportData->push(['']);
 
@@ -142,8 +144,8 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
                         
                         if (array_key_exists($statusAbbr, $counts)) {
                              if ($statusAbbr !== 'H') {
-                                $counts[$statusAbbr]++;
-                            }
+                                 $counts[$statusAbbr]++;
+                             }
                         }
                     }
                 }

@@ -4,145 +4,93 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Siswa;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Kelas;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Log; 
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class DataSiswaController extends Controller
 {
     public function index()
     {
-        $classes = Siswa::select('kelas', 'jurusan')->distinct()->get();
+        return Inertia::render('DataSiswa/AllClasses');
+    }
 
-        return Inertia::render('DataSiswa/AllClasses', [
-            'classes' => $classes,
+    public function showClass(Kelas $kelas)
+    {
+        $kelas->load(['jurusan', 'siswas' => function ($query) {
+            $query->orderBy('nama');
+        }]);
+        
+        return Inertia::render('DataSiswa/ShowClass', [
+            'selectedClass' => $kelas,
         ]);
     }
 
-  public function showClass($kelas, $jurusan)
-{
-    $students = Siswa::where('kelas', $kelas)
-                     ->where('jurusan', $jurusan)
-                     ->orderBy('nama')
-                     ->get();
-
-    return Inertia::render('DataSiswa/ShowClass', [
-        'selectedClass' => [
-            'kelas' => $kelas,
-            'jurusan' => $jurusan
-        ],
-        'students' => $students,
-    ]);
-}
     
     public function create()
     {
         return Inertia::render('DataSiswa/InputData');
     }
 
-    
-
-   public function store(Request $request)
+    public function storeApi(Request $request)
     {
-        $request->validate([
-            'kelas' => 'required|string|max:255',
-            'jurusan' => 'required|string|max:255',
-            'students' => 'required|array|min:1',
-            'students.*.nama' => 'required|string|max:255',
-            'students.*.nis' => 'required|string|max:20',
+        try {
+            $validatedData = $request->validate([
+                'kelas_id' => 'required|exists:kelas,id',
+                'students' => 'required|array|min:1',
+                'students.*.nama' => 'required|string|max:255',
+                'students.*.nis' => 'required|string|max:20',
+            ]);
+
+            $allNisInForm = collect($validatedData['students'])->pluck('nis')->map(fn($nis) => trim($nis));
+
+            $duplicates = Siswa::withTrashed()
+                ->where('kelas_id', $validatedData['kelas_id'])
+                ->whereIn('nis', $allNisInForm)
+                ->get();
+
+            if ($duplicates->isNotEmpty()) {
+                $errorMessage = 'Ada NIS yang sudah terdaftar di kelas ini. Mohon periksa kembali.';
+                return response()->json([
+                    'message' => $errorMessage,
+                    'errors' => ['students' => [$errorMessage]]
+                ], 409);
+            }
+
+            foreach ($validatedData['students'] as $studentData) {
+                Siswa::create([
+                    'nama' => trim($studentData['nama']),
+                    'nis' => trim($studentData['nis']),
+                    'kelas_id' => $validatedData['kelas_id'],
+                ]);
+            }
+
+            return response()->json(['message' => 'Data siswa berhasil disimpan!'], 201);
+
+        } catch (ValidationException $e) {
+            return response()->json(['message' => 'Terdapat kesalahan input, periksa kembali data Anda.', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Gagal menyimpan data siswa via API: ' . $e->getMessage());
+            return response()->json(['message' => 'Terjadi kesalahan pada server.'], 500);
+        }
+    }
+
+    public function updateStudentApi(Request $request, Siswa $siswa)
+    {
+        $validatedData = $request->validate([
+            'nama' => 'required|string|max:255',
+            'nis' => ['required', 'string', 'max:20', Rule::unique('siswas')->ignore($siswa->id)],
         ]);
 
-        $kelas = strtoupper(trim($request->kelas));
-        $jurusan = strtoupper(trim($request->jurusan));
-
-        $allNisInForm = collect($request->students)->pluck('nis')->map(fn($nis) => trim($nis));
-        if ($allNisInForm->duplicates()->isNotEmpty()) {
-            throw ValidationException::withMessages([
-                'students' => 'Terdapat duplikasi NIS dalam form. Mohon periksa kembali.',
-            ]);
-        }
-        
-        $duplicates = Siswa::where('kelas', $kelas)
-            ->where('jurusan', $jurusan)
-            ->whereIn('nis', $allNisInForm)
-            ->get();
-
-        if ($duplicates->isNotEmpty()) {
-            $duplicateNis = $duplicates->pluck('nis')->implode(', ');
-            throw ValidationException::withMessages([
-                'students' => "NIS ({$duplicateNis}) sudah terdaftar di kelas {$kelas} - {$jurusan} ini.",
-            ]);
-        }
-
-        foreach ($request->students as $studentData) {
-            Siswa::create([
-                'nama' => trim($studentData['nama']),
-                'nis' => trim($studentData['nis']),
-                'kelas' => $kelas,
-                'jurusan' => $jurusan,
-            ]);
-        }
-
-        return redirect()->route('data-siswa.index')->with('success', 'Data siswa berhasil disimpan!');
+        $siswa->update($validatedData);
+        return response()->json(['message' => 'Data siswa berhasil diperbarui!', 'student' => $siswa]);
     }
 
-    public function destroyClass($kelas, $jurusan)
-{
-    $deletedCount = Siswa::where('kelas', $kelas)->where('jurusan', $jurusan)->delete();
-
-    if ($deletedCount > 0) {
-        Log::info("Kelas {$kelas} - {$jurusan} berhasil dihapus. Total siswa dihapus: {$deletedCount}");
-    } else {
-        Log::warning("Gagal menghapus kelas {$kelas} - {$jurusan}. Data tidak ditemukan.");
+    public function destroyStudentApi(Siswa $siswa)
+    {
+        $siswa->delete();
+        return response()->json(['message' => 'Siswa berhasil dihapus.']);
     }
-
-    return redirect()->route('data-siswa.index')->with('success', "Kelas {$kelas} - {$jurusan} beserta semua siswanya berhasil dihapus!");
-}
-
- public function updateStudent(Request $request, $id)
-{
-    $request->validate([
-        'nama' => 'required|string|max:255',
-        'nis' => 'required|string|max:20|unique:siswas,nis,'.$id,
-        'kelas' => 'required|string|max:255',
-        'jurusan' => 'required|string|max:255',
-    ]);
-
-    $student = Siswa::findOrFail($id);
-    $student->update($request->all());
-
-    return Redirect::route('data-siswa.class.show', [
-        'kelas' => $student->kelas,
-        'jurusan' => $student->jurusan,
-    ])->with('success', 'Data siswa berhasil diperbarui!');
-}
-
-public function destroyStudent($id)
-{
-    try {
-        $student = Siswa::findOrFail($id);
-        $kelas = $student->kelas;
-        $jurusan = $student->jurusan;
-
-        $deleted = $student->delete();
-
-        if ($deleted) {
-            Log::info("Siswa dengan ID {$id} berhasil dihapus.");
-        } else {
-            Log::warning("Gagal menghapus siswa dengan ID {$id}. Operasi delete gagal.");
-        }
-
-        return Redirect::route('data-siswa.class.show', [
-            'kelas' => $kelas,
-            'jurusan' => $jurusan,
-        ])->with('success', 'Data siswa berhasil dihapus!');
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        Log::warning("Siswa dengan ID {$id} tidak ditemukan.");
-        return Redirect::back()->with('error', 'Siswa tidak ditemukan.');
-    }
-}
-
 }

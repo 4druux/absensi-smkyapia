@@ -1,35 +1,48 @@
-import { useRef, useEffect, useState } from "react";
-import MainLayout from "@/Layouts/MainLayout";
-import { useForm, usePage } from "@inertiajs/react";
-import { Save, Users, PlusCircle, Upload } from "lucide-react";
+import { useEffect } from "react";
+
 import toast from "react-hot-toast";
-import Button from "@/Components/common/Button";
-import PageContent from "@/Components/common/PageContent";
-import InputSiswaTable from "@/Components/siswa/InputSiswaTable";
-import InputSiswaCard from "@/Components/siswa/InputSiswaCard";
+import { usePage } from "@inertiajs/react";
+import { Save, Users, PlusCircle, Upload } from "lucide-react";
+
+// Components
+import MainLayout from "@/Layouts/MainLayout";
+import Button from "@/Components/common/button";
+import Select from "@/Components/common/select";
+import PageContent from "@/Components/ui/page-content";
+import InputSiswaCard from "@/Components/data-siswa/input-siswa-card";
+import InputSiswaTable from "@/Components/data-siswa/input-siswa-table";
+import useInputSiswaForm from "@/hooks/data-siswa/use-input-siswa";
 
 const InputData = () => {
+    const {
+        data,
+        isSubmitting,
+        errors,
+        formRef,
+        fileInputRef,
+        importError,
+        allJurusans,
+        isLoadingJurusans,
+        kelasOptions,
+        isLoadingKelas,
+        handleFormChange,
+        handleStudentChange,
+        addStudentRow,
+        removeStudentRow,
+        handleSubmit,
+        handleCreateJurusan,
+        handleDeleteJurusan,
+        handleCreateKelas,
+        handleDeleteKelas,
+        handleImportClick,
+        handleFileChange,
+    } = useInputSiswaForm();
+
     const { props } = usePage();
-    const { errors: pageErrors = {} } = props;
-
-    const { data, setData, post, processing, reset } = useForm({
-        kelas: "",
-        jurusan: "",
-        students: [{ id: Date.now(), nis: "", nama: "" }],
-    });
-
-    const [clientErrors, setClientErrors] = useState({});
-    const fileInputRef = useRef(null);
-    const formRef = useRef(null);
-    const [importError, setImportError] = useState("");
 
     useEffect(() => {
-        if (props.flash?.success) {
-            toast.success(props.flash.success);
-        }
-        if (props.flash?.error) {
-            toast.error(props.flash.error);
-        }
+        if (props.flash?.success) toast.success(props.flash.success);
+        if (props.flash?.error) toast.error(props.flash.error);
     }, [props.flash]);
 
     const breadcrumbItems = [
@@ -37,232 +50,13 @@ const InputData = () => {
         { label: "Input Data Baru", href: null },
     ];
 
-    const handleStudentChange = (index, field, value) => {
-        const updatedStudents = [...data.students];
-        updatedStudents[index][field] = value;
-        setData("students", updatedStudents);
-    };
-
-    const addStudentRow = () => {
-        setData("students", [
-            ...data.students,
-            { id: Date.now(), nis: "", nama: "" },
-        ]);
-    };
-
-    const removeStudentRow = (id) => {
-        if (data.students.length <= 1) {
-            toast.error("Minimal harus ada satu baris siswa.");
-            return;
-        }
-        const updatedStudents = data.students.filter(
-            (student) => student.id !== id
-        );
-        setData("students", updatedStudents);
-    };
-
-    const handleImportClick = () => {
-        setImportError("");
-        fileInputRef.current.click();
-    };
-
-    const processImportedData = (importedData) => {
-        const newStudents = importedData
-            .map((row, index) => ({
-                id: Date.now() + index,
-                nama: (
-                    row["NAMA SISWA"] ||
-                    row["Nama Siswa"] ||
-                    row["nama"] ||
-                    row["NAMA"] ||
-                    row["Nama"] ||
-                    ""
-                )
-                    .toString()
-                    .trim(),
-                nis: (
-                    row["NOMOR INDUK"] ||
-                    row["Nomor Induk"] ||
-                    row["nis"] ||
-                    row["NIS"] ||
-                    ""
-                )
-                    .toString()
-                    .trim(),
-            }))
-            .filter((s) => s.nis && s.nama)
-            .sort((a, b) => a.nama.localeCompare(b.nama));
-
-        if (newStudents.length > 0) {
-            toast.success(`${newStudents.length} data siswa berhasil diimpor.`);
-            setData("students", newStudents);
-        } else {
-            setImportError(
-                "Gagal memuat data. Pastikan file memiliki kolom 'NAMA SISWA' dan 'NOMOR INDUK'."
-            );
-        }
-    };
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        const fileExtension = file.name.split(".").pop().toLowerCase();
-
-        if (fileExtension === "csv") {
-            reader.onload = (e) => {
-                if (window.Papa) {
-                    const { data: jsonData } = window.Papa.parse(
-                        e.target.result,
-                        { header: true, skipEmptyLines: true }
-                    );
-                    processImportedData(jsonData);
-                } else {
-                    setImportError(
-                        "Library PapaParse untuk CSV tidak ditemukan."
-                    );
-                }
-            };
-            reader.readAsText(file);
-        } else if (fileExtension === "xlsx" || fileExtension === "xls") {
-            if (typeof window.XLSX === "undefined") {
-                setImportError(
-                    "Library untuk membaca file Excel (SheetJS) tidak termuat."
-                );
-                return;
-            }
-            reader.onload = (e) => {
-                try {
-                    const workbook = window.XLSX.read(e.target.result, {
-                        type: "binary",
-                    });
-                    const sheetName = workbook.SheetNames[0];
-                    const jsonData = window.XLSX.utils.sheet_to_json(
-                        workbook.Sheets[sheetName]
-                    );
-                    processImportedData(jsonData);
-                } catch (err) {
-                    setImportError(
-                        "Gagal memproses file Excel. Pastikan formatnya benar."
-                    );
-                }
-            };
-            reader.readAsBinaryString(file);
-        } else {
-            setImportError(
-                "Format file tidak didukung. Gunakan .csv, .xlsx, atau .xls."
-            );
-        }
-        event.target.value = null;
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-        let firstErrorId = null;
-
-        if (!data.kelas.trim()) {
-            newErrors.kelas = "Kode kelas wajib diisi.";
-            if (!firstErrorId) firstErrorId = "kelas";
-        }
-
-        if (!data.jurusan.trim()) {
-            newErrors.jurusan = "Jurusan wajib diisi.";
-            if (!firstErrorId) firstErrorId = "jurusan";
-        }
-
-        let studentErrorFound = false;
-        data.students.forEach((student, index) => {
-            if (!student.nama.trim() && !studentErrorFound) {
-                if (!firstErrorId) firstErrorId = `student-nama-${index}`;
-                studentErrorFound = true;
-            }
-            if (!student.nis.trim() && !studentErrorFound) {
-                if (!firstErrorId) firstErrorId = `student-nis-${index}`;
-                studentErrorFound = true;
-            }
-        });
-
-        const validStudents = data.students.filter(
-            (s) => s.nama.trim() && s.nis.trim()
-        );
-        if (validStudents.length === 0) {
-            newErrors.students =
-                "Minimal harus ada satu siswa yang valid (nama dan NIS terisi).";
-            if (!firstErrorId) firstErrorId = "students-list-error";
-        }
-
-        setClientErrors(newErrors);
-
-        return {
-            isValid: Object.keys(newErrors).length === 0,
-            firstErrorId: firstErrorId,
-        };
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const { isValid, firstErrorId } = validateForm();
-
-        if (!isValid) {
-            toast.error(
-                "Harap periksa kembali data Anda, ada yang belum terisi."
-            );
-            if (firstErrorId && formRef.current) {
-                const errorElement = formRef.current.querySelector(
-                    `#${firstErrorId}`
-                );
-                if (errorElement) {
-                    errorElement.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                    });
-                    errorElement.focus({ preventScroll: true });
-                }
-            }
-            return;
-        }
-
-        setClientErrors({});
-
-        const payload = {
-            ...data,
-            students: data.students.filter((s) => s.nama && s.nis),
-        };
-
-        post(route("data-siswa.store"), {
-            onSuccess: () => {
-                reset();
-                setData("students", [{ id: Date.now(), nis: "", nama: "" }]);
-            },
-            onError: (errors) => {
-                toast.error(
-                    "Gagal menyimpan data, periksa pesan error di form."
-                );
-
-                const firstErrorKey = Object.keys(errors)[0];
-                let elementIdToFocus = firstErrorKey;
-
-                if (firstErrorKey.startsWith("students.")) {
-                    const [, index, field] = firstErrorKey.split(".");
-                    elementIdToFocus = `student-${field}-${index}`;
-                }
-
-                const errorElement = formRef.current.querySelector(
-                    `#${elementIdToFocus}`
-                );
-                if (errorElement) {
-                    errorElement.scrollIntoView({
-                        behavior: "smooth",
-                        block: "center",
-                    });
-                    errorElement.focus({ preventScroll: true });
-                }
-            },
-        });
-    };
-
-    const displayErrors = { ...pageErrors, ...clientErrors };
+    const jurusanOptions =
+        allJurusans?.map((j) => ({ value: j.id, label: j.nama_jurusan })) || [];
+    const kelasSelectOptions =
+        kelasOptions?.map((k) => ({
+            value: k.id,
+            label: `${k.nama_kelas} ${k.kelompok}`,
+        })) || [];
 
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
@@ -275,7 +69,7 @@ const InputData = () => {
                         Input Data Kelas & Siswa
                     </h3>
                     <p className="text-xs md:text-sm text-neutral-500">
-                        Masukkan informasi kelas dan daftar siswa di bawah ini.
+                        Pilih kelas dan masukkan daftar siswa di bawah ini.
                     </p>
                 </div>
             </div>
@@ -287,56 +81,45 @@ const InputData = () => {
                 noValidate
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label
-                            htmlFor="kelas"
-                            className="block text-sm font-medium text-neutral-700 mb-2"
-                        >
-                            Kode Kelas <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="kelas"
-                            value={data.kelas}
-                            onChange={(e) => setData("kelas", e.target.value)}
-                            placeholder="XI-TKJ-1"
-                            className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
-                                displayErrors.kelas
-                                    ? "border-red-400"
-                                    : "border-slate-300 focus:border-sky-500"
-                            }`}
-                        />
-                        {displayErrors.kelas && (
-                            <p className="mt-1 text-xs text-red-600">
-                                {displayErrors.kelas}
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="jurusan"
-                            className="block text-sm font-medium text-neutral-700 mb-2"
-                        >
-                            Jurusan <span className="text-red-600">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            id="jurusan"
-                            value={data.jurusan}
-                            onChange={(e) => setData("jurusan", e.target.value)}
-                            placeholder="Rekayasa Perangkat Lunak"
-                            className={`w-full px-4 py-3 rounded-xl border transition-colors duration-200 focus:outline-none placeholder:text-sm ${
-                                displayErrors.jurusan
-                                    ? "border-red-400"
-                                    : "border-slate-300 focus:border-sky-500"
-                            }`}
-                        />
-                        {displayErrors.jurusan && (
-                            <p className="mt-1 text-xs text-red-600">
-                                {displayErrors.jurusan}
-                            </p>
-                        )}
-                    </div>
+                    <Select
+                        label="Pilih Jurusan"
+                        title="Manajemen Jurusan"
+                        description="Anda dapat mencari, menambah, atau menghapus jurusan."
+                        options={jurusanOptions}
+                        value={data.jurusan_id}
+                        onChange={(value) =>
+                            handleFormChange("jurusan_id", value)
+                        }
+                        isLoading={isLoadingJurusans}
+                        placeholder="-- Pilih Jurusan --"
+                        error={errors.jurusan_id?.[0]}
+                        allowAdd
+                        onAdd={handleCreateJurusan}
+                        allowDelete
+                        onDelete={handleDeleteJurusan}
+                        isProcessing={isSubmitting}
+                    />
+                    <Select
+                        label="Pilih Kelas"
+                        options={kelasSelectOptions}
+                        value={data.kelas_id}
+                        onChange={(value) =>
+                            handleFormChange("kelas_id", value)
+                        }
+                        isLoading={isLoadingKelas}
+                        disabled={!data.jurusan_id}
+                        placeholder={
+                            !data.jurusan_id
+                                ? "Pilih jurusan terlebih dahulu"
+                                : "-- Pilih Kelas --"
+                        }
+                        error={errors.kelas_id?.[0]}
+                        allowAdd
+                        onAdd={handleCreateKelas}
+                        allowDelete
+                        onDelete={handleDeleteKelas}
+                        isProcessing={isSubmitting}
+                    />
                 </div>
 
                 <div className="border-t border-neutral-200 pt-6">
@@ -375,12 +158,12 @@ const InputData = () => {
                             {importError}
                         </div>
                     )}
-                    {displayErrors.students && (
+                    {errors.students && (
                         <div
                             id="students-list-error"
                             className="text-center bg-red-50 border border-red-200 text-red-700 text-sm p-3 rounded-lg mb-4 w-fit"
                         >
-                            {displayErrors.students}
+                            {errors.students[0] || errors.students}
                         </div>
                     )}
 
@@ -389,16 +172,15 @@ const InputData = () => {
                             students={data.students}
                             handleStudentChange={handleStudentChange}
                             removeStudentRow={removeStudentRow}
-                            displayErrors={displayErrors}
+                            displayErrors={errors}
                         />
                     </div>
-
                     <div className="lg:hidden">
                         <InputSiswaCard
                             students={data.students}
                             handleStudentChange={handleStudentChange}
                             removeStudentRow={removeStudentRow}
-                            displayErrors={displayErrors}
+                            displayErrors={errors}
                         />
                     </div>
                 </div>
@@ -407,10 +189,10 @@ const InputData = () => {
                     <Button
                         type="submit"
                         variant="primary"
-                        disabled={processing}
+                        disabled={isSubmitting}
                     >
                         <Save className="w-4 h-4 mr-2" />
-                        {processing ? "Menyimpan..." : "Simpan"}
+                        {isSubmitting ? "Menyimpan..." : "Simpan"}
                     </Button>
                 </div>
             </form>

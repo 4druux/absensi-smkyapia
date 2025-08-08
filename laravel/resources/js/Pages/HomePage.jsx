@@ -1,5 +1,5 @@
 import MainLayout from "@/Layouts/MainLayout";
-import BreadcrumbNav from "@/Components/common/BreadcrumbNav";
+import BreadcrumbNav from "@/Components/ui/breadcrumb-nav";
 
 const InputData = () => {
     const breadcrumbItems = [

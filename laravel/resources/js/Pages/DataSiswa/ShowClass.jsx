@@ -1,129 +1,87 @@
-import { useState } from "react";
-import MainLayout from "@/Layouts/MainLayout";
-import { router } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
-import toast from "react-hot-toast";
-import Button from "@/Components/common/Button";
-import ShowSiswaTable from "@/Components/siswa/ShowSiswaTable";
-import ShowSiswaCard from "@/Components/siswa/ShowSiswaCard";
-import PageContent from "@/Components/common/PageContent";
 
-const ShowClass = ({ students, selectedClass }) => {
-    const [editingId, setEditingId] = useState(null);
-    const [editData, setEditData] = useState({});
+// Components
+import MainLayout from "@/Layouts/MainLayout";
+import Button from "@/Components/common/button";
+import DataNotFound from "@/Components/ui/data-not-found";
+import DotLoader from "@/Components/ui/dot-loader";
+import PageContent from "@/Components/ui/page-content";
+import ShowSiswaCard from "@/Components/data-siswa/show-siswa-card";
+import ShowSiswaTable from "@/Components/data-siswa/show-siswa-table";
+import { useShowSiswa } from "@/hooks/data-siswa/use-show-siswa";
+
+const ShowClass = ({ selectedClass }) => {
+    const {
+        students,
+        isLoading,
+        error,
+        editingId,
+        editData,
+        editErrors,
+        handleEditClick,
+        handleCancelEdit,
+        handleInputChange,
+        handleUpdate,
+        handleDelete,
+    } = useShowSiswa(selectedClass.id);
+
+    const fullClassName = `${selectedClass.nama_kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan.nama_jurusan}`;
 
     const breadcrumbItems = [
         { label: "Data Siswa", href: route("data-siswa.index") },
-        {
-            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
-            href: null,
-        },
+        { label: fullClassName, href: null },
     ];
 
-    const handleEditClick = (student) => {
-        setEditingId(student.id);
-        setEditData({
-            nama: student.nama,
-            nis: student.nis,
-            kelas: student.kelas,
-            jurusan: student.jurusan,
-        });
-    };
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <DotLoader text="Memuat data siswa..." />
+            </div>
+        );
+    }
 
-    const handleCancelEdit = () => {
-        setEditingId(null);
-        setEditData({});
-    };
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                Gagal memuat data siswa.
+            </div>
+        );
+    }
 
-    const handleUpdate = (e, id) => {
-        e.preventDefault();
-
-        const payload = {
-            _method: "put",
-            ...editData,
-            nama: editData.nama,
-            nis: editData.nis,
-            kelas: selectedClass.kelas,
-            jurusan: selectedClass.jurusan,
-        };
-
-        router.post(route("data-siswa.student.update", { id: id }), payload, {
-            onSuccess: () => {
-                toast.success("Data siswa berhasil diperbarui!");
-                setEditingId(null);
-            },
-            onError: (errors) => {
-                toast.error("Gagal memperbarui data.");
-                console.error("Update Errors:", errors);
-            },
-        });
-    };
-
-    const handleDelete = (e, id) => {
-        e.preventDefault();
-
-        if (confirm("Apakah Anda yakin ingin menghapus siswa ini?")) {
-            router.post(
-                route("data-siswa.student.destroy", { id: id }),
-                {
-                    _method: "delete",
-                },
-                {
-                    onSuccess: () => {
-                        toast.success("Siswa berhasil dihapus!");
-                    },
-                    onError: (errors) => {
-                        toast.error("Gagal menghapus siswa.");
-                        console.error(
-                            "Errors from server during delete:",
-                            errors
-                        );
-                    },
-                }
-            );
-        }
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditData((prev) => ({ ...prev, [name]: value }));
+    const tableProps = {
+        students,
+        editingId,
+        editData,
+        editErrors,
+        handleEditClick,
+        handleCancelEdit,
+        handleInputChange,
+        handleUpdate,
+        handleDelete,
     };
 
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
             <div className="px-1 py-4">
                 <h2 className="text-lg text-neutral-800">
-                    Daftar Siswa Kelas {selectedClass.kelas} -{" "}
-                    {selectedClass.jurusan}
+                    Daftar Siswa Kelas {fullClassName}
                 </h2>
             </div>
-
-            <div className="hidden lg:block">
-                <ShowSiswaTable
-                    students={students}
-                    editingId={editingId}
-                    editData={editData}
-                    handleEditClick={handleEditClick}
-                    handleUpdate={handleUpdate}
-                    handleDelete={handleDelete}
-                    handleCancelEdit={handleCancelEdit}
-                    handleInputChange={handleInputChange}
+            {students && students.length > 0 ? (
+                <>
+                    <div className="hidden lg:block">
+                        <ShowSiswaTable {...tableProps} />
+                    </div>
+                    <div className="lg:hidden">
+                        <ShowSiswaCard {...tableProps} />
+                    </div>
+                </>
+            ) : (
+                <DataNotFound
+                    title="Belum Ada Siswa"
+                    message="Tidak ada data siswa yang ditemukan untuk kelas ini. Anda bisa menambahkannya di halaman Input Data."
                 />
-            </div>
-
-            <div className="lg:hidden">
-                <ShowSiswaCard
-                    students={students}
-                    editingId={editingId}
-                    editData={editData}
-                    handleEditClick={handleEditClick}
-                    handleUpdate={handleUpdate}
-                    handleDelete={handleDelete}
-                    handleCancelEdit={handleCancelEdit}
-                    handleInputChange={handleInputChange}
-                />
-            </div>
-
+            )}
             <div className="mt-6 flex justify-start">
                 <Button
                     as="link"
@@ -141,7 +99,7 @@ const ShowClass = ({ students, selectedClass }) => {
 ShowClass.layout = (page) => (
     <MainLayout
         children={page}
-        title={`Siswa Kelas ${page.props.selectedClass.kelas}`}
+        title={`Siswa Kelas ${page.props.selectedClass.nama_kelas} ${page.props.selectedClass.kelompok}`}
     />
 );
 

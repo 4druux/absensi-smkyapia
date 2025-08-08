@@ -1,14 +1,19 @@
-import { useState, useEffect } from "react";
-import { router } from "@inertiajs/react";
-import toast from "react-hot-toast";
+// UangKas/UangKasPage.jsx
+import { useEffect } from "react";
+import { usePage } from "@inertiajs/react";
 import { Save, ArrowLeft } from "lucide-react";
+import toast from "react-hot-toast";
+
+// Components
 import MainLayout from "@/Layouts/MainLayout";
-import PageContent from "@/Components/common/PageContent";
-import Button from "@/Components/common/Button";
-import DataNotFound from "@/Components/common/DataNotFound";
-import UangKasHeader from "@/Components/uangkas/UangKasHeader";
-import UangKasTable from "@/Components/uangkas/UangKasTable";
-import UangKasCard from "@/Components/uangkas/UangKasCard";
+import PageContent from "@/Components/ui/page-content";
+import Button from "@/Components/common/button";
+import DataNotFound from "@/Components/ui/data-not-found";
+import DotLoader from "@/Components/ui/dot-loader";
+import UangKasHeader from "@/Components/uang-kas/uang-kas-header";
+import UangKasTable from "@/Components/uang-kas/uang-kas-table";
+import UangKasCard from "@/Components/uang-kas/uang-kas-card";
+import { useWeeklyPayments } from "@/hooks/uang-kas/use-weekly-payments";
 
 const UangKasPage = ({
     studentData,
@@ -19,6 +24,34 @@ const UangKasPage = ({
     selectedClass,
     namaBulan,
 }) => {
+    const {
+        payments,
+        fixedNominal,
+        isProcessing,
+        isLoading,
+        error,
+        handlePaymentChange,
+        handleNominalChange,
+        handleSelectAllChange,
+        handleSubmit,
+        dbSummary,
+        hasChanges,
+        hasAnyPaymentBeenSaved,
+        allStudentsPaidFromDb,
+    } = useWeeklyPayments(
+        selectedClass.kelas,
+        selectedClass.jurusan,
+        tahun,
+        bulanSlug,
+        minggu
+    );
+
+    const { props } = usePage();
+    useEffect(() => {
+        if (props.flash?.success) toast.success(props.flash.success);
+        if (props.flash?.error) toast.error(props.flash.error);
+    }, [props.flash]);
+
     if (
         !studentData ||
         !studentData.students ||
@@ -28,7 +61,7 @@ const UangKasPage = ({
             { label: "Uang Kas", href: route("uang-kas.index") },
             {
                 label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
-                href: route("absensi.index"),
+                href: route("uang-kas.index"),
             },
             {
                 label: tahun,
@@ -49,7 +82,6 @@ const UangKasPage = ({
             },
             {
                 label: `Minggu ${minggu}`,
-                minggu: minggu,
                 href: route("uang-kas.month.show", {
                     kelas: selectedClass.kelas,
                     jurusan: selectedClass.jurusan,
@@ -73,157 +105,27 @@ const UangKasPage = ({
         );
     }
 
-    const [payments, setPayments] = useState({});
-    const [fixedNominal, setFixedNominal] = useState(0);
-    const [processing, setProcessing] = useState(false);
-
-    const hasAnyPaymentBeenSaved = Object.keys(existingPayments).length > 0;
-    const isReadOnly = hasAnyPaymentBeenSaved;
-    const allStudentsPaidFromDb = studentData.students.every(
-        (student) => existingPayments[student.id]?.status === "paid"
-    );
-
-    useEffect(() => {
-        const initialState = {};
-        if (studentData?.students) {
-            studentData.students.forEach((student) => {
-                initialState[student.id] = {
-                    status: existingPayments[student.id]?.status || "unpaid",
-                };
-            });
-        }
-        setPayments(initialState);
-
-        const firstPaidPayment = Object.values(existingPayments).find(
-            (p) => p.status === "paid"
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <DotLoader text="Memuat data pembayaran..." />
+            </div>
         );
-        if (firstPaidPayment) {
-            setFixedNominal(firstPaidPayment.nominal);
-        }
-    }, [studentData, existingPayments]);
+    }
 
-    const handlePaymentChange = (studentId, field, value) => {
-        if (existingPayments[studentId]?.status === "paid") {
-            return;
-        }
-
-        setPayments((prev) => ({
-            ...prev,
-            [studentId]: {
-                ...prev[studentId],
-                [field]: value,
-            },
-        }));
-    };
-
-    const handleSelectAllChange = (checked) => {
-        const newPayments = {};
-        studentData.students.forEach((student) => {
-            const existingStatus =
-                existingPayments[student.id]?.status || "unpaid";
-            if (existingStatus === "paid") {
-                newPayments[student.id] = { status: "paid" };
-            } else {
-                newPayments[student.id] = {
-                    status: checked ? "paid" : "unpaid",
-                };
-            }
-        });
-        setPayments(newPayments);
-    };
-
-    const handleNominalChange = (value) => {
-        if (isReadOnly) {
-            return;
-        }
-        setFixedNominal(value);
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (parseInt(fixedNominal) <= 0) {
-            toast.error("Nominal uang kas harus lebih dari 0.");
-            return;
-        }
-
-        const payload = {
-            fixed_nominal: parseInt(fixedNominal),
-            payments: Object.entries(payments).map(([siswa_id, data]) => ({
-                siswa_id: parseInt(siswa_id),
-                status: data.status,
-            })),
-        };
-
-        router.post(
-            route("uang-kas.week.store", {
-                kelas: selectedClass.kelas,
-                jurusan: selectedClass.jurusan,
-                tahun,
-                bulanSlug,
-                minggu,
-            }),
-            payload,
-            {
-                preserveState: true,
-                onStart: () => setProcessing(true),
-                onFinish: () => setProcessing(false),
-                onSuccess: () => {
-                    toast.success("Pembayaran uang kas berhasil diperbarui!");
-                },
-                onError: (errors) => {
-                    if (errors.fixed_nominal) {
-                        toast.error(errors.fixed_nominal);
-                    } else {
-                        console.error(errors);
-                        toast.error(
-                            "Gagal menyimpan. Periksa error di console."
-                        );
-                    }
-                },
-            }
+    if (error) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                Gagal memuat data pembayaran.
+            </div>
         );
-    };
-
-    const getDbSummary = () => {
-        const paidStudentsCount = Object.values(existingPayments).filter(
-            (payment) => payment.status === "paid"
-        ).length;
-
-        const nominalFromDb = Object.values(existingPayments)[0]?.nominal || 0;
-
-        const totalCollected =
-            paidStudentsCount * (parseInt(nominalFromDb) || 0);
-
-        return {
-            totalStudents: studentData.students.length,
-            paidStudents: paidStudentsCount,
-            unpaidStudents: studentData.students.length - paidStudentsCount,
-            totalCollected: totalCollected,
-            target:
-                studentData.students.length * (parseInt(nominalFromDb) || 0),
-        };
-    };
-
-    const hasChanges = () => {
-        for (const student of studentData.students) {
-            const currentStatus = payments[student.id]?.status || "unpaid";
-            const existingStatus =
-                existingPayments[student.id]?.status || "unpaid";
-            if (currentStatus !== existingStatus) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    const dbSummary = getDbSummary();
+    }
 
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
         {
             label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
-            href: route("absensi.index"),
+            href: route("uang-kas.index"),
         },
         {
             label: tahun,
@@ -244,7 +146,6 @@ const UangKasPage = ({
         },
         {
             label: `Minggu ${minggu}`,
-            minggu: minggu,
             href: route("uang-kas.month.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
@@ -270,7 +171,7 @@ const UangKasPage = ({
                     summary={dbSummary}
                     nominal={fixedNominal}
                     onNominalChange={handleNominalChange}
-                    isReadOnly={isReadOnly}
+                    isReadOnly={hasAnyPaymentBeenSaved}
                 />
 
                 <div>
@@ -321,10 +222,10 @@ const UangKasPage = ({
                     <Button
                         type="submit"
                         variant="primary"
-                        disabled={processing || !hasChanges()}
+                        disabled={isProcessing || !hasChanges()}
                     >
                         <Save className="w-4 h-4 mr-2" />
-                        {processing
+                        {isProcessing
                             ? "Menyimpan..."
                             : !hasChanges()
                             ? "Disimpan"
