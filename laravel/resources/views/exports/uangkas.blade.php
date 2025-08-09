@@ -93,8 +93,8 @@
             </div>
         @endif
         <div class="header-text">
+            <h2>DATA UANG KAS SISWA</h2>
             <h1>SMK YAPIA PARUNG</h1>
-            <h2>LAPORAN UANG KAS SISWA/I</h2>
             <h2>Kelas {{ $kelas }} - {{ $jurusan }}</h2>
             <h2>Periode {{ $namaBulan }} {{ $tahun }}</h2>
         </div>
@@ -104,7 +104,7 @@
         <thead>
             <tr>
                 <th rowspan="3" style="width: 5%;">No</th>
-                <th rowspan="3" style="width: 30%; text-align: center;">Nama Siswa/i</th>
+                <th rowspan="3" style="width: 30%; text-align: center;">Nama Siswa</th>
                 <th colspan="5">Mingguan</th>
                 <th rowspan="3">Total</th>
                 <th rowspan="3">Status</th>

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\UangKas;
 
 use App\Models\Siswa;
 use App\Models\UangKasPayment;
@@ -20,7 +20,8 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
 {
     protected $kelas;
     protected $jurusan;
-    protected $tahun;
+    protected $tahun; 
+    protected $year;  
     protected $bulanSlug;
     protected $weeksInMonth;
     protected $dataRowsCount = 0;
@@ -44,12 +45,22 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
         return $monthMap[strtolower($slug)] ?? null;
     }
 
+    private function getCorrectYear($academicYear, $monthNumber)
+    {
+        [$startYear, $endYear] = explode('-', $academicYear);
+        return $monthNumber >= 7 ? $startYear : $endYear;
+    }
+    
     public function collection()
     {
-        $students = Siswa::where('kelas', $this->kelas)
-            ->where('jurusan', $this->jurusan)
-            ->orderBy('nama')
-            ->get();
+        $monthNumber = $this->getMonthNumberFromSlug($this->bulanSlug);
+        $this->year = $this->getCorrectYear($this->tahun, $monthNumber);
+
+        $selectedKelas = \App\Models\Kelas::whereHas('jurusan', function($query) {
+            $query->where('nama_jurusan', $this->jurusan);
+        })->where('nama_kelas', $this->kelas)->firstOrFail();
+
+        $students = $selectedKelas->siswas()->orderBy('nama')->get();
 
         $uangKasData = UangKasPayment::whereIn('siswa_id', $students->pluck('id'))
             ->where('tahun', $this->tahun)
@@ -62,15 +73,15 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
             });
 
         $exportData = new Collection();
-
-        $namaBulan = Carbon::createFromDate($this->tahun, $this->getMonthNumberFromSlug($this->bulanSlug), 1)->translatedFormat('F');
+        $namaBulan = Carbon::createFromDate($this->year, $monthNumber, 1)->translatedFormat('F');
+        
+        $exportData->push(['DATA UANG KAS SISWA']);
         $exportData->push(['SMK YAPIA PARUNG']);
-        $exportData->push(['LAPORAN UANG KAS SISWA/I']);
         $exportData->push(["Kelas {$this->kelas} {$this->jurusan}"]);
         $exportData->push(["Periode {$namaBulan} {$this->tahun}"]);
         $exportData->push(['']);
 
-        $headerRow1 = ['No', 'Nama Siswa/i'];
+        $headerRow1 = ['No', 'Nama Siswa'];
         for ($week = 1; $week <= 5; $week++) {
             $headerRow1[] = '';
         }
@@ -88,7 +99,7 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
         
         $headerRow3 = ['', ''];
         for ($week = 1; $week <= 5; $week++) {
-            if ($this->weeksInMonth[$week]) {
+            if (isset($this->weeksInMonth[$week]) && $this->weeksInMonth[$week]) {
                 $headerRow3[] = '-';
             } else {
                 $nominal = 0;
@@ -117,7 +128,7 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
             $studentTotal = 0;
             $paidCount = 0;
             for ($week = 1; $week <= 5; $week++) {
-                if ($this->weeksInMonth[$week]) {
+                if (isset($this->weeksInMonth[$week]) && $this->weeksInMonth[$week]) {
                     $rowData->push('');
                 } else {
                     $status = isset($uangKasData[$student->id . '_' . $week]) ? '✓' : 'X';
@@ -151,7 +162,7 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
         $jumlahRow->push('Jumlah');
         $jumlahRow->push('');
         for ($week = 1; $week <= 5; $week++) {
-            $jumlahRow->push($this->weeksInMonth[$week] ? '' : $mingguanTotalPaid[$week]);
+            $jumlahRow->push(isset($this->weeksInMonth[$week]) && $this->weeksInMonth[$week] ? '' : $mingguanTotalPaid[$week]);
         }
 
         $jumlahRow->push($grandTotalNominal);
@@ -189,7 +200,7 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
         $sheet->mergeCells('A' . $headerStartRow . ':A' . $headerEndRow);
         $sheet->setCellValue('A' . $headerStartRow, 'No');
         $sheet->mergeCells('B' . $headerStartRow . ':B' . $headerEndRow);
-        $sheet->setCellValue('B' . $headerStartRow, 'Nama Siswa/i');
+        $sheet->setCellValue('B' . $headerStartRow, 'Nama Siswa');
 
         $firstMingguCol = Coordinate::stringFromColumnIndex(3);
         $lastMingguCol = Coordinate::stringFromColumnIndex(7);
@@ -210,10 +221,10 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
             ->setBorderStyle(Border::BORDER_THIN);
 
         $sheet->mergeCells('A' . $jumlahRow . ':B' . $jumlahRow);
-        $sheet->getStyle('A' . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);        
+        $sheet->getStyle('A' . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);       
         for ($week = 1; $week <= 5; $week++) {
             $col = Coordinate::stringFromColumnIndex($week + 2);
-            if ($this->weeksInMonth[$week]) {
+            if (isset($this->weeksInMonth[$week]) && $this->weeksInMonth[$week]) {
                 $sheet->getStyle($col . ($headerStartRow + 1) . ':' . $col . $jumlahRow)
                     ->getFill()
                     ->setFillType(Fill::FILL_SOLID)
@@ -299,8 +310,7 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
                     $sheet->setCellValue('A' . $currentLegendRow, $row[0]);
                     $sheet->setCellValue('B' . $currentLegendRow, $row[1]);
                     $currentLegendRow++;
-            }
-
+                }
 
                 $legendEndRow = $legendStartRow + count($legendData) - 1;
                 $sheet->getStyle('A' . $legendStartRow . ':B' . $legendEndRow)->getBorders()

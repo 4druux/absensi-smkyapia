@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Exports;
+namespace App\Exports\Absensi;
 
 use App\Models\Siswa;
 use App\Models\Absensi;
 use App\Models\Holiday;
-use App\Models\Kelas; // Tambahkan import model Kelas
+use App\Models\Kelas;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -18,7 +18,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
-class AbsensiExport implements FromCollection, WithStyles, WithEvents
+class AbsensiExportMonth implements FromCollection, WithStyles, WithEvents
 {
     protected $kelasNama;
     protected $jurusanNama;
@@ -37,14 +37,16 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
         $this->tahun = $tahun;
         $this->bulanSlug = $bulanSlug;
         $this->bulanNumber = $this->getMonthNumberFromSlug($bulanSlug);
-        $this->daysInMonth = Carbon::createFromDate($tahun, $this->bulanNumber, 1)->daysInMonth;
         
-        $dbHolidays = Holiday::whereYear('date', $tahun)
+        $year = intval(explode('-', $this->tahun)[0]);
+        $this->daysInMonth = Carbon::createFromDate($year, $this->bulanNumber, 1)->daysInMonth;
+        
+        $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $this->bulanNumber)
             ->pluck('date');
 
         $weekends = collect();
-        $date = Carbon::create($tahun, $this->bulanNumber, 1);
+        $date = Carbon::create($year, $this->bulanNumber, 1);
         for ($i = 0; $i < $this->daysInMonth; $i++) {
             if ($date->isWeekend()) {
                 $weekends->push($date->format('Y-m-d'));
@@ -72,8 +74,9 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
         
         $students = $selectedKelas->siswas()->orderBy('nama')->get();
         
+        $yearForQuery = intval(explode('-', $this->tahun)[0]);
         $absensiData = Absensi::whereIn('siswa_id', $students->pluck('id'))
-            ->whereYear('tanggal', $this->tahun)
+            ->whereYear('tanggal', $yearForQuery)
             ->whereMonth('tanggal', $this->bulanNumber)
             ->get()
             ->mapWithKeys(function ($item) {
@@ -84,18 +87,18 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
 
         $exportData = new Collection();
         
-        $namaBulan = Carbon::createFromDate($this->tahun, $this->bulanNumber, 1)->translatedFormat('F');
+        $namaBulan = Carbon::createFromDate($yearForQuery, $this->bulanNumber, 1)->translatedFormat('F');
+        $exportData->push(['DATA KEHADIRAN SISWA']);
         $exportData->push(['SMK YAPIA PARUNG']);
-        $exportData->push(['LAPORAN ABSENSI SISWA/I']);
         $exportData->push(["Kelas {$this->kelasNama} {$this->jurusanNama}"]);
         $exportData->push(["Periode {$namaBulan} {$this->tahun}"]);
         $exportData->push(['']);
 
-        $headerRow1 = ['No', 'Nama Siswa/i'];
+        $headerRow1 = ['NO', 'NAMA SISWA'];
         for ($day = 1; $day <= $this->daysInMonth; $day++) {
             $headerRow1[] = '';
         }
-        $headerRow1[] = 'Total';
+        $headerRow1[] = 'TOTAL';
         $exportData->push($headerRow1);
 
         $headerRow2 = ['', ''];
@@ -120,43 +123,58 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
             $rowData->push($index + 1);
             $rowData->push($student->nama);
 
-            $counts = [
-                'H' => 0, 'T' => 0, 'S' => 0, 'I' => 0, 'A' => 0, 'B' => 0, 'L' => 0,
-            ];
+            $counts = ['H' => 0, 'T' => 0, 'S' => 0, 'I' => 0, 'A' => 0, 'B' => 0];
             
             for ($day = 1; $day <= $this->daysInMonth; $day++) {
-                $date = Carbon::create($this->tahun, $this->bulanNumber, $day);
+                $date = Carbon::create($yearForQuery, $this->bulanNumber, $day);
                 $dateString = $date->format('Y-m-d');
                 $status = $absensiData->get($student->id . '_' . $day, '');
                 
                 if ($this->allHolidays->contains($dateString)) {
                     $statusAbbr = '';
-                    $counts['L']++;
                 } else {
                     if ($status === '') {
                         $statusAbbr = '-';
                     } else {
-                        $statusAbbr = strtoupper(substr($status, 0, 1));
-                        if ($statusAbbr === 'H') {
-                            $statusAbbr = '✓';
-                            $counts['H']++;
-                        }
-                        
-                        if (array_key_exists($statusAbbr, $counts)) {
-                             if ($statusAbbr !== 'H') {
-                                 $counts[$statusAbbr]++;
-                             }
+                        $statusUpper = strtoupper($status);
+                        switch ($statusUpper) {
+                            case 'HADIR':
+                                $statusAbbr = '✓';
+                                $counts['H']++;
+                                break;
+                            case 'TELAT':
+                                $statusAbbr = 'T';
+                                $counts['T']++;
+                                break;
+                            case 'SAKIT':
+                                $statusAbbr = 'S';
+                                $counts['S']++;
+                                break;
+                            case 'IZIN':
+                                $statusAbbr = 'I';
+                                $counts['I']++;
+                                break;
+                            case 'ALFA':
+                                $statusAbbr = 'A';
+                                $counts['A']++;
+                                break;
+                            case 'BOLOS':
+                                $statusAbbr = 'B';
+                                $counts['B']++;
+                                break;
+                            default:
+                                $statusAbbr = '-';
                         }
                     }
                 }
                 $rowData->push($statusAbbr);
             }
             
-            $rowData->push($counts['T']);
-            $rowData->push($counts['S']);
-            $rowData->push($counts['I']);
-            $rowData->push($counts['A']);
-            $rowData->push($counts['B']);
+            $rowData->push($counts['T'] > 0 ? $counts['T'] : '');
+            $rowData->push($counts['S'] > 0 ? $counts['S'] : '');
+            $rowData->push($counts['I'] > 0 ? $counts['I'] : '');
+            $rowData->push($counts['A'] > 0 ? $counts['A'] : '');
+            $rowData->push($counts['B'] > 0 ? $counts['B'] : '');
             
             $exportData->push($rowData);
             $this->dataRowsCount++;
@@ -188,6 +206,8 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
 
     public function styles(Worksheet $sheet)
     {
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Cambria');
+
         $lastColIndex = (2 + $this->daysInMonth + 5);
         $lastCol = Coordinate::stringFromColumnIndex($lastColIndex);
         
@@ -196,7 +216,7 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
         $firstDataRow = $headerEndRow + 1;
         $lastDataRow = $firstDataRow + $this->dataRowsCount - 1;
         $jumlahRow = $lastDataRow + 1;
-        $sheet->getRowDimension($jumlahRow)->setRowHeight(30); 
+        $sheet->getRowDimension($jumlahRow)->setRowHeight(30);
 
         $sheet->mergeCells('A1:' . $lastCol . '1');
         $sheet->mergeCells('A2:' . $lastCol . '2');
@@ -208,23 +228,22 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
         $sheet->getStyle('A' . $headerStartRow . ':' . $lastCol . $headerEndRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $headerStartRow . ':' . $lastCol . $headerEndRow)->getFill()
             ->setFillType(Fill::FILL_SOLID)
-            ->getStartColor()->setARGB('FFD9E1F2');
+            ->getStartColor()->setARGB('FFC4D79B');
 
         $sheet->mergeCells('A' . $headerStartRow . ':A' . $headerEndRow);
-        $sheet->setCellValue('A' . $headerStartRow, 'No');
+        $sheet->setCellValue('A' . $headerStartRow, 'NO');
         $sheet->mergeCells('B' . $headerStartRow . ':B' . $headerEndRow);
-        $sheet->setCellValue('B' . $headerStartRow, 'Nama Siswa/i');
+        $sheet->setCellValue('B' . $headerStartRow, 'NAMA SISWA');
 
         $firstTglCol = Coordinate::stringFromColumnIndex(3);
         $lastTglCol = Coordinate::stringFromColumnIndex(2 + $this->daysInMonth);
         $sheet->mergeCells($firstTglCol . $headerStartRow . ':' . $lastTglCol . $headerStartRow);
-        $sheet->setCellValue($firstTglCol . $headerStartRow, 'Tanggal');
+        $sheet->setCellValue($firstTglCol . $headerStartRow, 'TANGGAL');
 
         $firstStatusColIndex = 3 + $this->daysInMonth;
         $firstStatusCol = Coordinate::stringFromColumnIndex($firstStatusColIndex);
-        $lastStatusCol = Coordinate::stringFromColumnIndex($lastColIndex);
-        $sheet->mergeCells($firstStatusCol . $headerStartRow . ':' . $lastStatusCol . $headerStartRow);
-        $sheet->setCellValue($firstStatusCol . $headerStartRow, 'Total');
+        $sheet->mergeCells($firstStatusCol . $headerStartRow . ':' . $lastCol . $headerStartRow);
+        $sheet->setCellValue($firstStatusCol . $headerStartRow, 'TOTAL');
 
         $sheet->getStyle('A' . $headerStartRow . ':' . $lastCol . $jumlahRow)
             ->getBorders()
@@ -234,14 +253,16 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
         $lastDataColIndex = 2 + $this->daysInMonth;
         $lastDataCol = Coordinate::stringFromColumnIndex($lastDataColIndex);
         $sheet->mergeCells('A' . $jumlahRow . ':' . $lastDataCol . $jumlahRow);
-        $sheet->getStyle('A' . $jumlahRow . ':' . $lastDataCol . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle('A' . $jumlahRow)->getFont()->setBold(false);
+        $sheet->getStyle('A' . $jumlahRow . ':' . $lastCol . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+        $yearForHoliday = intval(explode('-', $this->tahun)[0]);
         $dateOffset = 2;
         for ($day = 1; $day <= $this->daysInMonth; $day++) {
-            $date = Carbon::create($this->tahun, $this->bulanNumber, $day);
+            $date = Carbon::create($yearForHoliday, $this->bulanNumber, $day);
             if ($this->allHolidays->contains($date->format('Y-m-d'))) {
                 $col = Coordinate::stringFromColumnIndex($day + $dateOffset);
-                $sheet->getStyle($col . $firstDataRow . ':' . $col . $jumlahRow)
+                $sheet->getStyle($col . $headerEndRow . ':' . $col . $jumlahRow)
                     ->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()
@@ -265,55 +286,29 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
                 $jumlahRow = $lastDataRow + 1;
                 $legendStartRow = $jumlahRow + 3;
 
-                $sheet->getColumnDimension(column: 'A')->setWidth(5);
+                $sheet->getColumnDimension('A')->setAutoSize(true);
                 $sheet->getColumnDimension('B')->setAutoSize(true);
                 
                 $dateStartColIndex = 3;
                 $dateEndColIndex = 2 + $this->daysInMonth;
                 for ($colIndex = $dateStartColIndex; $colIndex <= $dateEndColIndex; $colIndex++) {
                     $col = Coordinate::stringFromColumnIndex($colIndex);
-                    $sheet->getColumnDimension($col)->setWidth(3);
+                    $sheet->getColumnDimension($col)->setWidth(4);
                 }
                 
                 $firstTotalColIndex = $dateEndColIndex + 1;
                 $lastTotalColIndex = $dateEndColIndex + 5;
                 for ($colIndex = $firstTotalColIndex; $colIndex <= $lastTotalColIndex; $colIndex++) {
                      $col = Coordinate::stringFromColumnIndex($colIndex);
-                    $sheet->getColumnDimension($col)->setWidth(3);
+                    $sheet->getColumnDimension($col)->setWidth(4);
                 }
 
                 $sheet->getStyle('A' . $headerStartRow . ':' . $lastCol . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle('B' . $headerStartRow . ':B' . $headerEndRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle('B' . ($headerEndRow + 1) . ':B' . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-                for ($row = $firstDataRow; $row <= $lastDataRow; $row++) {
-                    $dateOffset = 2;
-                    for ($colIndex = 1; $colIndex <= $this->daysInMonth; $colIndex++) {
-                        $realCol = $colIndex + $dateOffset;
-                        $cellValue = $sheet->getCellByColumnAndRow($realCol, $row)->getValue();
-                        $style = $sheet->getStyleByColumnAndRow($realCol, $row);
-
-                        switch ($cellValue) {
-                            case '✓':
-                                $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFC6EFCE');
-                                break;
-                            case 'T':
-                                $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFEB9C');
-                                break;
-                            case 'S':
-                            case 'I':
-                                $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
-                                break;
-                            case 'A':
-                            case 'B':
-                                $style->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFC7CE');
-                                break;
-                        }
-                    }
-                }
+                $sheet->getStyle('B' . $firstDataRow . ':B' . $jumlahRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
                 
                 $legendData = [
-                    ['Status', 'Keterangan'],
+                    ['STATUS', 'KETERANGAN'],
                     ['✓', 'Hadir'],
                     ['T', 'Telat'],
                     ['S', 'Sakit'],
@@ -323,10 +318,7 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
                     ['', 'Hari Libur / Akhir Pekan'],
                 ];
 
-                $statusColWidth = 10;
-                $legendColWidth = 20;
-                $sheet->getColumnDimension('A')->setWidth($statusColWidth);
-                $sheet->getColumnDimension('B')->setWidth($legendColWidth);
+                $sheet->getColumnDimension('B')->setWidth(25);
 
                 $currentLegendRow = $legendStartRow;
                 foreach ($legendData as $row) {
@@ -341,13 +333,10 @@ class AbsensiExport implements FromCollection, WithStyles, WithEvents
                     ->setBorderStyle(Border::BORDER_THIN);
                 
                 $sheet->getStyle('A' . $legendStartRow . ':B' . $legendStartRow)->getFont()->setBold(true);
+                $sheet->getStyle('A' . $legendStartRow . ':B' . $legendStartRow)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFC4D79B');
                 
-                $sheet->getStyle('A' . ($legendStartRow + 1))->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFC6EFCE');
-                $sheet->getStyle('A' . ($legendStartRow + 2))->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFEB9C');
-                $sheet->getStyle('A' . ($legendStartRow + 3))->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
-                $sheet->getStyle('A' . ($legendStartRow + 4))->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
-                $sheet->getStyle('A' . ($legendStartRow + 5))->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFC7CE');
-                $sheet->getStyle('A' . ($legendStartRow + 6))->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFFFC7CE');
                 $sheet->getStyle('A' . ($legendStartRow + 7))->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFD21A1A');
             },
         ];

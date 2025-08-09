@@ -1,6 +1,4 @@
-// UangKas/SelectYearPage.jsx
 import { ArrowLeft, CalendarDays, PlusCircle } from "lucide-react";
-import toast from "react-hot-toast";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
@@ -52,7 +50,7 @@ const SelectYearPage = ({ selectedClass }) => {
         >
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-md md:text-lg font-medium text-neutral-700">
-                    Pilih Tahun
+                    Pilih Tahun Ajaran
                 </h3>
                 <Button
                     onClick={handleAddYearClick}

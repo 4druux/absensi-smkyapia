@@ -60,7 +60,7 @@ const Select = forwardRef(
             if (isProcessing) return;
             if (searchTerm.trim() && onAdd) {
                 try {
-                    await onAdd(searchTerm.trim());
+                    await onAdd(searchTerm.trim().toUpperCase());
                     setIsOpen(false);
                     setSearchTerm("");
                 } catch (err) {
@@ -189,7 +189,7 @@ const Select = forwardRef(
                                                 value={searchTerm}
                                                 onChange={(e) =>
                                                     setSearchTerm(
-                                                        e.target.value
+                                                        e.target.value.toUpperCase()
                                                     )
                                                 }
                                                 onClick={(e) =>
@@ -224,15 +224,22 @@ const Select = forwardRef(
                                             filteredOptions.map((option) => (
                                                 <div
                                                     key={option.value}
-                                                    className="flex items-center justify-between hover:bg-gray-100 rounded-lg group"
+                                                    className="flex items-center justify-between hover:bg-gray-100 rounded-lg group p-3 cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOptionClick(
+                                                            option.value
+                                                        );
+                                                    }}
                                                 >
                                                     <label
-                                                        className="flex-grow flex items-center text-sm p-3 cursor-pointer"
-                                                        onClick={() =>
+                                                        className="flex-grow text-sm cursor-pointer"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             handleOptionClick(
                                                                 option.value
-                                                            )
-                                                        }
+                                                            );
+                                                        }}
                                                     >
                                                         <span
                                                             className={
@@ -246,22 +253,44 @@ const Select = forwardRef(
                                                         </span>
                                                     </label>
 
-                                                    {allowDelete && (
-                                                        <button
-                                                            disabled={
-                                                                isProcessing
+                                                    <div className="flex items-center">
+                                                        <input
+                                                            type="radio"
+                                                            name={label}
+                                                            value={option.value}
+                                                            checked={
+                                                                value ===
+                                                                option.value
                                                             }
-                                                            onClick={(e) =>
-                                                                handleDeleteItem(
-                                                                    e,
+                                                            onChange={() =>
+                                                                handleOptionClick(
                                                                     option.value
                                                                 )
                                                             }
-                                                            className="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-20 mr-2 cursor-pointer"
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>
-                                                    )}
+                                                            onClick={(e) =>
+                                                                e.stopPropagation()
+                                                            }
+                                                            className="form-radio h-4 w-4 text-sky-600 accent-sky-600 cursor-pointer"
+                                                        />
+                                                        {allowDelete && (
+                                                            <button
+                                                                disabled={
+                                                                    isProcessing
+                                                                }
+                                                                onClick={(e) =>
+                                                                    handleDeleteItem(
+                                                                        e,
+                                                                        option.value
+                                                                    )
+                                                                }
+                                                                className="p-1 ml-3 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-20 cursor-pointer"
+                                                            >
+                                                                <Trash2
+                                                                    size={16}
+                                                                />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ))
                                         ) : !showAddNewOption ? (

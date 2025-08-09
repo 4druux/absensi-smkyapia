@@ -24,6 +24,12 @@ class UangKasApiController extends Controller
         return $monthMap[strtolower($slug)] ?? null;
     }
     
+    private function getCorrectYear($academicYear, $month)
+    {
+        [$startYear, $endYear] = explode('-', $academicYear);
+        return $month >= 7 ? $startYear : $endYear;
+    }
+    
     public function getClasses()
     {
         $classes = Kelas::with('jurusan')->get();
@@ -40,33 +46,47 @@ class UangKasApiController extends Controller
         $years = AcademicYear::orderBy('year', 'asc')->get();
 
         if ($years->isEmpty()) {
-            $currentYear = now()->year;
+            $currentYear = now()->month >= 7 ? now()->year : now()->year - 1;
             AcademicYear::create(['year' => $currentYear]);
             $years = AcademicYear::orderBy('year', 'asc')->get();
         }
         
-        return response()->json($years->map(fn ($y) => ['nomor' => $y->year]));
+        return response()->json($years->map(fn ($y) => ['nomor' => $y->year . '-' . ($y->year + 1)]));
     }
 
     public function storeYearApi()
     {
         $latestYear = AcademicYear::orderBy('year', 'desc')->first();
-        $yearToAdd = $latestYear ? $latestYear->year + 1 : now()->year;
+        $yearToCreate = now()->month >= 7 ? now()->year : now()->year - 1;
         
-        $academicYear = AcademicYear::firstOrCreate(['year' => $yearToAdd]);
+        if ($latestYear) {
+                $yearToCreate = $latestYear->year + 1;
+        }
+        
+        $academicYear = AcademicYear::firstOrCreate(['year' => $yearToCreate]);
         
         return response()->json(['message' => 'Tahun ajaran berhasil ditambahkan!', 'year' => $academicYear], 201);
     }
     
     public function getMonths($kelas, $jurusan, $tahun)
     {
-        $months = collect(range(1, 12))->map(function ($month) use ($tahun) {
-            $date = Carbon::create($tahun, $month, 1);
+        $startYear = intval(explode('-', $tahun)[0]);
+        $endYear = intval(explode('-', $tahun)[1]);
+
+        $months = collect(range(7, 12))->map(function ($month) use ($startYear) {
+            $date = Carbon::create($startYear, $month, 1);
             return [
                 'nama' => $date->translatedFormat('F'),
                 'slug' => strtolower($date->translatedFormat('F')),
             ];
-        });
+        })->merge(collect(range(1, 6))->map(function ($month) use ($endYear) {
+            $date = Carbon::create($endYear, $month, 1);
+            return [
+                'nama' => $date->translatedFormat('F'),
+                'slug' => strtolower($date->translatedFormat('F')),
+            ];
+        }));
+
         return response()->json($months);
     }
 
@@ -76,11 +96,12 @@ class UangKasApiController extends Controller
         if (!$monthNumber) {
             return response()->json(['error' => 'Bulan tidak valid.'], 404);
         }
-
+        
+        $year = $this->getCorrectYear($tahun, $monthNumber);
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
 
-        $firstDayOfMonth = Carbon::create($tahun, $monthNumber, 1);
+        $firstDayOfMonth = Carbon::create($year, $monthNumber, 1);
         $lastDayOfMonth = $firstDayOfMonth->copy()->endOfMonth();
         $students = $selectedKelas->siswas;
 
@@ -145,7 +166,7 @@ class UangKasApiController extends Controller
             ->keys()
             ->toArray();
 
-        $dbHolidays = Holiday::whereYear('date', $tahun)
+        $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
             ->get()
             ->pluck('date')->toArray();
@@ -226,12 +247,15 @@ class UangKasApiController extends Controller
             'payments.*.siswa_id' => 'required|exists:siswas,id',
             'payments.*.status' => 'required|in:paid,unpaid',
         ]);
+        
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $year = $this->getCorrectYear($tahun, $monthNumber);
 
         $fixedNominal = $request->input('fixed_nominal');
         $paidSiswaIds = collect($request->payments)->where('status', 'paid')->pluck('siswa_id');
 
-        DB::transaction(function () use ($paidSiswaIds, $tahun, $bulanSlug, $minggu, $fixedNominal) {
-            UangKasPayment::where('tahun', $tahun)
+        DB::transaction(function () use ($paidSiswaIds, $year, $bulanSlug, $minggu, $fixedNominal) {
+            UangKasPayment::where('tahun', $year)
                 ->where('bulan_slug', $bulanSlug)
                 ->where('minggu', $minggu)
                 ->whereNotIn('siswa_id', $paidSiswaIds)
@@ -241,7 +265,7 @@ class UangKasApiController extends Controller
                 UangKasPayment::updateOrCreate(
                     [
                         'siswa_id' => $siswaId,
-                        'tahun' => $tahun,
+                        'tahun' => $year,
                         'bulan_slug' => $bulanSlug,
                         'minggu' => $minggu,
                     ],
@@ -260,7 +284,8 @@ class UangKasApiController extends Controller
     public function storeHolidayApi($kelas, $jurusan, $tahun, $bulanSlug, $minggu)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
-        $startOfMonth = Carbon::createFromDate($tahun, $monthNumber, 1);
+        $year = $this->getCorrectYear($tahun, $monthNumber);
+        $startOfMonth = Carbon::createFromDate($year, $monthNumber, 1);
         $targetWeekStart = $startOfMonth->copy()->addWeeks($minggu - 1)->startOfWeek(Carbon::SUNDAY);
         
         $weekDateToMark = $targetWeekStart->isSameMonth($startOfMonth) ? $targetWeekStart : $startOfMonth;

@@ -14,6 +14,7 @@ const useInputSiswaForm = () => {
     const [formData, setFormData] = useState({
         jurusan_id: "",
         kelas_id: "",
+        new_kelas: null,
         students: [{ id: Date.now(), nis: "", nama: "" }],
     });
 
@@ -44,6 +45,7 @@ const useInputSiswaForm = () => {
             const newState = { ...prev, [name]: value };
             if (name === "jurusan_id") {
                 newState.kelas_id = "";
+                newState.new_kelas = null;
             }
             return newState;
         });
@@ -261,9 +263,27 @@ const useInputSiswaForm = () => {
         setIsProcessing(true);
         setErrors({});
 
+        const validStudents = formData.students.filter((s) => s.nama && s.nis);
+
+        if (!formData.kelas_id) {
+            setErrors({ kelas_id: ["Pilih kelas terlebih dahulu."] });
+            toast.error("Pilih kelas terlebih dahulu.");
+            setIsProcessing(false);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+        }
+
+        if (validStudents.length === 0) {
+            setErrors({ students: ["Daftar siswa tidak boleh kosong."] });
+            toast.error("Daftar siswa tidak boleh kosong.");
+            setIsProcessing(false);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            return;
+        }
+
         const payload = {
             kelas_id: formData.kelas_id,
-            students: formData.students.filter((s) => s.nama && s.nis),
+            students: validStudents,
         };
 
         try {
@@ -311,6 +331,7 @@ const useInputSiswaForm = () => {
         handleFormChange,
         handleStudentChange,
         addStudentRow,
+        removeStudentRow,
         removeStudentRow,
         handleSubmit,
         handleCreateJurusan,

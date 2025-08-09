@@ -41,6 +41,23 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
         if (props.flash?.error) toast.error(props.flash.error);
     }, [props.flash]);
 
+    let displayYear;
+    const [startYear, endYear] = tahun.split("-");
+    const month = namaBulan.toLowerCase();
+
+    if (
+        month === "januari" ||
+        month === "februari" ||
+        month === "maret" ||
+        month === "april" ||
+        month === "mei" ||
+        month === "juni"
+    ) {
+        displayYear = endYear;
+    } else {
+        displayYear = startYear;
+    }
+
     if (
         !attendanceData ||
         !attendanceData.students ||
@@ -130,7 +147,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
             }),
         },
         {
-            label: `${tanggal}`,
+            label: `${tanggal} ${namaBulan} ${displayYear}`,
             href: route("absensi.month.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
@@ -168,7 +185,8 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
                 <div>
                     <div className="px-1 py-4">
                         <h2 className="text-lg text-neutral-800">
-                            Daftar Kehadiran
+                            Daftar Kehadiran ({tanggal} {namaBulan}{" "}
+                            {displayYear})
                         </h2>
                     </div>
 

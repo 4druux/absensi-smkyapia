@@ -1,4 +1,3 @@
-// UangKas/SelectMonthPage.jsx
 import { useEffect, useRef, useState } from "react";
 import { usePage } from "@inertiajs/react";
 import toast from "react-hot-toast";
@@ -15,6 +14,7 @@ import CardContent from "@/Components/ui/card-content";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
 import { useUangKasMonths } from "@/hooks/uang-kas/use-uang-kas-months";
+import { dropdownAnimation } from "@/hooks/use-dropdown";
 
 const SelectMonthPage = ({ tahun, selectedClass }) => {
     const { flash } = usePage().props;
@@ -56,11 +56,6 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
         };
     }, [isDropdownOpen, downloadingStatus]);
 
-    const dropdownVariants = {
-        hidden: { opacity: 0, y: -5, scale: 0.98 },
-        visible: { opacity: 1, y: 0, scale: 1 },
-    };
-
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
         {
@@ -99,116 +94,136 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
             pageClassName="-mt-16 md:-mt-20"
         >
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Bulan ({tahun})
+                Pilih Bulan Tahun Ajaran {tahun}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {months &&
-                    months.map((month) => (
-                        <CardContent
-                            key={month.slug}
-                            href={route("uang-kas.month.show", {
-                                kelas: selectedClass.kelas,
-                                jurusan: selectedClass.jurusan,
-                                tahun,
-                                bulanSlug: month.slug,
-                            })}
-                            icon={CalendarDays}
-                            title={month.nama}
-                        >
-                            <div
-                                className="absolute -top-6 -right-6 z-20"
-                                ref={
-                                    isDropdownOpen === month.slug
-                                        ? dropdownRef
-                                        : null
-                                }
+                    months.map((month) => {
+                        const [startYear, endYear] = tahun.split("-");
+                        const displayYear =
+                            month.slug === "januari" ||
+                            month.slug === "februari" ||
+                            month.slug === "maret" ||
+                            month.slug === "april" ||
+                            month.slug === "mei" ||
+                            month.slug === "juni"
+                                ? endYear
+                                : startYear;
+                        return (
+                            <CardContent
+                                key={month.slug}
+                                href={route("uang-kas.month.show", {
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
+                                    tahun,
+                                    bulanSlug: month.slug,
+                                })}
+                                icon={CalendarDays}
+                                title={month.nama}
+                                subtitle={displayYear}
                             >
-                                <Button
-                                    size="sm"
-                                    variant="icon"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        setIsDropdownOpen(
-                                            isDropdownOpen === month.slug
-                                                ? false
-                                                : month.slug
-                                        );
-                                    }}
+                                <div
+                                    className="absolute -top-6 -right-6 z-20"
+                                    ref={
+                                        isDropdownOpen === month.slug
+                                            ? dropdownRef
+                                            : null
+                                    }
                                 >
-                                    <IoIosMore size={16} />
-                                </Button>
-                                <AnimatePresence>
-                                    {isDropdownOpen === month.slug && (
-                                        <motion.div
-                                            initial="hidden"
-                                            animate="visible"
-                                            exit="hidden"
-                                            variants={dropdownVariants}
-                                            transition={{
-                                                duration: 0.15,
-                                                ease: "easeInOut",
-                                            }}
-                                            className="absolute right-0 top-8 w-48 rounded-lg shadow-lg bg-white border border-slate-200"
-                                        >
-                                            <div className="px-1 py-3 space-y-1">
-                                                <div
-                                                    className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        handleExport(
-                                                            month.slug,
-                                                            "excel"
-                                                        );
-                                                    }}
-                                                >
-                                                    {downloadingStatus[
-                                                        `${month.slug}-excel`
-                                                    ] ? (
-                                                        <span className="flex items-center gap-1">
-                                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                                            Mengekspor...
-                                                        </span>
-                                                    ) : (
-                                                        <span className="flex items-center gap-1">
-                                                            <RiFileExcel2Line className="w-5 h-5" />
-                                                            Eksport Excel
-                                                        </span>
-                                                    )}
+                                    <Button
+                                        size="sm"
+                                        variant="icon"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setIsDropdownOpen(
+                                                isDropdownOpen === month.slug
+                                                    ? false
+                                                    : month.slug
+                                            );
+                                        }}
+                                    >
+                                        <IoIosMore size={16} />
+                                    </Button>
+                                    <AnimatePresence>
+                                        {isDropdownOpen === month.slug && (
+                                            <motion.div
+                                                initial="hidden"
+                                                animate="visible"
+                                                exit="hidden"
+                                                variants={
+                                                    dropdownAnimation.variants
+                                                }
+                                                transition={
+                                                    dropdownAnimation.transition
+                                                }
+                                                className="absolute right-0 top-8 w-48 rounded-lg shadow-lg bg-white border border-slate-200"
+                                            >
+                                                <div className="px-1 py-3 space-y-1">
+                                                    <div
+                                                        className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            handleExport(
+                                                                month.slug,
+                                                                "excel"
+                                                            );
+                                                            setIsDropdownOpen(
+                                                                null
+                                                            );
+                                                        }}
+                                                    >
+                                                        {downloadingStatus[
+                                                            `${month.slug}-excel`
+                                                        ] ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                                Mengekspor...
+                                                            </span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-1">
+                                                                <RiFileExcel2Line className="w-5 h-5" />
+                                                                Eksport Excel
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div
+                                                        className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            handleExport(
+                                                                month.slug,
+                                                                "pdf"
+                                                            );
+                                                            setIsDropdownOpen(
+                                                                null
+                                                            );
+                                                        }}
+                                                    >
+                                                        {downloadingStatus[
+                                                            `${month.slug}-pdf`
+                                                        ] ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                                                Mengekspor...
+                                                            </span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-1">
+                                                                <FaFilePdf className="w-5 h-5" />
+                                                                Export PDF
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                                <div
-                                                    className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        handleExport(
-                                                            month.slug,
-                                                            "pdf"
-                                                        );
-                                                    }}
-                                                >
-                                                    {downloadingStatus[
-                                                        `${month.slug}-pdf`
-                                                    ] ? (
-                                                        <span className="flex items-center gap-1">
-                                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                                            Mengekspor...
-                                                        </span>
-                                                    ) : (
-                                                        <span className="flex items-center gap-1">
-                                                            <FaFilePdf className="w-5 h-5" />
-                                                            Export PDF
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        </CardContent>
-                    ))}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </CardContent>
+                        );
+                    })}
             </div>
             <div className="flex justify-start mt-8">
                 <Button

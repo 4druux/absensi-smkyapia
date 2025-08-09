@@ -96,7 +96,7 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
             pageClassName="-mt-16 md:-mt-20"
         >
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Bulan ({tahun})
+                Pilih Bulan Tahun Ajaran {tahun}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {months &&
@@ -111,6 +111,16 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                             })}
                             icon={CalendarDays}
                             title={month.nama}
+                            subtitle={
+                                month.nama === "Juli" ||
+                                month.nama === "Agustus" ||
+                                month.nama === "September" ||
+                                month.nama === "Oktober" ||
+                                month.nama === "November" ||
+                                month.nama === "Desember"
+                                    ? tahun.split("-")[0]
+                                    : tahun.split("-")[1]
+                            }
                         >
                             <div
                                 className="absolute -top-6 -right-6 z-20"
@@ -159,7 +169,6 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                                                             month.slug,
                                                             "excel"
                                                         );
-                                                        setIsDropdownOpen(null);
                                                     }}
                                                 >
                                                     {downloadingStatus[
@@ -185,7 +194,6 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                                                             month.slug,
                                                             "pdf"
                                                         );
-                                                        setIsDropdownOpen(null);
                                                     }}
                                                 >
                                                     {downloadingStatus[
@@ -217,7 +225,6 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                     href={route("absensi.class.show", {
                         kelas: selectedClass.kelas,
                         jurusan: selectedClass.jurusan,
-                        tahun: tahun,
                     })}
                 >
                     <ArrowLeft size={16} className="mr-2" />

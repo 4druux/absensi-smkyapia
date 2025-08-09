@@ -39,6 +39,8 @@ Route::controller(AbsensiController::class)->prefix('absensi')->name('absensi.')
 Route::controller(AbsensiExportController::class)->prefix('absensi')->name('absensi.')->group(function () {
     Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/excel', 'exportMonthExcel')->name('month.export.excel');
     Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/pdf', 'exportMonthPdf')->name('month.export.pdf');
+    Route::get('/{kelas}/{jurusan}/{tahun}/export/rekap/excel', 'exportYearExcel')->name('year.export.rekap.excel'); // Rute baru untuk ekspor Excel tahunan
+    Route::get('/{kelas}/{jurusan}/{tahun}/export/rekap/pdf', 'exportYearPdf')->name('year.export.rekap.pdf');
 });
 
 

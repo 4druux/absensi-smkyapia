@@ -41,11 +41,11 @@ class KelasController extends Controller
     {
         try {
             DB::transaction(function () use ($kelas) {
-                $kelas->siswas()->delete();
+                $kelas->siswas()->forceDelete();
                 $kelas->forceDelete();
             });
 
-            return response()->json(['message' => 'Kelas dan semua siswanya berhasil dihapus.']);
+            return response()->json(['message' => 'Kelas dan semua siswa berhasil dihapus.']);
 
         } catch (\Exception $e) {
             Log::error('Gagal menghapus kelas: ' . $e->getMessage());

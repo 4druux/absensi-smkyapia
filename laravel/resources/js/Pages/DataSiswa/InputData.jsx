@@ -57,6 +57,8 @@ const InputData = () => {
             value: k.id,
             label: `${k.nama_kelas} ${k.kelompok}`,
         })) || [];
+    const jurusanSelected =
+        allJurusans?.find((j) => j.id === data.jurusan_id)?.nama_jurusan || "";
 
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
@@ -99,8 +101,19 @@ const InputData = () => {
                         onDelete={handleDeleteJurusan}
                         isProcessing={isSubmitting}
                     />
+
                     <Select
                         label="Pilih Kelas"
+                        title={
+                            jurusanSelected
+                                ? `Kelas untuk ${jurusanSelected}`
+                                : "Pilih Jurusan Dahulu"
+                        }
+                        description={
+                            jurusanSelected
+                                ? "Berikut daftar kelas yang tersedia untuk jurusan ini."
+                                : "Pilih jurusan di sebelah kiri untuk melihat daftar kelas."
+                        }
                         options={kelasSelectOptions}
                         value={data.kelas_id}
                         onChange={(value) =>

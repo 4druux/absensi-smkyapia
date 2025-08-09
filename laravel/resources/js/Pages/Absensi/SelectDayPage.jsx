@@ -1,4 +1,3 @@
-//selectDayPage
 import { useEffect } from "react";
 
 import toast from "react-hot-toast";
@@ -35,6 +34,23 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
             toast.error(flash.error);
         }
     }, [flash]);
+
+    let displayYear;
+    const [startYear, endYear] = tahun.split("-");
+    const month = namaBulan.toLowerCase();
+
+    if (
+        month === "januari" ||
+        month === "februari" ||
+        month === "maret" ||
+        month === "april" ||
+        month === "mei" ||
+        month === "juni"
+    ) {
+        displayYear = endYear;
+    } else {
+        displayYear = startYear;
+    }
 
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
@@ -96,7 +112,7 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
             pageClassName="-mt-16 md:-mt-20"
         >
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Hari ({namaBulan} {tahun})
+                Pilih Hari ({namaBulan} {displayYear})
             </h3>
 
             <SelectDayMobile {...selectDataProps} />

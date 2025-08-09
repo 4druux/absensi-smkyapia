@@ -24,6 +24,12 @@ class AbsensiApiController extends Controller
         ];
         return $monthMap[strtolower($slug)] ?? null;
     }
+    
+    private function getCorrectYear($academicYear, $month)
+    {
+        [$startYear, $endYear] = explode('-', $academicYear);
+        return $month >= 7 ? $startYear : $endYear;
+    }
 
     public function getClasses()
     {
@@ -41,33 +47,47 @@ class AbsensiApiController extends Controller
         $years = AcademicYear::orderBy('year', 'asc')->get();
 
         if ($years->isEmpty()) {
-            $currentYear = now()->year;
+            $currentYear = now()->month >= 7 ? now()->year : now()->year - 1;
             AcademicYear::create(['year' => $currentYear]);
             $years = AcademicYear::orderBy('year', 'asc')->get();
         }
         
-        return response()->json($years->map(fn ($y) => ['nomor' => $y->year]));
+        return response()->json($years->map(fn ($y) => ['nomor' => $y->year . '-' . ($y->year + 1)]));
     }
 
     public function storeYearApi(Request $request)
     {
         $latestYear = AcademicYear::orderBy('year', 'desc')->first();
-        $yearToAdd = $latestYear ? $latestYear->year + 1 : now()->year;
-        
-        $academicYear = AcademicYear::firstOrCreate(['year' => $yearToAdd]);
-        
+        $yearToCreate = now()->month >= 7 ? now()->year : now()->year - 1;
+    
+        if ($latestYear) {
+            $yearToCreate = $latestYear->year + 1;
+        }
+
+        $academicYear = AcademicYear::firstOrCreate(['year' => $yearToCreate]);
+    
         return response()->json(['message' => 'Tahun ajaran berhasil ditambahkan!', 'year' => $academicYear], 201);
     }
 
     public function getMonths($kelas, $jurusan, $tahun)
     {
-        $months = collect(range(1, 12))->map(function ($month) use ($tahun) {
-            $date = Carbon::create($tahun, $month, 1);
+        $startYear = intval(explode('-', $tahun)[0]);
+        $endYear = intval(explode('-', $tahun)[1]);
+
+        $months = collect(range(7, 12))->map(function ($month) use ($startYear) {
+            $date = Carbon::create($startYear, $month, 1);
             return [
                 'nama' => $date->translatedFormat('F'),
                 'slug' => strtolower($date->translatedFormat('F')),
             ];
-        });
+        })->merge(collect(range(1, 6))->map(function ($month) use ($endYear) {
+            $date = Carbon::create($endYear, $month, 1);
+            return [
+                'nama' => $date->translatedFormat('F'),
+                'slug' => strtolower($date->translatedFormat('F')),
+            ];
+        }));
+
         return response()->json($months);
     }
     
@@ -77,29 +97,30 @@ class AbsensiApiController extends Controller
         if (!$monthNumber) {
             return response()->json(['error' => 'Bulan tidak valid.'], 404);
         }
-
+        
+        $year = $this->getCorrectYear($tahun, $monthNumber);
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
 
-        $date = Carbon::create($tahun, $monthNumber, 1);
+        $date = Carbon::create($year, $monthNumber, 1);
         $daysInMonth = $date->daysInMonth;
 
         $students = $selectedKelas->siswas;
 
-        $absensiDays = Absensi::whereYear('tanggal', $tahun)
+        $absensiDays = Absensi::whereYear('tanggal', $year)
             ->whereMonth('tanggal', $monthNumber)
             ->whereIn('siswa_id', $students->pluck('id'))
             ->distinct()
             ->pluck(DB::raw('DAY(tanggal)'));
 
-        $dbHolidays = Holiday::whereYear('date', $tahun)
+        $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
             ->get()
             ->pluck('date')
             ->map(fn($date) => Carbon::parse($date)->day);
 
         $days = collect();
-        $firstDayOfMonth = Carbon::create($tahun, $monthNumber, 1);
+        $firstDayOfMonth = Carbon::create($year, $monthNumber, 1);
         $startDayOfWeek = $firstDayOfMonth->dayOfWeek;
 
         for ($i = $startDayOfWeek; $i > 0; $i--) {
@@ -112,8 +133,8 @@ class AbsensiApiController extends Controller
             ]);
         }
         
-        $realDays = collect(range(1, $daysInMonth))->map(function ($day) use ($tahun, $monthNumber) {
-            $date = Carbon::create($tahun, $monthNumber, $day);
+        $realDays = collect(range(1, $daysInMonth))->map(function ($day) use ($year, $monthNumber) {
+            $date = Carbon::create($year, $monthNumber, $day);
             return [
                 'nomor' => $day,
                 'nama_hari' => $date->translatedFormat('l'),
@@ -124,7 +145,7 @@ class AbsensiApiController extends Controller
 
         $days = $days->merge($realDays);
 
-        $lastDayOfMonth = Carbon::create($tahun, $monthNumber, $daysInMonth);
+        $lastDayOfMonth = Carbon::create($year, $monthNumber, $daysInMonth);
         $endDayOfWeek = $lastDayOfMonth->dayOfWeek;
         $paddingEndDaysCount = 6 - $endDayOfWeek;
         if ($paddingEndDaysCount > 0) {
@@ -153,24 +174,30 @@ class AbsensiApiController extends Controller
             'holidays' => $allHolidays,
         ]);
     }
-    
+
     public function getAttendance($kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
-        if (!$monthNumber || !checkdate($monthNumber, (int) $tanggal, $tahun)) {
+        if (!$monthNumber || !checkdate($monthNumber, (int) $tanggal, (int) $this->getCorrectYear($tahun, $monthNumber))) {
             return response()->json(['error' => 'Tanggal tidak valid.'], 404);
         }
 
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
-
-        $targetDate = Carbon::create($tahun, $monthNumber, $tanggal);
+        $selectedKelas->load('siswas');
         $allStudents = $selectedKelas->siswas;
 
         if ($allStudents->isEmpty()) {
-            return response()->json(['error' => "Tidak ada siswa di kelas ini."], 404);
+            return response()->json([
+                'students' => [],
+                'tanggalAbsen' => null,
+                'existingAttendance' => [],
+            ]);
         }
 
+        $year = $this->getCorrectYear($tahun, $monthNumber);
+        $targetDate = Carbon::create($year, $monthNumber, $tanggal);
+        
         $existingAttendance = Absensi::whereDate('tanggal', $targetDate->toDateString())
             ->whereIn('siswa_id', $allStudents->pluck('id'))
             ->get();
@@ -203,7 +230,8 @@ class AbsensiApiController extends Controller
             ->where('nama_kelas', $kelas)->firstOrFail();
 
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
-        $targetDate = Carbon::create($tahun, $monthNumber, $tanggal)->toDateString();
+        $year = $this->getCorrectYear($tahun, $monthNumber);
+        $targetDate = Carbon::create($year, $monthNumber, $tanggal)->toDateString();
 
         $allStudents = $selectedKelas->siswas;
         $existingAttendance = Absensi::where('tanggal', $targetDate)->whereIn('siswa_id', $allStudents->pluck('id'))->exists();
@@ -241,7 +269,8 @@ class AbsensiApiController extends Controller
     public function storeHolidayApi($kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
-        $holidayDate = Carbon::create($tahun, $monthNumber, $tanggal)->toDateString();
+        $year = $this->getCorrectYear($tahun, $monthNumber);
+        $holidayDate = Carbon::create($year, $monthNumber, $tanggal)->toDateString();
 
         $existingHoliday = Holiday::where('date', $holidayDate)->exists();
         if ($existingHoliday) {

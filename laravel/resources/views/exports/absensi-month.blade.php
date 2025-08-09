@@ -56,12 +56,8 @@
         }
 
         th {
-            background-color: #D9E1F2;
+            background-color: #c4d79b;
             font-weight: bold;
-        }
-
-        .header-cell {
-            background-color: #D9E1F2;
         }
 
         .legend-table {
@@ -74,22 +70,6 @@
         .holiday-cell {
             background-color: #D21A1A;
         }
-
-        .hadir-cell {
-            background-color: #C6EFCE;
-        }
-
-        .telat-cell {
-            background-color: #FFEB9C;
-        }
-
-        .izin-sakit-cell {
-            background-color: #D9D9D9;
-        }
-
-        .alfa-bolos-cell {
-            background-color: #FFC7CE;
-        }
     </style>
 </head>
 
@@ -101,24 +81,27 @@
             </div>
         @endif
         <div class="header-text">
-            <h1>SMK YAPIA PARUNG</h1>
-            <h2>LAPORAN ABSENSI SISWA/I</h2>
+            <h1>DATA KEHADIRAN SISWA</h1>
+            <h2>SMK YAPIA PARUNG</h2>
             <h2>Kelas {{ $kelas }} - {{ $jurusan }}</h2>
-            <h2>Periode {{ $namaBulan }} {{ $tahun }}</h2>
+            <h2>Periode {{ $namaBulan }} {{ $year }}</h2>
         </div>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th rowspan="2" style="width: 5%;">No</th>
-                <th rowspan="2" style="width: 15%;">Nama Siswa/i</th>
-                <th colspan="{{ $daysInMonth }}" class="header-cell">Tanggal</th>
-                <th colspan="5" class="header-cell">Total</th>
+                <th rowspan="2" style="width: 3%;">NO</th>
+                <th rowspan="2" style="width: 15%;">NAMA SISWA</th>
+                <th colspan="{{ $daysInMonth }}">TANGGAL</th>
+                <th colspan="5">TOTAL</th>
             </tr>
             <tr>
                 @foreach (range(1, $daysInMonth) as $day)
-                    <th>{{ $day }}</th>
+                    @php
+                        $isHolidayHeader = $allHolidays->contains($day);
+                    @endphp
+                    <th class="{{ $isHolidayHeader ? 'holiday-cell' : '' }}">{{ $day }}</th>
                 @endforeach
                 <th>T</th>
                 <th>S</th>
@@ -145,42 +128,36 @@
                     @foreach (range(1, $daysInMonth) as $day)
                         @php
                             $status = $absensiData->get($student->id . '_' . $day, '-');
-                            $date = \Carbon\Carbon::createFromDate($tahun, $monthNumber, $day);
-                            $isHoliday = $allHolidays->contains($date->day);
-
+                            $isHoliday = $allHolidays->contains($day);
                             $cellClass = '';
+                            $displayStatus = '';
+
                             if ($isHoliday) {
                                 $cellClass = 'holiday-cell';
                                 $displayStatus = '';
                             } else {
                                 switch ($status) {
                                     case 'hadir':
-                                        $cellClass = 'hadir-cell';
                                         $displayStatus = '✓';
                                         $counts['H']++;
                                         break;
                                     case 'telat':
-                                        $cellClass = 'telat-cell';
                                         $displayStatus = 'T';
                                         $counts['T']++;
                                         break;
                                     case 'sakit':
-                                        $cellClass = 'izin-sakit-cell';
                                         $displayStatus = 'S';
                                         $counts['S']++;
                                         break;
                                     case 'izin':
-                                        $cellClass = 'izin-sakit-cell';
                                         $displayStatus = 'I';
                                         $counts['I']++;
                                         break;
                                     case 'alfa':
-                                        $cellClass = 'alfa-bolos-cell';
                                         $displayStatus = 'A';
                                         $counts['A']++;
                                         break;
                                     case 'bolos':
-                                        $cellClass = 'alfa-bolos-cell';
                                         $displayStatus = 'B';
                                         $counts['B']++;
                                         break;
@@ -192,11 +169,11 @@
                         @endphp
                         <td class="{{ $cellClass }}">{{ $displayStatus }}</td>
                     @endforeach
-                    <td>{{ $counts['T'] }}</td>
-                    <td>{{ $counts['S'] }}</td>
-                    <td>{{ $counts['I'] }}</td>
-                    <td>{{ $counts['A'] }}</td>
-                    <td>{{ $counts['B'] }}</td>
+                    <td>{{ $counts['T'] == 0 ? '' : $counts['T'] }}</td>
+                    <td>{{ $counts['S'] == 0 ? '' : $counts['S'] }}</td>
+                    <td>{{ $counts['I'] == 0 ? '' : $counts['I'] }}</td>
+                    <td>{{ $counts['A'] == 0 ? '' : $counts['A'] }}</td>
+                    <td>{{ $counts['B'] == 0 ? '' : $counts['B'] }}</td>
                 </tr>
                 @php
                     $grandTotalT += $counts['T'];
@@ -207,7 +184,7 @@
                 @endphp
             @endforeach
             <tr style="height: 30px;">
-                <td colspan="{{ 2 + $daysInMonth }}" style="text-align: center;">Jumlah</td>
+                <td colspan="{{ 2 + $daysInMonth }}" style="text-align: center; font-weight: bold;">Jumlah</td>
                 <td>{{ $grandTotalT }}</td>
                 <td>{{ $grandTotalS }}</td>
                 <td>{{ $grandTotalI }}</td>
@@ -226,27 +203,27 @@
         </thead>
         <tbody>
             <tr>
-                <td class="hadir-cell">✓</td>
+                <td>✓</td>
                 <td>Hadir</td>
             </tr>
             <tr>
-                <td class="telat-cell">T</td>
+                <td>T</td>
                 <td>Telat</td>
             </tr>
             <tr>
-                <td class="izin-sakit-cell">S</td>
+                <td>S</td>
                 <td>Sakit</td>
             </tr>
             <tr>
-                <td class="izin-sakit-cell">I</td>
+                <td>I</td>
                 <td>Izin</td>
             </tr>
             <tr>
-                <td class="alfa-bolos-cell">A</td>
+                <td>A</td>
                 <td>Alfa</td>
             </tr>
             <tr>
-                <td class="alfa-bolos-cell">B</td>
+                <td>B</td>
                 <td>Bolos</td>
             </tr>
             <tr>

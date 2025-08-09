@@ -32,6 +32,19 @@ const AllClasses = () => {
             </div>
         );
 
+    const groupedClasses = allKelas?.reduce((acc, kelas) => {
+        (acc[kelas.nama_kelas] = acc[kelas.nama_kelas] || []).push(kelas);
+        return acc;
+    }, {});
+
+    const classOrder = ["X", "XI", "XII"];
+    const sortedGroupedClasses = {};
+    classOrder.forEach((key) => {
+        if (groupedClasses?.[key]) {
+            sortedGroupedClasses[key] = groupedClasses[key];
+        }
+    });
+
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
             <div className="flex justify-between items-center mb-6">
@@ -50,33 +63,47 @@ const AllClasses = () => {
             </div>
 
             {allKelas && allKelas.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {allKelas.map((kelas) => (
-                        <CardContent
-                            key={kelas.id}
-                            href={route("data-siswa.class.show", {
-                                kelas: kelas.id,
-                            })}
-                            icon={School}
-                            title={`${kelas.nama_kelas} ${kelas.kelompok}`}
-                            subtitle={kelas.jurusan?.nama_jurusan}
-                        >
-                            <Button
-                                size="sm"
-                                variant="primary"
-                                aria-label={`Hapus kelas ${kelas.nama_kelas} ${kelas.kelompok}`}
-                                className="absolute -top-4 -right-4 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    const className = `${kelas.nama_kelas} ${kelas.kelompok} - ${kelas.jurusan?.nama_jurusan}`;
-                                    handleDeleteKelas(kelas.id, className);
-                                }}
-                            >
-                                <Trash2 size={16} />
-                            </Button>
-                        </CardContent>
-                    ))}
-                </div>
+                <>
+                    {Object.entries(sortedGroupedClasses).map(
+                        ([namaKelas, kelasList]) => (
+                            <div key={namaKelas} className="mb-8">
+                                <h4 className="text-md font-medium text-neutral-700 mb-4">{`Kelas ${namaKelas}`}</h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {kelasList.map((kelas) => (
+                                        <CardContent
+                                            key={kelas.id}
+                                            href={route(
+                                                "data-siswa.class.show",
+                                                {
+                                                    kelas: kelas.id,
+                                                }
+                                            )}
+                                            icon={School}
+                                            title={`${kelas.nama_kelas} ${kelas.kelompok}`}
+                                        >
+                                            <Button
+                                                size="sm"
+                                                variant="primary"
+                                                aria-label={`Hapus kelas ${kelas.nama_kelas} ${kelas.kelompok}`}
+                                                className="absolute -top-4 -right-4 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-200"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    const className = `${kelas.nama_kelas} ${kelas.kelompok} - ${kelas.jurusan?.nama_jurusan}`;
+                                                    handleDeleteKelas(
+                                                        kelas.id,
+                                                        className
+                                                    );
+                                                }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </Button>
+                                        </CardContent>
+                                    ))}
+                                </div>
+                            </div>
+                        )
+                    )}
+                </>
             ) : (
                 <DataNotFound
                     title="Data Kelas Kosong"

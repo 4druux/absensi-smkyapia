@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\UangKas;
 
-use App\Exports\UangKasExport;
+use App\Exports\UangKas\UangKasExport;
 use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\UangKasPayment;
@@ -23,9 +23,16 @@ class UangKasExportController extends Controller
         return $monthMap[strtolower($slug)] ?? null;
     }
     
+    private function getCorrectYear($academicYear, $month)
+    {
+        [$startYear, $endYear] = explode('-', $academicYear);
+        return $month >= 7 ? $startYear : $endYear;
+    }
+    
     public function exportMonthExcel($kelas, $jurusan, $tahun, $bulanSlug)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $year = $this->getCorrectYear($tahun, $monthNumber);
         
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
@@ -33,7 +40,7 @@ class UangKasExportController extends Controller
         $students = $selectedKelas->siswas;
 
         if ($students->isEmpty()) {
-            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+            $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
             return response()->json(['error' => "Tidak ada data siswa di kelas ini."], 404);
         }
 
@@ -42,13 +49,13 @@ class UangKasExportController extends Controller
             ->where('bulan_slug', $bulanSlug)
             ->get();
         
-        $dbHolidays = Holiday::whereYear('date', $tahun)
+        $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
             ->get()
             ->pluck('date');
 
         $weeksInMonth = [];
-        $firstDayOfMonth = Carbon::create($tahun, $monthNumber, 1);
+        $firstDayOfMonth = Carbon::create($year, $monthNumber, 1);
         $lastDayOfMonth = $firstDayOfMonth->copy()->endOfMonth();
         $startOfWeek = $firstDayOfMonth->copy()->startOfWeek(Carbon::SUNDAY);
         
@@ -73,11 +80,11 @@ class UangKasExportController extends Controller
         }
 
         if ($uangKasData->isEmpty() && count(array_filter($weeksInMonth, fn($isHoliday) => !$isHoliday)) > 0) {
-            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
-            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan}."], 404);
+            $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
+            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan} {$year}."], 404);
         }
 
-        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
+        $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
         $fileName = "UangKas-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.xlsx";
 
         return Excel::download(new UangKasExport($kelas, $jurusan, $tahun, $bulanSlug, $weeksInMonth), $fileName);
@@ -87,13 +94,19 @@ class UangKasExportController extends Controller
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
         
+        if (!$monthNumber) {
+            return response()->json(['error' => 'Bulan tidak valid.'], 404);
+        }
+        
+        $year = $this->getCorrectYear($tahun, $monthNumber);
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
             
         $students = $selectedKelas->siswas;
+        $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
 
         if ($students->isEmpty()) {
-            return response()->json(['error' => 'Tidak ada siswa di kelas ini.'], 404);
+            return response()->json(['error' => 'Tidak ada data siswa di kelas ini.'], 404);
         }
 
         $uangKasData = UangKasPayment::whereIn('siswa_id', $students->pluck('id'))
@@ -106,13 +119,13 @@ class UangKasExportController extends Controller
                 ];
             });
 
-        $dbHolidays = Holiday::whereYear('date', $tahun)
+        $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
             ->get()
             ->pluck('date');
         
         $weeksInMonth = [];
-        $firstDayOfMonth = Carbon::create($tahun, $monthNumber, 1);
+        $firstDayOfMonth = Carbon::create($year, $monthNumber, 1);
         $lastDayOfMonth = $firstDayOfMonth->copy()->endOfMonth();
         $startOfWeek = $firstDayOfMonth->copy()->startOfWeek(Carbon::SUNDAY);
         
@@ -146,11 +159,9 @@ class UangKasExportController extends Controller
         }
         
         if ($uangKasData->isEmpty() && $paidWeeksCount === 0) {
-            $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
-            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan}."], 404);
+            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan} {$year}."], 404);
         }
         
-        $namaBulan = Carbon::createFromDate($tahun, $monthNumber)->translatedFormat('F');
         $fileName = "UangKas-{$kelas}-{$jurusan}-{$namaBulan}-{$tahun}.pdf";
         $logoPath = 'images/logo-smk.png';
 

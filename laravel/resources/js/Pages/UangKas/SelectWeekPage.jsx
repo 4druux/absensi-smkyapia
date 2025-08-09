@@ -1,4 +1,3 @@
-// UangKas/SelectWeek.jsx
 import { useEffect } from "react";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import toast from "react-hot-toast";
@@ -47,6 +46,23 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
         );
     }
 
+    let displayYear;
+    const [startYear, endYear] = tahun.split("-");
+    const month = namaBulan.toLowerCase();
+
+    if (
+        month === "januari" ||
+        month === "februari" ||
+        month === "maret" ||
+        month === "april" ||
+        month === "mei" ||
+        month === "juni"
+    ) {
+        displayYear = endYear;
+    } else {
+        displayYear = startYear;
+    }
+
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
         {
@@ -77,7 +93,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
             pageClassName="-mt-16 md:-mt-20"
         >
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Minggu ({namaBulan} {tahun})
+                Pilih Minggu ({namaBulan} {displayYear})
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {weeks &&
