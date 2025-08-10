@@ -194,11 +194,11 @@ class AbsensiExportMonth implements FromCollection, WithStyles, WithEvents
             $jumlahRow->push('');
         }
         
-        $jumlahRow->push($totalT);
-        $jumlahRow->push($totalS);
-        $jumlahRow->push($totalI);
-        $jumlahRow->push($totalA);
-        $jumlahRow->push($totalB);
+        $jumlahRow->push($totalT == 0 ? '0' : $totalT);
+        $jumlahRow->push($totalS == 0 ? '0' : $totalS);
+        $jumlahRow->push($totalI == 0 ? '0' : $totalI);
+        $jumlahRow->push($totalA == 0 ? '0' : $totalA);
+        $jumlahRow->push($totalB == 0 ? '0' : $totalB);
         $exportData->push($jumlahRow);
         
         return $exportData;

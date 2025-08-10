@@ -110,11 +110,11 @@ class AbsensiExportYear implements FromCollection, WithStyles, WithEvents
         }
         
         foreach ($monthlyTotals as $total) {
-            $jumlahRow->push($total['telat']);
-            $jumlahRow->push($total['sakit']);
-            $jumlahRow->push($total['izin']);
-            $jumlahRow->push($total['alfa']);
-            $jumlahRow->push($total['bolos']);
+            $jumlahRow->push($total['telat'] == 0 ? '0' : $total['telat']);
+            $jumlahRow->push($total['sakit'] == 0 ? '0' : $total['sakit']);
+            $jumlahRow->push($total['izin'] == 0 ? '0' : $total['izin']);
+            $jumlahRow->push($total['alfa'] == 0 ? '0' : $total['alfa']);
+            $jumlahRow->push($total['bolos'] == 0 ? '0' : $total['bolos']);
         }
         
         $exportData->push($jumlahRow);
@@ -208,8 +208,8 @@ class AbsensiExportYear implements FromCollection, WithStyles, WithEvents
                           ->getStartColor()
                           ->setARGB('FFC4D79B');
                 }
-
-                $sheet->getRowDimension($statusRow)->setRowHeight(50);
+                $sheet->getRowDimension($headerStartRow)->setRowHeight(25);
+                $sheet->getRowDimension($statusRow)->setRowHeight(40);
                 $sheet->getRowDimension($jumlahRow)->setRowHeight(30);
             }
         ];

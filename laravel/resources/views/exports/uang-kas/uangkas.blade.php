@@ -56,21 +56,10 @@
         }
 
         th {
-            background-color: #D9E1F2;
+            background-color: #c4d79b;
             font-weight: bold;
         }
 
-        .header-cell {
-            background-color: #D9E1F2;
-        }
-
-        .paid-cell {
-            background-color: #C6EFCE;
-        }
-
-        .unpaid-cell {
-            background-color: #FFC7CE;
-        }
 
         .holiday-cell {
             background-color: #D21A1A;
@@ -93,10 +82,10 @@
             </div>
         @endif
         <div class="header-text">
-            <h2>DATA UANG KAS SISWA</h2>
-            <h1>SMK YAPIA PARUNG</h1>
+            <h1>DATA UANG KAS SISWA</h1>
+            <h2>SMK YAPIA PARUNG</h2>
             <h2>Kelas {{ $kelas }} - {{ $jurusan }}</h2>
-            <h2>Periode {{ $namaBulan }} {{ $tahun }}</h2>
+            <h2>Periode {{ $namaBulan }} {{ $year }}</h2>
         </div>
     </div>
 
@@ -161,9 +150,8 @@
                             <td class="holiday-cell"></td>
                         @else
                             @php
-                                $cellClass = isset($uangKasData[$student->id . '_' . $week])
-                                    ? 'paid-cell'
-                                    : 'unpaid-cell';
+                                $cellClass = isset($uangKasData[$student->id . '_' . $week]);
+
                                 $displayStatus = isset($uangKasData[$student->id . '_' . $week]) ? '✓' : '✗';
                                 if (isset($uangKasData[$student->id . '_' . $week])) {
                                     $studentTotal += $uangKasData[$student->id . '_' . $week]->nominal;
@@ -218,11 +206,11 @@
         </thead>
         <tbody>
             <tr>
-                <td class="paid-cell">✓</td>
+                <td>✓</td>
                 <td>Sudah Bayar</td>
             </tr>
             <tr>
-                <td class="unpaid-cell">X</td>
+                <td>X</td>
                 <td>Belum Bayar</td>
             </tr>
             <tr>

@@ -332,7 +332,6 @@ const useInputSiswaForm = () => {
         handleStudentChange,
         addStudentRow,
         removeStudentRow,
-        removeStudentRow,
         handleSubmit,
         handleCreateJurusan,
         handleDeleteJurusan,

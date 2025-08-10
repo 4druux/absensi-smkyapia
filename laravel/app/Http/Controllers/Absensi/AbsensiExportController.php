@@ -111,7 +111,7 @@ class AbsensiExportController extends Controller
 
         $logoPath = 'images/logo-smk.png'; 
         
-        $pdf = Pdf::loadView('exports.absensi-month', compact('students', 'kelas', 'jurusan', 'namaBulan', 'year', 'daysInMonth', 'absensiData', 'allHolidays', 'monthNumber', 'logoPath'));
+        $pdf = Pdf::loadView('exports.absensi.absensi-month', compact('students', 'kelas', 'jurusan', 'namaBulan', 'year', 'daysInMonth', 'absensiData', 'allHolidays', 'monthNumber', 'logoPath'));
         
         return $pdf->download($fileName);
     }
@@ -241,7 +241,7 @@ class AbsensiExportController extends Controller
         $fileName = "Absensi-{$kelas}-{$jurusan}-{$tahun}.pdf";
         $logoPath = 'images/logo-smk.png'; 
 
-        $pdf = Pdf::loadView('exports.absensi-year', compact('rekapAbsensi', 'grandTotals', 'kelas', 'jurusan', 'tahun', 'namaBulan', 'logoPath'));
+        $pdf = Pdf::loadView('exports.absensi.absensi-year', compact('rekapAbsensi', 'grandTotals', 'kelas', 'jurusan', 'tahun', 'namaBulan', 'logoPath'));
         
         return $pdf->download($fileName);
     }

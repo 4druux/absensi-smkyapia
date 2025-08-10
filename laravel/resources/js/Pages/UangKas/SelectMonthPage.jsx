@@ -161,11 +161,17 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                                             >
                                                 <div className="px-1 py-3 space-y-1">
                                                     <div
-                                                        className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
-                                                        onClick={(e) => {
+                                                        className={`block w-full text-left p-3 text-sm rounded-md cursor-pointer ${
+                                                            downloadingStatus[
+                                                                `${month.slug}-excel`
+                                                            ]
+                                                                ? "bg-sky-50 text-sky-600"
+                                                                : "text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
+                                                        }`}
+                                                        onClick={async (e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            handleExport(
+                                                            await handleExport(
                                                                 month.slug,
                                                                 "excel"
                                                             );
@@ -189,11 +195,17 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                                                         )}
                                                     </div>
                                                     <div
-                                                        className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
-                                                        onClick={(e) => {
+                                                        className={`block w-full text-left p-3 text-sm rounded-md cursor-pointer ${
+                                                            downloadingStatus[
+                                                                `${month.slug}-pdf`
+                                                            ]
+                                                                ? "bg-sky-50 text-sky-600"
+                                                                : "text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
+                                                        }`}
+                                                        onClick={async (e) => {
                                                             e.preventDefault();
                                                             e.stopPropagation();
-                                                            handleExport(
+                                                            await handleExport(
                                                                 month.slug,
                                                                 "pdf"
                                                             );

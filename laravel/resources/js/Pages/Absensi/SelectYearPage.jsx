@@ -161,16 +161,23 @@ const SelectYearPage = ({ selectedClass }) => {
                                         >
                                             <div className="px-1 py-3 space-y-1">
                                                 <div
-                                                    className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
-                                                    onClick={(e) => {
+                                                    className={`block w-full text-left p-3 text-sm rounded-md cursor-pointer ${
+                                                        downloadingStatus[
+                                                            `${year.nomor}-excel`
+                                                        ]
+                                                            ? "bg-sky-50 text-sky-600"
+                                                            : "text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
+                                                    }`}
+                                                    onClick={async (e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
-                                                        handleExportYear(
+                                                        await handleExportYear(
                                                             selectedClass.kelas,
                                                             selectedClass.jurusan,
                                                             year.nomor,
                                                             "excel"
                                                         );
+                                                        setIsDropdownOpen(null);
                                                     }}
                                                 >
                                                     {downloadingStatus[
@@ -183,21 +190,28 @@ const SelectYearPage = ({ selectedClass }) => {
                                                     ) : (
                                                         <span className="flex items-center gap-1">
                                                             <RiFileExcel2Line className="w-5 h-5" />
-                                                            Export Rekap Excel
+                                                            Export Excel
                                                         </span>
                                                     )}
                                                 </div>
                                                 <div
-                                                    className="block w-full text-left p-3 text-sm rounded-md cursor-pointer text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
-                                                    onClick={(e) => {
+                                                    className={`block w-full text-left p-3 text-sm rounded-md cursor-pointer ${
+                                                        downloadingStatus[
+                                                            `${year.nomor}-pdf`
+                                                        ]
+                                                            ? "bg-sky-50 text-sky-600"
+                                                            : "text-neutral-700 hover:bg-sky-50 hover:text-sky-600"
+                                                    }`}
+                                                    onClick={async (e) => {
                                                         e.preventDefault();
                                                         e.stopPropagation();
-                                                        handleExportYear(
+                                                        await handleExportYear(
                                                             selectedClass.kelas,
                                                             selectedClass.jurusan,
                                                             year.nomor,
                                                             "pdf"
                                                         );
+                                                        setIsDropdownOpen(null);
                                                     }}
                                                 >
                                                     {downloadingStatus[
@@ -210,7 +224,7 @@ const SelectYearPage = ({ selectedClass }) => {
                                                     ) : (
                                                         <span className="flex items-center gap-1">
                                                             <FaFilePdf className="w-5 h-5" />
-                                                            Export Rekap PDF
+                                                            Export PDF
                                                         </span>
                                                     )}
                                                 </div>
