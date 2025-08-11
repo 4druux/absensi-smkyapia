@@ -19,7 +19,7 @@ const SelectYearPage = ({ selectedClass }) => {
             label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
             href: route("uang-kas.index"),
         },
-        { label: "Pilih Tahun", href: null },
+        { label: "Pilih Tahun Ajaran", href: null },
     ];
 
     const handleAddYearClick = (e) => {
@@ -58,8 +58,10 @@ const SelectYearPage = ({ selectedClass }) => {
                     variant="primary"
                     size="sm"
                 >
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    <span>{isLoading ? "Memuat..." : "Tambah Tahun"}</span>
+                    <PlusCircle className="w-4 h-4 mr-1 md:mr-2" />
+                    <span className="text-xs md:text-sm font-medium">
+                        {isLoading ? "Memuat..." : "Tambah Tahun"}
+                    </span>
                 </Button>
             </div>
 

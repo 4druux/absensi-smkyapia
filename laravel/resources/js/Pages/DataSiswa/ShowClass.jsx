@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
@@ -62,10 +62,18 @@ const ShowClass = ({ selectedClass }) => {
 
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
-            <div className="px-1 py-4">
-                <h2 className="text-lg text-neutral-800">
-                    Daftar Siswa Kelas {fullClassName}
-                </h2>
+            <div className="flex items-center space-x-2 md:space-x-3 mb-6">
+                <div className="p-3 bg-sky-100 rounded-lg">
+                    <Users className="w-5 h-5 md:w-6 md:h-6 text-sky-600 " />
+                </div>
+                <div>
+                    <h3 className="text-md md:text-lg font-medium text-neutral-700">
+                        Daftar Siswa
+                    </h3>
+                    <p className="text-xs md:text-sm text-neutral-500">
+                        {fullClassName}
+                    </p>
+                </div>
             </div>
             {students && students.length > 0 ? (
                 <>

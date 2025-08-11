@@ -12,36 +12,32 @@ const UangKasHeader = ({
     return (
         <>
             <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 md:space-x-3">
                     <div className="p-3 rounded-lg bg-sky-100">
-                        <FaMoneyBillWave className="w-5 h-5 text-sky-600 md:w-6 md:h-6" />
+                        <FaMoneyBillWave className="w-5 h-5 md:w-6 md:h-6 text-sky-600" />
                     </div>
                     <div>
-                        <h3 className="text-lg font-medium text-neutral-700">
+                        <h3 className="text-md md:text-lg font-medium text-neutral-700">
                             Pembayaran Uang Kas
                         </h3>
-                        <div className="flex flex-row gap-2 mt-1 md:items-center">
-                            <div className="flex items-center space-x-1 md:space-x-2">
-                                <Users className="hidden w-5 h-5 md:block text-neutral-500" />
-                                <span className="text-xs font-medium md:text-sm text-neutral-700">
+                        <div className="flex flex-row gap-2 md:mt-1 md:items-center">
+                            <div className="flex items-center space-x-1 md:space-x-2 text-neutral-500">
+                                <Users className="hidden w-5 h-5 md:block" />
+                                <span className="text-xs md:text-sm">
                                     {studentData.students.length} Siswa
                                 </span>
-                                <span className="block text-neutral-600 md:hidden">
-                                    |
-                                </span>
+                                <span className="block md:hidden">|</span>
                             </div>
-                            <div className="flex items-center space-x-1 md:space-x-2">
-                                <School className="hidden w-5 h-5 md:block text-neutral-500" />
-                                <span className="text-xs font-medium md:text-sm text-neutral-700">
+                            <div className="flex items-center space-x-1 md:space-x-2 text-neutral-500">
+                                <School className="hidden w-5 h-5 md:block" />
+                                <span className="text-xs md:text-sm">
                                     {studentData.classCode}
                                 </span>
-                                <span className="block text-neutral-600 md:hidden">
-                                    |
-                                </span>
+                                <span className="block md:hidden">|</span>
                             </div>
-                            <div className="flex items-center space-x-1 md:space-x-2">
-                                <BookOpen className="hidden w-5 h-5 md:block text-neutral-500" />
-                                <span className="text-xs font-medium md:text-sm text-neutral-700">
+                            <div className="flex items-center space-x-1 md:space-x-2 text-neutral-500">
+                                <BookOpen className="hidden w-5 h-5 md:block" />
+                                <span className="text-xs md:text-sm">
                                     {studentData.major}
                                 </span>
                             </div>

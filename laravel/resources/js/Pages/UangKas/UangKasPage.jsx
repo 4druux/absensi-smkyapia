@@ -145,7 +145,7 @@ const UangKasPage = ({
             }),
         },
         {
-            label: `Minggu ${minggu}`,
+            label: `${minggu}`,
             href: route("uang-kas.month.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
@@ -176,7 +176,7 @@ const UangKasPage = ({
 
                 <div>
                     <div className="px-1 py-4">
-                        <h2 className="text-lg text-neutral-800">
+                        <h2 className="text-md md:text-lg text-neutral-800">
                             Daftar Pembayaran
                         </h2>
                     </div>

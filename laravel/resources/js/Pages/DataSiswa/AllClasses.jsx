@@ -80,6 +80,7 @@ const AllClasses = () => {
                                             )}
                                             icon={School}
                                             title={`${kelas.nama_kelas} ${kelas.kelompok}`}
+                                            subtitle={kelas.jurusan?.nama_jurusan}
                                         >
                                             <Button
                                                 size="sm"

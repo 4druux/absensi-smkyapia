@@ -50,6 +50,7 @@ class AbsensiController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
         ]);
@@ -83,6 +84,7 @@ class AbsensiController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
         ]);
@@ -168,6 +170,7 @@ class AbsensiController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
             'tahun' => $tahun,
@@ -210,6 +213,7 @@ class AbsensiController extends Controller
                 'selectedClass' => [
                     'id' => $selectedKelas->id,
                     'kelas' => $selectedKelas->nama_kelas,
+                    'kelompok' => $selectedKelas->kelompok,
                     'jurusan' => $selectedKelas->jurusan->nama_jurusan,
                 ],
             ]);
@@ -248,6 +252,7 @@ class AbsensiController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
         ]);

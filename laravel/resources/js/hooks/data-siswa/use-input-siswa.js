@@ -49,12 +49,20 @@ const useInputSiswaForm = () => {
             }
             return newState;
         });
+
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: null }));
+        }
     };
 
     const handleStudentChange = (index, field, value) => {
         const updatedStudents = [...formData.students];
         updatedStudents[index][field] = value;
         setFormData((prev) => ({ ...prev, students: updatedStudents }));
+
+        if (errors.students) {
+            setErrors((prev) => ({ ...prev, students: null }));
+        }
     };
 
     const addStudentRow = () => {

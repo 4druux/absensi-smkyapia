@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import toast from "react-hot-toast";
 import { usePage } from "@inertiajs/react";
-import { Save, Users, PlusCircle, Upload } from "lucide-react";
+import { Save, Users, PlusCircle, Upload, ArrowLeft } from "lucide-react";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
@@ -62,9 +62,9 @@ const InputData = () => {
 
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
-            <div className="flex items-center space-x-3 mb-8">
+            <div className="flex items-center space-x-3 mb-6">
                 <div className="p-3 bg-sky-100 rounded-lg">
-                    <Users className="w-6 h-6 text-sky-600" />
+                    <Users className="w-5 h-5 md:w-6 md:h-6 text-sky-600 " />
                 </div>
                 <div>
                     <h3 className="text-md md:text-lg font-medium text-neutral-700">
@@ -198,7 +198,15 @@ const InputData = () => {
                     </div>
                 </div>
 
-                <div className="mt-6 flex justify-end">
+                <div className="mt-6 flex items-center justify-end space-x-4">
+                    <Button
+                        as="link"
+                        variant="outline"
+                        href={route("data-siswa.index")}
+                    >
+                        <ArrowLeft size={16} className="mr-2" />
+                        Kembali
+                    </Button>
                     <Button
                         type="submit"
                         variant="primary"

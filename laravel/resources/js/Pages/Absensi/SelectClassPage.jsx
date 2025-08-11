@@ -46,7 +46,7 @@ const SelectClassPage = () => {
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Kelas
+                Pilih Kelas Untuk Absensi
             </h3>
             {classes && classes.length > 0 ? (
                 <>

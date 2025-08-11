@@ -128,7 +128,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
         {
-            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
             href: route("absensi.index"),
         },
         {
@@ -147,7 +147,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
             }),
         },
         {
-            label: `${tanggal} ${namaBulan} ${displayYear}`,
+            label: `${tanggal}`,
             href: route("absensi.month.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
@@ -184,9 +184,9 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
 
                 <div>
                     <div className="px-1 py-4">
-                        <h2 className="text-lg text-neutral-800">
-                            Daftar Kehadiran ({tanggal} {namaBulan}{" "}
-                            {displayYear})
+                        <h2 className="text-md md:text-lg text-neutral-800">
+                            Daftar Kehadiran {tanggal} {namaBulan}{" "}
+                            {displayYear}
                         </h2>
                     </div>
 

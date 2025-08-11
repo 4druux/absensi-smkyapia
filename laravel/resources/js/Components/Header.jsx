@@ -17,7 +17,7 @@ const Header = ({ onMenuClick }) => {
                         <Menu className="w-6 h-6" />
                     </button>
                     <h1 className="text-lg uppercase font-medium">
-                        smk yapia parung
+                        tkj {new Date().getFullYear()}
                     </h1>
                 </div>
 

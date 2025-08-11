@@ -9,6 +9,7 @@ const Select = forwardRef(
         {
             label,
             options = [],
+            isSearchable = true,
             value,
             onChange,
             placeholder = "Pilih Opsi",
@@ -180,33 +181,38 @@ const Select = forwardRef(
                                             </span>
                                         )}
 
-                                        <div className="relative my-2">
-                                            <input
-                                                type="text"
-                                                placeholder={`Cari ${
-                                                    label || "opsi"
-                                                }...`}
-                                                value={searchTerm}
-                                                onChange={(e) =>
-                                                    setSearchTerm(
-                                                        e.target.value.toUpperCase()
-                                                    )
-                                                }
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                                className="w-full border border-gray-300 rounded-full px-3 py-1.5 text-sm placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-sky-300"
-                                            />
-                                            {searchTerm && (
-                                                <button
-                                                    type="button"
-                                                    onClick={handleClearSearch}
-                                                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </button>
-                                            )}
-                                        </div>
+                                        {isSearchable && (
+                                            <div className="relative my-2">
+                                                <input
+                                                    type="text"
+                                                    placeholder={`Cari ${
+                                                        label || "opsi"
+                                                    }...`}
+                                                    value={searchTerm}
+                                                    onChange={(e) =>
+                                                        setSearchTerm(
+                                                            e.target.value.toUpperCase()
+                                                        )
+                                                    }
+                                                    onClick={(e) =>
+                                                        e.stopPropagation()
+                                                    }
+                                                    className="w-full border border-gray-300 rounded-full px-3 py-1.5 text-sm placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-sky-300"
+                                                />
+                                                {searchTerm && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={
+                                                            handleClearSearch
+                                                        }
+                                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+
                                         <div className="border-b-2 border-gray-200 mb-1" />
                                     </div>
 

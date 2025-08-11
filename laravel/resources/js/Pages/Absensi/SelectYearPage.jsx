@@ -67,6 +67,15 @@ const SelectYearPage = ({ selectedClass }) => {
         handleAddYear();
     };
 
+    const breadcrumbItems = [
+        { label: "Absensi", href: route("absensi.index") },
+        {
+            label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
+            href: route("absensi.index"),
+        },
+        { label: "Pilih Tahun Ajaran", href: null },
+    ];
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -85,14 +94,7 @@ const SelectYearPage = ({ selectedClass }) => {
 
     return (
         <PageContent
-            breadcrumbItems={[
-                { label: "Absensi", href: route("absensi.index") },
-                {
-                    label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
-                    href: route("absensi.index"),
-                },
-                { label: "Pilih Tahun Ajaran", href: null },
-            ]}
+            breadcrumbItems={breadcrumbItems}
             pageClassName="-mt-16 md:-mt-20"
         >
             <div className="flex justify-between items-center mb-6">
@@ -105,8 +107,10 @@ const SelectYearPage = ({ selectedClass }) => {
                     variant="primary"
                     size="sm"
                 >
-                    <PlusCircle className="w-4 h-4 mr-2" />
-                    <span>{isLoading ? "Memuat..." : "Tambah Tahun"}</span>
+                    <PlusCircle className="w-4 h-4 mr-1 md:mr-2" />
+                    <span className="text-xs md:text-sm font-medium">
+                        {isLoading ? "Memuat..." : "Tambah Tahun"}
+                    </span>
                 </Button>
             </div>
             {years && years.length > 0 ? (

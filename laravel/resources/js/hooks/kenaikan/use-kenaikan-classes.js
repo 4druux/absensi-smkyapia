@@ -1,0 +1,13 @@
+import useSWR from "swr";
+import { fetcher } from "@/utils/api";
+
+export const useKenaikanClasses = () => {
+    const swrKey = "/kenaikan-bersyarat/classes";
+    const { data, error, isLoading } = useSWR(swrKey, fetcher);
+
+    return {
+        classes: data,
+        isLoading,
+        error,
+    };
+};

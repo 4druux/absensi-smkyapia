@@ -55,7 +55,7 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
     const breadcrumbItems = [
         { label: "Absensi", href: route("absensi.index") },
         {
-            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
             href: route("absensi.index"),
         },
         {

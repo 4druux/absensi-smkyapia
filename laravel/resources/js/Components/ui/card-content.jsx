@@ -24,7 +24,21 @@ const cardVariants = cva(
 );
 
 const iconVariants = cva(
-    "w-12 h-12 text-sky-500 mx-auto transition-transform duration-200 group-hover:scale-105 mb-2"
+    "w-12 h-12 mx-auto transition-transform duration-200 group-hover:scale-105 mb-2",
+    {
+        variants: {
+            variant: {
+                default: "text-sky-500",
+                active: "text-sky-600",
+                success: "text-green-500",
+                warning: "text-yellow-500",
+                error: "text-red-500",
+            },
+        },
+        defaultVariants: {
+            variant: "default",
+        },
+    }
 );
 
 const CardContent = ({
@@ -64,7 +78,7 @@ const CardContent = ({
         >
             <div className="relative">
                 {children}
-                {Icon && <Icon className={iconVariants()} />}
+                {Icon && <Icon className={iconVariants({ variant })} />}
                 {title && (
                     <h4
                         className={clsx(
