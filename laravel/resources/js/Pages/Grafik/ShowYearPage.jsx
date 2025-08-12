@@ -6,7 +6,7 @@ import { IoStatsChart } from "react-icons/io5";
 // Components
 import MainLayout from "@/Layouts/MainLayout";
 import BarChart from "@/Components/ui/bar-chart";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
@@ -122,7 +122,7 @@ const ShowYearPage = ({ tahun, selectedClass }) => {
                 </div>
 
                 <div className="flex items-center justify-end gap-2">
-                    <Button
+                    <ButtonRounded
                         variant="outline"
                         size="sm"
                         onClick={() => handleExport("excel")}
@@ -136,8 +136,8 @@ const ShowYearPage = ({ tahun, selectedClass }) => {
                         {downloadingStatus[`${tahun}-excel`]
                             ? "Mengekspor..."
                             : "Export Excel"}
-                    </Button>
-                    <Button
+                    </ButtonRounded>
+                    <ButtonRounded
                         variant="primary"
                         size="sm"
                         onClick={() => handleExport("pdf")}
@@ -151,7 +151,7 @@ const ShowYearPage = ({ tahun, selectedClass }) => {
                         {downloadingStatus[`${tahun}-pdf`]
                             ? "Mengekspor..."
                             : "Export PDF"}
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </div>
 
@@ -199,7 +199,7 @@ const ShowYearPage = ({ tahun, selectedClass }) => {
             </div>
 
             <div className="flex justify-start mt-8">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("grafik.class.show", {
@@ -209,7 +209,7 @@ const ShowYearPage = ({ tahun, selectedClass }) => {
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

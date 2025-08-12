@@ -25,7 +25,7 @@ const variants = cva(
     }
 );
 
-const Button = ({
+const ButtonRounded = ({
     className,
     children,
     variant,
@@ -45,4 +45,4 @@ const Button = ({
     );
 };
 
-export default Button;
+export default ButtonRounded;

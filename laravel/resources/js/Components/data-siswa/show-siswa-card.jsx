@@ -1,5 +1,5 @@
 import { Edit, Trash2, Save, X } from "lucide-react";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 
 const ShowSiswaCard = ({
     students,
@@ -86,15 +86,15 @@ const ShowSiswaCard = ({
                                     )}
                                 </label>
                                 <div className="flex justify-end gap-2 mt-4">
-                                    <Button
+                                    <ButtonRounded
                                         size="sm"
                                         variant="outline"
                                         onClick={handleCancelEdit}
                                     >
                                         <X size={16} className="mr-1" />
                                         Batal
-                                    </Button>
-                                    <Button
+                                    </ButtonRounded>
+                                    <ButtonRounded
                                         size="sm"
                                         onClick={(e) =>
                                             handleUpdate(e, student.id)
@@ -102,27 +102,27 @@ const ShowSiswaCard = ({
                                     >
                                         <Save size={16} className="mr-1" />
                                         Simpan
-                                    </Button>
+                                    </ButtonRounded>
                                 </div>
                             </div>
                         ) : (
                             <div className="flex justify-end gap-2">
-                                <Button
+                                <ButtonRounded
                                     size="sm"
                                     variant="outline"
                                     onClick={() => handleEditClick(student)}
                                 >
                                     <Edit size={16} className="mr-1" />
                                     Edit
-                                </Button>
-                                <Button
+                                </ButtonRounded>
+                                <ButtonRounded
                                     size="sm"
                                     variant="primary"
                                     onClick={(e) => handleDelete(e, student.id)}
                                 >
                                     <Trash2 size={16} className="mr-1" />
                                     Hapus
-                                </Button>
+                                </ButtonRounded>
                             </div>
                         )}
                     </div>

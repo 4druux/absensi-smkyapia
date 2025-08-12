@@ -5,7 +5,7 @@ import { ArrowLeft, BookOpen, PlusCircle, School, Users } from "lucide-react";
 import { IoIosWarning } from "react-icons/io";
 import toast from "react-hot-toast";
 
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import ProblemModal from "@/Components/permasalahan/problem-modal";
 import ProblemStudentCard from "@/Components/permasalahan/problem-student-card";
 import ProblemStudentTabel from "@/Components/permasalahan/problem-student-table";
@@ -102,7 +102,7 @@ const ShowStudentProblemsPage = ({
                 </div>
 
                 <div className="flex items-center justify-end mb-6">
-                    <Button
+                    <ButtonRounded
                         variant="primary"
                         size="sm"
                         onClick={() => setIsModalOpen(true)}
@@ -111,7 +111,7 @@ const ShowStudentProblemsPage = ({
                         <span className="text-xs md:text-sm font-medium">
                             Tambah Laporan
                         </span>
-                    </Button>
+                    </ButtonRounded>
                 </div>
 
                 <div className="hidden lg:block">
@@ -129,7 +129,7 @@ const ShowStudentProblemsPage = ({
                 </div>
 
                 <div className="flex justify-start mt-8">
-                    <Button
+                    <ButtonRounded
                         as="link"
                         variant="outline"
                         href={route("permasalahan.year.show", {
@@ -140,7 +140,7 @@ const ShowStudentProblemsPage = ({
                     >
                         <ArrowLeft size={16} className="mr-2" />
                         Kembali
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </PageContent>
         </>

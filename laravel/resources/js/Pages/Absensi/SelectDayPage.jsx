@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
 import SelectDayDesktop from "@/Components/absensi/select-day-desktop";
@@ -119,7 +119,7 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
             <SelectDayDesktop {...selectDataProps} />
 
             <div className="flex justify-start mt-8">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("absensi.year.show", {
@@ -130,7 +130,7 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 
 const InputSiswaCard = ({
     students,
@@ -18,13 +18,13 @@ const InputSiswaCard = ({
                         <p className="text-sm font-medium text-neutral-800">
                             Siswa {index + 1}
                         </p>
-                        <Button
+                        <ButtonRounded
                             size="sm"
                             variant="primary"
                             onClick={() => removeStudentRow(student.id)}
                         >
                             <Trash2 size={16} />
-                        </Button>
+                        </ButtonRounded>
                     </div>
 
                     <div className="flex flex-col gap-4">

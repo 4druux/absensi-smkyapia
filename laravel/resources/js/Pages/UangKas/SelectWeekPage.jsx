@@ -5,7 +5,7 @@ import { usePage } from "@inertiajs/react";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import PageContent from "@/Components/ui/page-content";
 import CardContent from "@/Components/ui/card-content";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -138,7 +138,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
             </div>
 
             <div className="flex justify-start mt-8">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("uang-kas.year.show", {
@@ -149,7 +149,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

@@ -2,7 +2,7 @@ import { ArrowLeft, User, Loader2 } from "lucide-react";
 import { FaFilePdf } from "react-icons/fa6";
 import { RiFileExcel2Line } from "react-icons/ri";
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
 import PageContent from "@/Components/ui/page-content";
@@ -45,7 +45,7 @@ const ShowStudentListPage = ({ tahun, selectedClass, students }) => {
                     Pilih Siswa
                 </h3>
                 <div className="flex items-center justify-end gap-2">
-                    <Button
+                    <ButtonRounded
                         variant="outline"
                         size="sm"
                         onClick={() => handleExport("excel")}
@@ -59,8 +59,8 @@ const ShowStudentListPage = ({ tahun, selectedClass, students }) => {
                         {downloadingStatus[`${tahun}-excel`]
                             ? "Mengekspor..."
                             : "Export Excel"}
-                    </Button>
-                    <Button
+                    </ButtonRounded>
+                    <ButtonRounded
                         variant="primary"
                         size="sm"
                         onClick={() => handleExport("pdf")}
@@ -74,7 +74,7 @@ const ShowStudentListPage = ({ tahun, selectedClass, students }) => {
                         {downloadingStatus[`${tahun}-pdf`]
                             ? "Mengekspor..."
                             : "Export PDF"}
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </div>
 
@@ -108,7 +108,7 @@ const ShowStudentListPage = ({ tahun, selectedClass, students }) => {
             )}
 
             <div className="flex justify-start mt-8">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("kenaikan-bersyarat.class.show", {
@@ -118,7 +118,7 @@ const ShowStudentListPage = ({ tahun, selectedClass, students }) => {
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

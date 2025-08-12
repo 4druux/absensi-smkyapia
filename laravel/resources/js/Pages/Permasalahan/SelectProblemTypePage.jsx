@@ -2,7 +2,7 @@ import { ArrowLeft, Users, UserX, Loader2 } from "lucide-react";
 import { FaFilePdf } from "react-icons/fa6";
 import { RiFileExcel2Line } from "react-icons/ri";
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import PageContent from "@/Components/ui/page-content";
 import { usePermasalahanExport } from "@/hooks/permasalahan/use-permasalahan-export";
@@ -40,7 +40,7 @@ const SelectProblemTypePage = ({ tahun, selectedClass }) => {
                     Pilih Jenis Laporan Permasalahan
                 </h3>
                 <div className="flex items-center gap-2">
-                    <Button
+                    <ButtonRounded
                         variant="outline"
                         size="sm"
                         onClick={() => handleExport("excel")}
@@ -54,8 +54,8 @@ const SelectProblemTypePage = ({ tahun, selectedClass }) => {
                         {downloadingStatus[`${tahun}-excel`]
                             ? "Mengekspor..."
                             : "Export Excel"}
-                    </Button>
-                    <Button
+                    </ButtonRounded>
+                    <ButtonRounded
                         variant="primary"
                         size="sm"
                         onClick={() => handleExport("pdf")}
@@ -69,7 +69,7 @@ const SelectProblemTypePage = ({ tahun, selectedClass }) => {
                         {downloadingStatus[`${tahun}-pdf`]
                             ? "Mengekspor..."
                             : "Export PDF"}
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </div>
 
@@ -97,7 +97,7 @@ const SelectProblemTypePage = ({ tahun, selectedClass }) => {
             </div>
 
             <div className="flex justify-start mt-8">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("permasalahan.class.show", {
@@ -107,7 +107,7 @@ const SelectProblemTypePage = ({ tahun, selectedClass }) => {
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

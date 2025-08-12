@@ -2,7 +2,7 @@ import { School, PlusCircle, Trash2 } from "lucide-react";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -51,7 +51,7 @@ const AllClasses = () => {
                 <h3 className="text-md md:text-lg font-medium text-neutral-700">
                     Daftar Kelas
                 </h3>
-                <Button
+                <ButtonRounded
                     as="link"
                     href={route("data-siswa.input")}
                     variant="primary"
@@ -59,7 +59,7 @@ const AllClasses = () => {
                 >
                     <PlusCircle className="w-5 h-5 mr-1" />
                     <span>Tambah Data</span>
-                </Button>
+                </ButtonRounded>
             </div>
 
             {allKelas && allKelas.length > 0 ? (
@@ -80,9 +80,11 @@ const AllClasses = () => {
                                             )}
                                             icon={School}
                                             title={`${kelas.nama_kelas} ${kelas.kelompok}`}
-                                            subtitle={kelas.jurusan?.nama_jurusan}
+                                            subtitle={
+                                                kelas.jurusan?.nama_jurusan
+                                            }
                                         >
-                                            <Button
+                                            <ButtonRounded
                                                 size="sm"
                                                 variant="primary"
                                                 aria-label={`Hapus kelas ${kelas.nama_kelas} ${kelas.kelompok}`}
@@ -97,7 +99,7 @@ const AllClasses = () => {
                                                 }}
                                             >
                                                 <Trash2 size={16} />
-                                            </Button>
+                                            </ButtonRounded>
                                         </CardContent>
                                     ))}
                                 </div>

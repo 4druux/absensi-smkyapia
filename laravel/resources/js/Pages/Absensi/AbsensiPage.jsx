@@ -9,7 +9,7 @@ import MainLayout from "@/Layouts/MainLayout";
 import AbsensiTable from "@/Components/absensi/absensi-table";
 import AbsensiCard from "@/Components/absensi/absensi-card";
 import AbsensiHeader from "@/Components/absensi/absensi-header";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
@@ -200,7 +200,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
                 </div>
 
                 <div className="mt-6 flex items-center justify-end space-x-4">
-                    <Button
+                    <ButtonRounded
                         as="link"
                         variant="outline"
                         href={route("absensi.month.show", {
@@ -212,16 +212,16 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
                     >
                         <ArrowLeft size={16} className="mr-2" />
                         Kembali
-                    </Button>
+                    </ButtonRounded>
 
-                    <Button
+                    <ButtonRounded
                         type="submit"
                         variant="primary"
                         disabled={isProcessing || hasAttendanceBeenSaved}
                     >
                         <Save className="w-4 h-4 mr-2" />
                         {isProcessing ? "Menyimpan..." : "Simpan"}
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </PageContent>
         </form>

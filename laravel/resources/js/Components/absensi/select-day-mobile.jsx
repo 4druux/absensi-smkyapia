@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 import { IoIosMore } from "react-icons/io";
 import { TbCalendarCheck } from "react-icons/tb";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 
 const SelectDayMobile = ({
@@ -90,7 +90,7 @@ const SelectDayMobile = ({
                                             : null
                                     }
                                 >
-                                    <Button
+                                    <ButtonRounded
                                         size="sm"
                                         variant="icon"
                                         onClick={(e) => {
@@ -104,7 +104,7 @@ const SelectDayMobile = ({
                                         }}
                                     >
                                         <IoIosMore size={16} />
-                                    </Button>
+                                    </ButtonRounded>
                                     <AnimatePresence>
                                         {isOpen === day.nomor && (
                                             <motion.div

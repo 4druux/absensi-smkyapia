@@ -1,6 +1,6 @@
 import { ArrowLeft, Loader2, Save, Users } from "lucide-react";
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import PageContent from "@/Components/ui/page-content";
 import DotLoader from "@/Components/ui/dot-loader";
 import { useKenaikanForm } from "@/hooks/kenaikan/use-kenaikan-form";
@@ -18,9 +18,9 @@ const ShowStudentFormPage = ({ tahun, selectedClass, student }) => {
     } = useKenaikanForm(student.id, tahun);
 
     const getFirstName = (fullName) => {
-    if (!fullName) return "";
-    return fullName.split(" ")[0];
-};
+        if (!fullName) return "";
+        return fullName.split(" ")[0];
+    };
 
     const breadcrumbItems = [
         {
@@ -47,7 +47,7 @@ const ShowStudentFormPage = ({ tahun, selectedClass, student }) => {
                 tahun: tahun,
             }),
         },
-    { label: getFirstName(student.nama), href: null },
+        { label: getFirstName(student.nama), href: null },
     ];
 
     if (isLoading) {
@@ -211,7 +211,7 @@ const ShowStudentFormPage = ({ tahun, selectedClass, student }) => {
                 </div>
 
                 <div className="mt-6 flex items-center justify-end space-x-4">
-                    <Button
+                    <ButtonRounded
                         as="link"
                         variant="outline"
                         href={route("kenaikan-bersyarat.year.show", {
@@ -222,9 +222,9 @@ const ShowStudentFormPage = ({ tahun, selectedClass, student }) => {
                     >
                         <ArrowLeft size={16} className="mr-2" />
                         Kembali
-                    </Button>
+                    </ButtonRounded>
 
-                    <Button
+                    <ButtonRounded
                         type="submit"
                         variant="primary"
                         disabled={isSubmitting}
@@ -234,7 +234,7 @@ const ShowStudentFormPage = ({ tahun, selectedClass, student }) => {
                         )}
                         <Save className="w-4 h-4 mr-2" />
                         Simpan
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </form>
         </PageContent>

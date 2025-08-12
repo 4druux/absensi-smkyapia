@@ -5,14 +5,13 @@ import { ArrowLeft, BookOpen, PlusCircle, School } from "lucide-react";
 import { IoIosWarning } from "react-icons/io";
 import toast from "react-hot-toast";
 
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import ProblemClassCard from "@/Components/permasalahan/problem-class-card";
 import ProblemClassTable from "@/Components/permasalahan/problem-class-table";
 import ProblemModal from "@/Components/permasalahan/problem-modal";
 import PageContent from "@/Components/ui/page-content";
 import MainLayout from "@/Layouts/MainLayout";
 import { deleteClassProblem } from "@/services/permasalahan/permasalahan-service";
-
 
 const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,7 +96,7 @@ const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
                 </div>
 
                 <div className="flex items-center justify-end mb-6">
-                    <Button
+                    <ButtonRounded
                         variant="primary"
                         size="sm"
                         onClick={() => setIsModalOpen(true)}
@@ -106,7 +105,7 @@ const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
                         <span className="text-xs md:text-sm font-medium">
                             Tambah Laporan
                         </span>
-                    </Button>
+                    </ButtonRounded>
                 </div>
 
                 <div className="hidden lg:block">
@@ -124,7 +123,7 @@ const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
                 </div>
 
                 <div className="flex justify-start mt-8">
-                    <Button
+                    <ButtonRounded
                         as="link"
                         variant="outline"
                         href={route("permasalahan.year.show", {
@@ -135,7 +134,7 @@ const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
                     >
                         <ArrowLeft size={16} className="mr-2" />
                         Kembali
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </PageContent>
         </>

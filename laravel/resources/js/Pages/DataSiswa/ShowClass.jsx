@@ -2,7 +2,7 @@ import { ArrowLeft, Users } from "lucide-react";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
@@ -91,14 +91,14 @@ const ShowClass = ({ selectedClass }) => {
                 />
             )}
             <div className="mt-6 flex justify-start">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("data-siswa.index")}
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

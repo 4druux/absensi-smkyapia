@@ -9,7 +9,7 @@ import { RiFileExcel2Line } from "react-icons/ri";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
@@ -116,12 +116,6 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                         return (
                             <CardContent
                                 key={month.slug}
-                                href={route("rekapitulasi.month.show", {
-                                    kelas: selectedClass.kelas,
-                                    jurusan: selectedClass.jurusan,
-                                    tahun,
-                                    bulanSlug: month.slug,
-                                })}
                                 icon={CalendarDays}
                                 title={month.nama}
                                 subtitle={displayYear}
@@ -134,7 +128,7 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                                             : null
                                     }
                                 >
-                                    <Button
+                                    <ButtonRounded
                                         size="sm"
                                         variant="icon"
                                         onClick={(e) => {
@@ -148,7 +142,7 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                                         }}
                                     >
                                         <IoIosMore size={16} />
-                                    </Button>
+                                    </ButtonRounded>
                                     <AnimatePresence>
                                         {isDropdownOpen === month.slug && (
                                             <motion.div
@@ -242,7 +236,7 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                     })}
             </div>
             <div className="flex justify-start mt-8">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("rekapitulasi.class.show", {
@@ -252,7 +246,7 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

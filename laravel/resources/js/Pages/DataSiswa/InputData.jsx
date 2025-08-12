@@ -6,7 +6,7 @@ import { Save, Users, PlusCircle, Upload, ArrowLeft } from "lucide-react";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import Select from "@/Components/common/select";
 import PageContent from "@/Components/ui/page-content";
 import InputSiswaCard from "@/Components/data-siswa/input-siswa-card";
@@ -199,22 +199,22 @@ const InputData = () => {
                 </div>
 
                 <div className="mt-6 flex items-center justify-end space-x-4">
-                    <Button
+                    <ButtonRounded
                         as="link"
                         variant="outline"
                         href={route("data-siswa.index")}
                     >
                         <ArrowLeft size={16} className="mr-2" />
                         Kembali
-                    </Button>
-                    <Button
+                    </ButtonRounded>
+                    <ButtonRounded
                         type="submit"
                         variant="primary"
                         disabled={isSubmitting}
                     >
                         <Save className="w-4 h-4 mr-2" />
                         {isSubmitting ? "Menyimpan..." : "Simpan"}
-                    </Button>
+                    </ButtonRounded>
                 </div>
             </form>
         </PageContent>

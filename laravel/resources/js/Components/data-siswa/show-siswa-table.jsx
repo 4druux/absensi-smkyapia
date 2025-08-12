@@ -1,5 +1,5 @@
 import { Edit, Trash2, Save, X } from "lucide-react";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 
 const ShowSiswaTable = ({
     students,
@@ -101,14 +101,14 @@ const ShowSiswaTable = ({
                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                 {editingId === student.id ? (
                                     <div className="flex items-center justify-center space-x-2">
-                                        <Button
+                                        <ButtonRounded
                                             size="sm"
                                             variant="outline"
                                             onClick={handleCancelEdit}
                                         >
                                             <X size={16} />
-                                        </Button>
-                                        <Button
+                                        </ButtonRounded>
+                                        <ButtonRounded
                                             size="sm"
                                             variant="primary"
                                             onClick={(e) =>
@@ -116,11 +116,11 @@ const ShowSiswaTable = ({
                                             }
                                         >
                                             <Save size={16} />
-                                        </Button>
+                                        </ButtonRounded>
                                     </div>
                                 ) : (
                                     <div className="flex items-center justify-center space-x-2">
-                                        <Button
+                                        <ButtonRounded
                                             size="sm"
                                             variant="outline"
                                             onClick={() =>
@@ -128,8 +128,8 @@ const ShowSiswaTable = ({
                                             }
                                         >
                                             <Edit size={16} />
-                                        </Button>
-                                        <Button
+                                        </ButtonRounded>
+                                        <ButtonRounded
                                             size="sm"
                                             variant="primary"
                                             onClick={(e) =>
@@ -137,7 +137,7 @@ const ShowSiswaTable = ({
                                             }
                                         >
                                             <Trash2 size={16} />
-                                        </Button>
+                                        </ButtonRounded>
                                     </div>
                                 )}
                             </td>

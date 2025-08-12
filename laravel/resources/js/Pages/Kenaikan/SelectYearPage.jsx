@@ -4,7 +4,7 @@ import { ArrowLeft, CalendarDays, PlusCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -68,7 +68,7 @@ const SelectYearPage = ({ selectedClass, years: initialYears }) => {
                 <h3 className="text-md md:text-lg font-medium text-neutral-700">
                     Pilih Tahun Ajaran
                 </h3>
-                <Button
+                <ButtonRounded
                     onClick={handleAddYearClick}
                     disabled={isLoading}
                     variant="primary"
@@ -78,7 +78,7 @@ const SelectYearPage = ({ selectedClass, years: initialYears }) => {
                     <span className="text-xs md:text-sm font-medium">
                         {isLoading ? "Memuat..." : "Tambah Tahun"}
                     </span>
-                </Button>
+                </ButtonRounded>
             </div>
             {years && years.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -102,14 +102,14 @@ const SelectYearPage = ({ selectedClass, years: initialYears }) => {
                 />
             )}
             <div className="flex justify-start mt-8">
-                <Button
+                <ButtonRounded
                     as="link"
                     variant="outline"
                     href={route("kenaikan-bersyarat.index")}
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
-                </Button>
+                </ButtonRounded>
             </div>
         </PageContent>
     );

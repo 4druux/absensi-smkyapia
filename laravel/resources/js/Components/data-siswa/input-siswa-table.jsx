@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 
 const InputSiswaTable = ({
     students,
@@ -93,13 +93,13 @@ const InputSiswaTable = ({
                                 )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
-                                <Button
+                                <ButtonRounded
                                     size="sm"
                                     variant="primary"
                                     onClick={() => removeStudentRow(student.id)}
                                 >
                                     <Trash2 size={16} />
-                                </Button>
+                                </ButtonRounded>
                             </td>
                         </tr>
                     ))}

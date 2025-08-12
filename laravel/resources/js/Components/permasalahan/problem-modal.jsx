@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, Save, X } from "lucide-react";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 import Select from "@/Components/common/select";
 import { usePermasalahanForm } from "@/hooks/permasalahan/use-permasalahan-form";
 
@@ -219,7 +219,7 @@ const ProblemModal = ({
                                     </div>
                                 )}
                                 <div className="flex justify-end">
-                                    <Button
+                                    <ButtonRounded
                                         type="submit"
                                         variant="primary"
                                         disabled={isSubmitting}
@@ -229,7 +229,7 @@ const ProblemModal = ({
                                         )}
                                         <Save className="w-4 h-4 mr-2" />
                                         Simpan
-                                    </Button>
+                                    </ButtonRounded>
                                 </div>
                             </div>
                         </form>

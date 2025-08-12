@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import Button from "@/Components/common/button";
+import ButtonRounded from "@/Components/common/button-rounded";
 
 const ProblemClassCard = ({ problems, handleDelete }) => {
     return (
@@ -21,13 +21,13 @@ const ProblemClassCard = ({ problems, handleDelete }) => {
                                     }
                                 )}
                             </div>
-                            <Button
+                            <ButtonRounded
                                 size="sm"
                                 variant="primary"
                                 onClick={() => handleDelete(problem.id)}
                             >
                                 <Trash2 className="w-4 h-4" />
-                            </Button>
+                            </ButtonRounded>
                         </div>
                         <div className="text-xs">
                             <p className="font-medium text-neutral-500">
