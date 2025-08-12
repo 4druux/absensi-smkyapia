@@ -166,9 +166,9 @@ class RekapitulasiExportController extends Controller
         $annualActiveDays = $this->getAnnualActiveDays($tahun);
         $rekapData = $this->getRekapitulasiDataYear($kelas, $jurusan, $tahun, $annualActiveDays);
 
-        if ($rekapData->isEmpty()) {
-            return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
-        }
+        if ($rekapData->isEmpty() || $rekapData->every(fn($item) => collect($item['periods'])->every(fn($p) => collect($p)->only(['telat', 'alfa', 'sakit', 'izin', 'bolos'])->sum() === 0))) {
+        return response()->json(['error' => "Tidak ada data rekapitulasi untuk tahun ajaran {$tahun}."], 404);
+    }
 
         $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
         ->where('nama_kelas', $kelas)->firstOrFail();
@@ -185,9 +185,9 @@ class RekapitulasiExportController extends Controller
         $annualActiveDays = $this->getAnnualActiveDays(tahun: $tahun);
         $rekapData = $this->getRekapitulasiDataYear($kelas, $jurusan, $tahun, $annualActiveDays);
         
-        if ($rekapData->isEmpty()) {
-            return response()->json(['error' => "Tidak ada data rekapitulasi untuk diekspor."], 404);
-        }
+        if ($rekapData->isEmpty() || $rekapData->every(fn($item) => collect($item['periods'])->every(fn($p) => collect($p)->only(['telat', 'alfa', 'sakit', 'izin', 'bolos'])->sum() === 0))) {
+        return response()->json(['error' => "Tidak ada data rekapitulasi untuk tahun ajaran {$tahun}."], 404);
+    }
 
         $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
         ->where('nama_kelas', $kelas)->firstOrFail();
@@ -205,9 +205,13 @@ class RekapitulasiExportController extends Controller
     public function exportMonthExcel($kelas, $jurusan, $tahun, $bulanSlug)
     {
         $rekapData = $this->getRekapitulasiDataMonth($kelas, $jurusan, $tahun, $bulanSlug);
-        if ($rekapData->isEmpty()) {
-            return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
+
+        $totalAbsensi = $rekapData->sum(fn($item) => collect($item['absensi'])->only(['telat', 'alfa', 'sakit', 'izin', 'bolos'])->sum());
+    
+        if ($rekapData->isEmpty() || $totalAbsensi === 0) {
+            return response()->json(['error' => "Tidak ada data rekapitulasi untuk bulan {$bulanSlug} {$tahun}."], 404);
         }
+
         $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
         ->where('nama_kelas', $kelas)->firstOrFail();
         $kelompok = $selectedKelas->kelompok;
@@ -237,8 +241,11 @@ class RekapitulasiExportController extends Controller
     public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
     {
         $rekapData = $this->getRekapitulasiDataMonth($kelas, $jurusan, $tahun, $bulanSlug);
-        if ($rekapData->isEmpty()) {
-            return response()->json(['error' => "Tidak ada data rekapitulasi untuk diekspor."], 404);
+
+        $totalAbsensi = $rekapData->sum(fn($item) => collect($item['absensi'])->only(['telat', 'alfa', 'sakit', 'izin', 'bolos'])->sum());
+    
+        if ($rekapData->isEmpty() || $totalAbsensi === 0) {
+            return response()->json(['error' => "Tidak ada data rekapitulasi untuk bulan {$bulanSlug} {$tahun}."], 404);
         }
 
         $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))

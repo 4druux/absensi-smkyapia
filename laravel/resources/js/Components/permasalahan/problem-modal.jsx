@@ -1,9 +1,10 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { Save, X, Loader2 } from "lucide-react";
-import Button from "@/Components/common/button";
-import { usePermasalahanForm } from "@/hooks/permasalahan/use-permasalahan-form";
 import { useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Loader2, Save, X } from "lucide-react";
+import Button from "@/Components/common/button";
 import Select from "@/Components/common/select";
+import { usePermasalahanForm } from "@/hooks/permasalahan/use-permasalahan-form";
+
 
 const ProblemModal = ({
     isOpen,

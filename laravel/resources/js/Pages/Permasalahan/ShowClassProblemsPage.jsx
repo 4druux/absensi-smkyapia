@@ -1,15 +1,18 @@
-import MainLayout from "@/Layouts/MainLayout";
-import PageContent from "@/Components/ui/page-content";
-import ProblemModal from "@/Components/permasalahan/problem-modal";
-import { ArrowLeft, BookOpen, PlusCircle, School } from "lucide-react";
-import Button from "@/Components/common/button";
-import toast from "react-hot-toast";
-import { router } from "@inertiajs/react";
-import { deleteClassProblem } from "@/services/permasalahan/permasalahan-service";
 import { useState } from "react";
-import ProblemClassTable from "@/Components/permasalahan/problem-class-table";
-import ProblemClassCard from "@/Components/permasalahan/problem-class-card";
+
+import { router } from "@inertiajs/react";
+import { ArrowLeft, BookOpen, PlusCircle, School } from "lucide-react";
 import { IoIosWarning } from "react-icons/io";
+import toast from "react-hot-toast";
+
+import Button from "@/Components/common/button";
+import ProblemClassCard from "@/Components/permasalahan/problem-class-card";
+import ProblemClassTable from "@/Components/permasalahan/problem-class-table";
+import ProblemModal from "@/Components/permasalahan/problem-modal";
+import PageContent from "@/Components/ui/page-content";
+import MainLayout from "@/Layouts/MainLayout";
+import { deleteClassProblem } from "@/services/permasalahan/permasalahan-service";
+
 
 const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);

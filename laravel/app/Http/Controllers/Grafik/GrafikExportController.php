@@ -67,7 +67,7 @@ class GrafikExportController extends Controller
     {
         $chartData = $this->getChartData($kelas, $jurusan, $tahun);
         if (!$chartData) {
-            return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
+            return response()->json(['error' => "Tidak ada data untuk tahun ajaran {$tahun}."], 404);
         }
 
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
@@ -85,7 +85,7 @@ class GrafikExportController extends Controller
     {
         $chartData = $this->getChartData($kelas, $jurusan, $tahun);
         if (!$chartData) {
-            return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
+            return response()->json(['error' => "Tidak ada data untuk untuk tahun ajaran {$tahun}."],404);
         }
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();

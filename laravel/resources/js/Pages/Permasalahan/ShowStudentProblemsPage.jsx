@@ -1,15 +1,17 @@
 import { useState } from "react";
-import MainLayout from "@/Layouts/MainLayout";
-import PageContent from "@/Components/ui/page-content";
+
+import { router } from "@inertiajs/react";
 import { ArrowLeft, BookOpen, PlusCircle, School, Users } from "lucide-react";
-import Button from "@/Components/common/button";
-import ProblemModal from "@/Components/permasalahan/problem-modal";
 import { IoIosWarning } from "react-icons/io";
 import toast from "react-hot-toast";
-import { router } from "@inertiajs/react";
-import { deleteStudentProblem } from "@/services/permasalahan/permasalahan-service";
-import ProblemStudentTabel from "@/Components/permasalahan/problem-student-table";
+
+import Button from "@/Components/common/button";
+import ProblemModal from "@/Components/permasalahan/problem-modal";
 import ProblemStudentCard from "@/Components/permasalahan/problem-student-card";
+import ProblemStudentTabel from "@/Components/permasalahan/problem-student-table";
+import PageContent from "@/Components/ui/page-content";
+import MainLayout from "@/Layouts/MainLayout";
+import { deleteStudentProblem } from "@/services/permasalahan/permasalahan-service";
 
 const ShowStudentProblemsPage = ({
     tahun,
@@ -98,7 +100,7 @@ const ShowStudentProblemsPage = ({
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="flex items-center justify-end mb-6">
                     <Button
                         variant="primary"

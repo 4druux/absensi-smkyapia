@@ -5,10 +5,11 @@ import { IoStatsChart } from "react-icons/io5";
 
 // Components
 import MainLayout from "@/Layouts/MainLayout";
-import Button from "@/Components/common/button";
-import PageContent from "@/Components/ui/page-content";
-import DotLoader from "@/Components/ui/dot-loader";
 import BarChart from "@/Components/ui/bar-chart";
+import Button from "@/Components/common/button";
+import DataNotFound from "@/Components/ui/data-not-found";
+import DotLoader from "@/Components/ui/dot-loader";
+import PageContent from "@/Components/ui/page-content";
 import { useGrafikAbsensiYearlyData } from "@/hooks/grafik/use-grafik-absensi-yearly-data";
 
 const ShowYearPage = ({ tahun, selectedClass }) => {
@@ -52,6 +53,29 @@ const ShowYearPage = ({ tahun, selectedClass }) => {
             <div className="flex items-center justify-center h-screen">
                 Gagal memuat data grafik.
             </div>
+        );
+    }
+
+    const isDataEmpty =
+        !chartData ||
+        (Array.isArray(chartData.telat) &&
+            chartData.telat.every((val) => val === 0) &&
+            chartData.alfa.every((val) => val === 0) &&
+            chartData.sakit.every((val) => val === 0) &&
+            chartData.izin.every((val) => val === 0) &&
+            chartData.bolos.every((val) => val === 0));
+
+    if (error || isDataEmpty) {
+        return (
+            <PageContent
+                breadcrumbItems={breadcrumbItems}
+                pageClassName="-mt-16 md:-mt-20"
+            >
+                <DataNotFound
+                    title="Tidak Ada Data Absensi"
+                    message={`Tidak ada data absensi untuk tahun ajaran ${tahun}.`}
+                />
+            </PageContent>
         );
     }
 

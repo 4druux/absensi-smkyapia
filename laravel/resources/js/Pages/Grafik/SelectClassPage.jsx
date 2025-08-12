@@ -1,4 +1,5 @@
 import { School } from "lucide-react";
+
 import MainLayout from "@/Layouts/MainLayout";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
