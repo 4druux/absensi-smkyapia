@@ -17,16 +17,18 @@ class AbsensiExportYear implements FromCollection, WithStyles, WithEvents
 {
     protected $rekapAbsensi;
     protected $kelas;
+    protected $kelompok;
     protected $jurusan;
     protected $tahun;
     protected $dataRowsCount = 0;
     protected $grandTotals;
     protected $bulanHeaders = [];
 
-    public function __construct($rekapAbsensi, $kelas, $jurusan, $tahun)
+    public function __construct($rekapAbsensi, $kelas, $kelompok, $jurusan, $tahun)
     {
         $this->rekapAbsensi = $rekapAbsensi;
         $this->kelas = $kelas;
+        $this->kelompok = $kelompok;
         $this->jurusan = $jurusan;
         $this->tahun = $tahun;
 
@@ -54,9 +56,9 @@ class AbsensiExportYear implements FromCollection, WithStyles, WithEvents
     {
         $exportData = new Collection();
         
-        $exportData->push(['DATA KEHADIRAN SISWA']);
+        $exportData->push(['DATA KEHADIRAN SISWA TAHUNAN']);
         $exportData->push(['SMK YAPIA PARUNG']);
-        $exportData->push(["Kelas {$this->kelas} - {$this->jurusan}"]);
+        $exportData->push(["Kelas {$this->kelas} {$this->kelompok} - {$this->jurusan}"]);
         $exportData->push(["Tahun Ajaran {$this->tahun}"]);
         $exportData->push(['']);
 

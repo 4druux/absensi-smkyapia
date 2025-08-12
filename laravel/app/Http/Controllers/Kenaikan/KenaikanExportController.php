@@ -58,14 +58,17 @@ class KenaikanExportController extends Controller
     public function exportExcel($kelas, $jurusan, $tahun)
     {
         $data = $this->getKenaikanData($kelas, $jurusan, $tahun);
+        $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
+            ->where('nama_kelas', $kelas)->firstOrFail();
+        $kelompok = $selectedKelas->kelompok;
 
         if ($data->isEmpty()) {
             return response()->json(['error' => "Tidak ada siswa yang memenuhi kriteria untuk diekspor."], 404);
         }
 
         return Excel::download(
-            new KenaikanExport($data, $kelas, $jurusan, $tahun),
-            "Kenaikan-Bersyarat-{$kelas}-{$jurusan}-{$tahun}.xlsx"
+            new KenaikanExport($data, $kelas, $kelompok, $jurusan, $tahun),
+            "Kenaikan-Bersyarat-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.xlsx"
         );
     }
 
@@ -77,11 +80,15 @@ class KenaikanExportController extends Controller
             return response()->json(['error' => "Tidak ada siswa yang memenuhi kriteria untuk diekspor."], 404);
         }
 
+        $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
+            ->where('nama_kelas', $kelas)->firstOrFail();
+        $kelompok = $selectedKelas->kelompok;
+
         $logoPath = 'images/logo-smk.png';
 
-        $pdf = Pdf::loadView('exports.kenaikan.kenaikan-bersyarat', compact('data', 'kelas', 'jurusan', 'tahun', 'logoPath'))
+        $pdf = Pdf::loadView('exports.kenaikan.kenaikan-bersyarat', compact('data', 'kelas','kelompok', 'jurusan', 'tahun', 'logoPath'))
             ->setPaper('a4', 'landscape');
         
-        return $pdf->download("Kenaikan-Bersyarat-{$kelas}-{$jurusan}-{$tahun}.pdf");
+        return $pdf->download("Kenaikan-Bersyarat-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.pdf");
     }
 }

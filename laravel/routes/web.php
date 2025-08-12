@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\DataSiswaController;
-use App\Http\Controllers\JurusanController;
+use App\Http\Controllers\DataSiswa\DataSiswaController;
+use App\Http\Controllers\DataSiswa\JurusanController;
 use App\Http\Controllers\Absensi\AbsensiController; 
 use App\Http\Controllers\Absensi\AbsensiExportController;
 use App\Http\Controllers\Grafik\GrafikController;

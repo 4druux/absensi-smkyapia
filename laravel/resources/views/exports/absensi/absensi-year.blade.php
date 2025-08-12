@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekapitulasi Absensi Tahunan</title>
+    <title>Laporan Absensi Tahunan</title>
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
@@ -116,9 +116,9 @@
             </div>
         @endif
         <div class="header-text">
-            <h1>DATA KEHADIRAN SISWA</h1>
+            <h1>DATA KEHADIRAN SISWA TAHUNAN</h1>
             <h2>SMK YAPIA PARUNG</h2>
-            <h2>Kelas {{ $kelas }} - {{ $jurusan }}</h2>
+            <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
             <h2>Tahun Ajaran {{ $tahun }}</h2>
         </div>
     </div>

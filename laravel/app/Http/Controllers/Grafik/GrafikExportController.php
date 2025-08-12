@@ -70,9 +70,14 @@ class GrafikExportController extends Controller
             return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
         }
 
+        $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
+            ->where('nama_kelas', $kelas)->firstOrFail();
+            
+        $kelompok = $selectedKelas->kelompok;
+
         return Excel::download(
-            new GrafikExportYear($chartData, $kelas, $jurusan, $tahun),
-            "Grafik-Absensi-{$kelas}-{$jurusan}-{$tahun}.xlsx"
+            new GrafikExportYear($chartData, $kelas, $kelompok, $jurusan, $tahun),
+            "Grafik-Absensi-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.xlsx"
         );
     }
 
@@ -82,13 +87,17 @@ class GrafikExportController extends Controller
         if (!$chartData) {
             return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
         }
+        $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
+            ->where('nama_kelas', $kelas)->firstOrFail();
+            
+        $kelompok = $selectedKelas->kelompok;
 
         $logoPath = 'images/logo-smk.png';
         
         $pdf = Pdf::loadView('exports.grafik.grafik-year', compact(
-            'chartData', 'kelas', 'jurusan', 'tahun', 'logoPath'
+            'chartData', 'kelas','kelompok', 'jurusan', 'tahun', 'logoPath'
         ))->setPaper('a4', 'landscape');
         
-        return $pdf->download("Grafik-Absensi-{$kelas}-{$jurusan}-{$tahun}.pdf");
+        return $pdf->download("Grafik-Absensi-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.pdf");
     }
 }

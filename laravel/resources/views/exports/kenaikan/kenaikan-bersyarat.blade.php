@@ -1,22 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Laporan Kenaikan Bersyarat</title>
     <style>
-        body { font-family: 'DejaVu Sans', sans-serif; font-size: 10px; }
-        .header { margin-bottom: 20px; }
-        .logo-container { display: inline-block; vertical-align: top; width: 80px; }
-        .logo-container img { width: 100%; }
-        .header-text { display: inline-block; vertical-align: top; margin-left: 15px;}
-        h1 { font-size: 14px; margin: 0;}
-        h2 { font-size: 12px; margin: 0;}
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: center; vertical-align: middle; }
-        th { font-weight: bold; background-color: #C4D79B; }
-        .text-left { text-align: left; }
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 10px;
+        }
+
+        .header {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .logo-container {
+            display: inline-block;
+            vertical-align: top;
+            margin-right: 15px;
+        }
+
+        .logo-container img {
+            height: 80px;
+        }
+
+        .header-text {
+            display: inline-block;
+            vertical-align: top;
+            text-align: left;
+        }
+
+        h1 {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        h2 {
+            font-size: 12px;
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            font-weight: bold;
+            background-color: #C4D79B;
+        }
+
+        .text-left {
+            text-align: left;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         @if (isset($logoPath) && file_exists(public_path($logoPath)))
@@ -25,7 +73,8 @@
         <div class="header-text">
             <h1>DATA SISWA NAIK KELAS BERSYARAT</h1>
             <h2>SMK YAPIA PARUNG</h2>
-            <h2>KELAS: {{ $kelas }} - {{ $jurusan }} | TAHUN AJARAN: {{ $tahun }}</h2>
+            <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
+            <h2>Tahun Ajaran {{ $tahun }}</h2>
         </div>
     </div>
 
@@ -51,7 +100,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($data as $index => $student)
+            @foreach ($data as $index => $student)
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td class="text-left">{{ $student['nama'] }}</td>
@@ -61,10 +110,11 @@
                     <td>{{ $student['akhlak'] === 'Kurang' ? '✓' : '' }}</td>
                     <td>{{ $student['rekomendasi_walas'] === 'Tidak Naik' ? '✓' : '' }}</td>
                     <td>{{ $student['rekomendasi_walas'] === 'Ragu-ragu' ? '✓' : '' }}</td>
-                    <td class="text-left">{{ $student['keputusan_akhir'] }}</td>
+                    <td class="text-center">{{ $student['keputusan_akhir'] }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 </body>
+
 </html>

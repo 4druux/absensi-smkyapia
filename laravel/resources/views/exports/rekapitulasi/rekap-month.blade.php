@@ -119,9 +119,9 @@
             </div>
         @endif
         <div class="header-text">
-            <h1>DATA REKAPITULASI SISWA</h1>
+            <h1>DATA REKAPITULASI SISWA BULANAN</h1>
             <h2>SMK YAPIA PARUNG</h2>
-            <h2>Kelas {{ $kelas }} - {{ $jurusan }}</h2>
+            <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
             <h2>Periode {{ $namaBulan }} {{ $year }}</h2>
         </div>
     </div>
@@ -234,23 +234,23 @@
                     <tr style="height: 25px;">
                         <td>{{ $index + 1 }}</td>
                         <td class="text-left">{{ $student['nama'] }}</td>
-                        <td>{{ $absensi['telat'] ?: '-' }}</td>
-                        <td>{{ $absensi['alfa'] ?: '-' }}</td>
-                        <td>{{ $absensi['sakit'] ?: '-' }}</td>
-                        <td>{{ $absensi['izin'] ?: '-' }}</td>
-                        <td>{{ $absensi['bolos'] ?: '-' }}</td>
-                        <td>{{ $pointTelat > 0 ? ($pointTelat == (int) $pointTelat ? number_format($pointTelat, 0, ',', '.') : number_format($pointTelat, 1, ',', '.')) : '-' }}
+                        <td>{{ $absensi['telat'] ?: '' }}</td>
+                        <td>{{ $absensi['alfa'] ?: '' }}</td>
+                        <td>{{ $absensi['sakit'] ?: '' }}</td>
+                        <td>{{ $absensi['izin'] ?: '' }}</td>
+                        <td>{{ $absensi['bolos'] ?: '' }}</td>
+                        <td>{{ $pointTelat > 0 ? ($pointTelat == (int) $pointTelat ? number_format($pointTelat, 0, ',', '.') : number_format($pointTelat, 1, ',', '.')) : '' }}
                         </td>
-                        <td>{{ $pointAlfa > 0 ? ($pointAlfa == (int) $pointAlfa ? number_format($pointAlfa, 0, ',', '.') : number_format($pointAlfa, 1, ',', '.')) : '-' }}
+                        <td>{{ $pointAlfa > 0 ? ($pointAlfa == (int) $pointAlfa ? number_format($pointAlfa, 0, ',', '.') : number_format($pointAlfa, 1, ',', '.')) : '' }}
                         </td>
-                        <td>{{ $pointBolos > 0 ? ($pointBolos == (int) $pointBolos ? number_format($pointBolos, 0, ',', '.') : number_format($pointBolos, 1, ',', '.')) : '-' }}
+                        <td>{{ $pointBolos > 0 ? ($pointBolos == (int) $pointBolos ? number_format($pointBolos, 0, ',', '.') : number_format($pointBolos, 1, ',', '.')) : '' }}
                         </td>
                         <td>{{ round($persentase) }}%</td>
                         <td></td>
                         <td></td>
-                        <td>{{ $student['total_point_bulan_lalu'] > 0 ? ($student['total_point_bulan_lalu'] == (int) $student['total_point_bulan_lalu'] ? number_format($student['total_point_bulan_lalu'], 0, ',', '.') : number_format($student['total_point_bulan_lalu'], 1, ',', '.')) : '-' }}
+                        <td>{{ $student['total_point_bulan_lalu'] > 0 ? ($student['total_point_bulan_lalu'] == (int) $student['total_point_bulan_lalu'] ? number_format($student['total_point_bulan_lalu'], 0, ',', '.') : number_format($student['total_point_bulan_lalu'], 1, ',', '.')) : '' }}
                         </td>
-                        <td>{{ $totalPointSampaiBulanIni > 0 ? ($totalPointSampaiBulanIni == (int) $totalPointSampaiBulanIni ? number_format($totalPointSampaiBulanIni, 0, ',', '.') : number_format($totalPointSampaiBulanIni, 1, ',', '.')) : '-' }}
+                        <td>{{ $totalPointSampaiBulanIni > 0 ? ($totalPointSampaiBulanIni == (int) $totalPointSampaiBulanIni ? number_format($totalPointSampaiBulanIni, 0, ',', '.') : number_format($totalPointSampaiBulanIni, 1, ',', '.')) : '' }}
                         </td>
                         <td class="text-left" style="{{ $rowColor }}">{{ $deskripsi }}</td>
                     </tr>

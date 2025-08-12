@@ -18,14 +18,16 @@ class RekapitulasiExportYear implements FromCollection, WithStyles, WithEvents, 
 {
     protected $rekapData;
     protected $kelas;
+    protected $kelompok;
     protected $jurusan;
     protected $tahun;
     protected $dataRowsCount;
 
-    public function __construct($rekapData, $kelas, $jurusan, $tahun)
+    public function __construct($rekapData, $kelas, $kelompok, $jurusan, $tahun)
     {
         $this->rekapData = $rekapData;
         $this->kelas = $kelas;
+        $this->kelompok = $kelompok;
         $this->jurusan = $jurusan;
         $this->tahun = $tahun;
         $this->dataRowsCount = $rekapData->count();
@@ -37,7 +39,7 @@ class RekapitulasiExportYear implements FromCollection, WithStyles, WithEvents, 
         
         $exportData->push(['REKAPITULASI DATA SISWA TAHUNAN']);
         $exportData->push(['SMK YAPIA PARUNG']);
-        $exportData->push(["Kelas {$this->kelas} - {$this->jurusan}"]);
+        $exportData->push(["Kelas {$this->kelas} {$this->kelompok} - {$this->jurusan}"]);
         $exportData->push(["Tahun Ajaran {$this->tahun}"]);
         $exportData->push(['']);
 

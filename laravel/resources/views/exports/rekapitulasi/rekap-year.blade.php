@@ -111,7 +111,7 @@
         <div class="header-text">
             <h1>REKAPITULASI DATA SISWA TAHUNAN</h1>
             <h2>SMK YAPIA PARUNG</h2>
-            <h2>Kelas {{ $kelas }} - {{ $jurusan }}</h2>
+            <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
             <h2>Tahun Ajaran {{ $tahun }}</h2>
         </div>
     </div>
@@ -177,14 +177,14 @@
                         <td>{{ $index + 1 }}</td>
                         <td class="text-left">{{ $student['nama'] }}</td>
                         @foreach ($student['periods'] as $periodData)
-                            <td>{{ $periodData['telat'] ?: '-' }}</td>
-                            <td>{{ $periodData['alfa'] ?: '-' }}</td>
-                            <td>{{ $periodData['sakit'] ?: '-' }}</td>
-                            <td>{{ $periodData['izin'] ?: '-' }}</td>
-                            <td>{{ $periodData['bolos'] ?: '-' }}</td>
+                            <td>{{ $periodData['telat'] ?: '' }}</td>
+                            <td>{{ $periodData['alfa'] ?: '' }}</td>
+                            <td>{{ $periodData['sakit'] ?: '' }}</td>
+                            <td>{{ $periodData['izin'] ?: '' }}</td>
+                            <td>{{ $periodData['bolos'] ?: '' }}</td>
                             <td>
                                 @php $point = $periodData['total_point_kumulatif']; @endphp
-                                {{ $point > 0 ? ($point == (int) $point ? number_format($point, 0, ',', '.') : number_format($point, 1, ',', '.')) : '-' }}
+                                {{ $point > 0 ? ($point == (int) $point ? number_format($point, 0, ',', '.') : number_format($point, 1, ',', '.')) : '' }}
                             </td>
                         @endforeach
                         <td>{{ round($student['persentase_sia']) }}%</td>

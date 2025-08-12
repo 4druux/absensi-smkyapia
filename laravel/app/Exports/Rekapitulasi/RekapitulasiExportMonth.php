@@ -20,16 +20,18 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
 {
     protected $rekapData;
     protected $kelas;
+    protected $kelompok;
     protected $jurusan;
     protected $tahun;
     protected $namaBulan;
     protected $activeDaysInMonth;
     protected $dataRowsCount;
 
-    public function __construct($rekapData, $kelas, $jurusan, $tahun, $namaBulan, $activeDaysInMonth)
+    public function __construct($rekapData, $kelas, $kelompok, $jurusan, $tahun, $namaBulan, $activeDaysInMonth)
     {
         $this->rekapData = $rekapData;
         $this->kelas = $kelas;
+        $this->kelompok = $kelompok;
         $this->jurusan = $jurusan;
         $this->tahun = $tahun;
         $this->namaBulan = $namaBulan;
@@ -41,9 +43,9 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
     {
         $exportData = new Collection();
         
-        $exportData->push(['DATA REKAPITULASI SISWA']);
+        $exportData->push(['REKAPITULASI DATA SISWA BULANAN']);
         $exportData->push(['SMK YAPIA PARUNG']);
-        $exportData->push(["Kelas {$this->kelas} - {$this->jurusan}"]);
+        $exportData->push(["Kelas {$this->kelas} {$this->kelompok} - {$this->jurusan}"]);
         $exportData->push(["Periode {$this->namaBulan}"]);
         $exportData->push(['']);
 

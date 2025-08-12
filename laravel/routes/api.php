@@ -2,9 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DataSiswaController;
-use App\Http\Controllers\JurusanController;
-use App\Http\Controllers\KelasController;
+use App\Http\Controllers\DataSiswa\DataSiswaController;
+use App\Http\Controllers\DataSiswa\JurusanController;
+use App\Http\Controllers\DataSiswa\KelasController;
 use App\Http\Controllers\Absensi\AbsensiApiController;
 use App\Http\Controllers\Grafik\GrafikApiController;
 use App\Http\Controllers\Kenaikan\KenaikanApiController;

@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grafik Absensi Tahunan</title>
     <style>
         @page {
@@ -10,30 +12,30 @@
         }
 
         body {
-            font-family: 'DejaVu Sans', sans-serif;
+            font-family: DejaVu Sans, sans-serif;
             font-size: 10px;
             margin: 0;
         }
 
         .header {
+            text-align: left;
             margin-bottom: 20px;
-            width: 100%;
         }
 
         .logo-container {
             display: inline-block;
             vertical-align: top;
-            width: 80px;
+            margin-right: 15px;
         }
 
         .logo-container img {
-            width: 100%;
+            height: 80px;
         }
 
         .header-text {
             display: inline-block;
             vertical-align: top;
-            margin-left: 15px;
+            text-align: left;
         }
 
         .header-text h1,
@@ -58,11 +60,9 @@
         .summary-table td {
             border: 1px solid #333;
             padding: 3px;
-            /* Padding diperkecil agar muat */
             text-align: center;
             vertical-align: middle;
             font-size: 9px;
-            /* Font diperkecil */
         }
 
         .summary-table th {
@@ -126,12 +126,15 @@
 <body>
     <div class="header">
         @if (isset($logoPath) && file_exists(public_path($logoPath)))
-            <div class="logo-container"><img src="{{ public_path($logoPath) }}" alt="Logo"></div>
+            <div class="logo-container">
+                <img src="{{ public_path($logoPath) }}" alt="Logo">
+            </div>
         @endif
         <div class="header-text">
             <h1>GRAFIK ABSENSI TAHUNAN</h1>
             <h2>SMK YAPIA PARUNG</h2>
-            <h2>Kelas {{ $kelas }} - {{ $jurusan }} ({{ $tahun }})</h2>
+            <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
+            <h2>Tahun Ajaran {{ $tahun }}</h2>
         </div>
     </div>
 
@@ -173,11 +176,11 @@
                             @foreach ($chartData['labels'] as $index => $label)
                                 <tr>
                                     <td>{{ $label }}</td>
-                                    <td>{{ $chartData['telat'][$index] ?: '-' }}</td>
-                                    <td>{{ $chartData['alfa'][$index] ?: '-' }}</td>
-                                    <td>{{ $chartData['sakit'][$index] ?: '-' }}</td>
-                                    <td>{{ $chartData['izin'][$index] ?: '-' }}</td>
-                                    <td>{{ $chartData['bolos'][$index] ?: '-' }}</td>
+                                    <td>{{ $chartData['telat'][$index] ?: '' }}</td>
+                                    <td>{{ $chartData['alfa'][$index] ?: '' }}</td>
+                                    <td>{{ $chartData['sakit'][$index] ?: '' }}</td>
+                                    <td>{{ $chartData['izin'][$index] ?: '' }}</td>
+                                    <td>{{ $chartData['bolos'][$index] ?: '' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

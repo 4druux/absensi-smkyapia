@@ -39,14 +39,17 @@ class PermasalahanExportController extends Controller
     public function exportCombinedExcel($kelas, $jurusan, $tahun)
     {
         $data = $this->getCombinedProblemsData($kelas, $jurusan, $tahun);
+        $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
+            ->where('nama_kelas', $kelas)->firstOrFail();
+        $kelompok = $selectedKelas->kelompok;
 
         if ($data['kelas']->isEmpty() && $data['siswa']->isEmpty()) {
             return response()->json(['error' => "Tidak ada data permasalahan untuk diekspor."], 404);
         }
 
         return Excel::download(
-            new PermasalahanCombinedExport($data, $kelas, $jurusan, $tahun),
-            "Laporan-Permasalahan-{$kelas}-{$jurusan}-{$tahun}.xlsx"
+            new PermasalahanCombinedExport($data, $kelas,$kelompok, $jurusan, $tahun),
+            "Laporan-Permasalahan-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.xlsx"
         );
     }
 
@@ -60,18 +63,20 @@ class PermasalahanExportController extends Controller
         
         $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
-            
+        $kelompok = $selectedKelas->kelompok;
+
         $logoPath = 'images/logo-smk.png';
 
         $pdf = Pdf::loadView('exports.permasalahan.permasalahan-combined', [
             'permasalahanKelas' => $data['kelas'],
             'permasalahanSiswa' => $data['siswa'],
-            'kelas' => $selectedKelas->nama_kelas,
-            'jurusan' => $selectedKelas->jurusan->nama_jurusan,
+            'kelas' => $kelas,
+            'kelompok' => $kelompok,
+            'jurusan' => $jurusan,
             'tahun' => $tahun,
             'logoPath' => $logoPath,
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download("Laporan-Permasalahan-{$kelas}-{$jurusan}-{$tahun}.pdf");
+        return $pdf->download("Laporan-Permasalahan-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.pdf");
     }
 }

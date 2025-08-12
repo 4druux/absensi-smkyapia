@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class UangKasExport implements FromCollection, WithStyles, WithEvents
 {
     protected $kelas;
+    protected $kelompok;
     protected $jurusan;
     protected $academicYear;
     protected $year;
@@ -26,9 +27,10 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
     protected $weeksInMonth;
     protected $dataRowsCount = 0;
 
-    public function __construct($kelas, $jurusan, $academicYear, $year, $bulanSlug, $weeksInMonth)
+    public function __construct($kelas, $kelompok, $jurusan, $academicYear, $year, $bulanSlug, $weeksInMonth)
     {
         $this->kelas = $kelas;
+        $this->kelompok = $kelompok;
         $this->jurusan = $jurusan;
         $this->academicYear = $academicYear;
         $this->year = $year;
@@ -64,9 +66,9 @@ class UangKasExport implements FromCollection, WithStyles, WithEvents
         $exportData = new Collection();
         $namaBulan = Carbon::createFromDate($this->year, $monthNumber, 1)->translatedFormat('F');
 
-        $exportData->push(['DATA UANG KAS SISWA']);
+        $exportData->push(['DATA UANG KAS SISWA BULANAN']);
         $exportData->push(['SMK YAPIA PARUNG']);
-        $exportData->push(["Kelas {$this->kelas} {$this->jurusan}"]);
+        $exportData->push(["Kelas {$this->kelas} {$this->kelompok} - {$this->jurusan}"]);
         $exportData->push(["Periode {$namaBulan} {$this->year}"]);
         $exportData->push(['']);
 

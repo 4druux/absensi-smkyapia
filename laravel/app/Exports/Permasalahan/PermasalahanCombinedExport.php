@@ -15,14 +15,16 @@ class PermasalahanCombinedExport implements WithEvents, WithTitle
     protected $permasalahanKelas;
     protected $permasalahanSiswa;
     protected $kelas;
+    protected $kelompok;
     protected $jurusan;
     protected $tahun;
 
-    public function __construct($data, $kelas, $jurusan, $tahun)
+    public function __construct($data, $kelas, $kelompok, $jurusan, $tahun)
     {
         $this->permasalahanKelas = $data['kelas'];
         $this->permasalahanSiswa = $data['siswa'];
         $this->kelas = $kelas;
+        $this->kelompok = $kelompok;
         $this->jurusan = $jurusan;
         $this->tahun = $tahun;
     }
@@ -35,82 +37,96 @@ class PermasalahanCombinedExport implements WithEvents, WithTitle
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function(AfterSheet $event) {
+            AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
                 $currentRow = 1;
 
-                // --- Tabel Permasalahan Kelas ---
-                $sheet->setCellValue("A{$currentRow}", 'LAPORAN KEADAAN PERMASALAHAN KELAS');
-                $sheet->mergeCells("A{$currentRow}:F{$currentRow}");
-                $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-                $currentRow++;
-                
+                $sheet->setCellValue('A1', 'LAPORAN KEADAAN PERMASALAHAN KELAS');
+                $sheet->setCellValue('A2', 'SMK YAPIA PARUNG');
+                $sheet->setCellValue('A3', "Kelas {$this->kelas} {$this->kelompok} - {$this->jurusan}");
+                $sheet->setCellValue('A4', "TAHUN AJARAN {$this->tahun}");
+
+                $sheet->setCellValue('H1', 'LAPORAN KEADAAN PERMASALAHAN SISWA');
+                $sheet->setCellValue('H2', 'SMK YAPIA PARUNG');
+                $sheet->setCellValue('H3', "Kelas {$this->kelas} {$this->kelompok} - {$this->jurusan}");
+                $sheet->setCellValue('H4', "TAHUN AJARAN {$this->tahun}");
+
+                $sheet->getStyle('A1:N4')->getFont()->setBold(true);
+                $sheet->getStyle('A1:N4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->mergeCells('A1:F1');
+                $sheet->mergeCells('A2:F2');
+                $sheet->mergeCells('A3:F3');
+                $sheet->mergeCells('A4:F4');
+                $sheet->mergeCells('H1:M1');
+                $sheet->mergeCells('H2:M2');
+                $sheet->mergeCells('H3:M3');
+                $sheet->mergeCells('H4:M4');
+
+                $currentRow = 6;
                 $headerKelas = ['NO', 'TGL/BLN/TAHUN', 'KELAS', 'MASALAH KELAS', 'PEMECAHAN MASALAH', 'KET'];
                 $sheet->fromArray($headerKelas, null, "A{$currentRow}");
                 $startHeaderKelas = $currentRow;
                 $currentRow++;
 
-                foreach($this->permasalahanKelas as $index => $problem) {
+                foreach ($this->permasalahanKelas as $index => $problem) {
                     $sheet->fromArray([
                         $index + 1,
                         \Carbon\Carbon::parse($problem->tanggal)->format('d/m/Y'),
-                        "{$this->kelas} {$this->jurusan}",
+                        "{$this->kelas} {$this->kelompok} - {$this->jurusan}",
                         $problem->masalah,
                         $problem->pemecahan,
-                        '', // Kolom KET kosong
+                        '',
                     ], null, "A{$currentRow}");
                     $currentRow++;
                 }
-                
+
                 $endTableKelas = $currentRow - 1;
                 $sheet->getStyle("A{$startHeaderKelas}:F{$endTableKelas}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 $sheet->getStyle("A{$startHeaderKelas}:F{$startHeaderKelas}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFC4D79B');
-                $sheet->getStyle("D".($startHeaderKelas+1).":E{$endTableKelas}")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("A" . ($startHeaderKelas + 1) . ":F{$endTableKelas}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_TOP)->setWrapText(true);
+                $sheet->getStyle("A" . ($startHeaderKelas) . ":F{$startHeaderKelas}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+                
 
-
-                // --- Jarak Antar Tabel ---
-                $currentRow += 2;
-
-                // --- Tabel Permasalahan Siswa ---
-                $sheet->setCellValue("A{$currentRow}", 'LAPORAN KEADAAN PERMASALAHAN SISWA');
-                $sheet->mergeCells("A{$currentRow}:G{$currentRow}");
-                $sheet->getStyle("A{$currentRow}")->getFont()->setBold(true);
-                $currentRow++;
-
+                $currentRow = 6;
                 $headerSiswa = ['NO', 'TGL/BLN/TAHUN', 'NAMA SISWA', 'KELAS', 'MASALAH', 'TINDAKAN WALAS', 'KET'];
-                $sheet->fromArray($headerSiswa, null, "A{$currentRow}");
+                $sheet->fromArray($headerSiswa, null, "H{$currentRow}");
                 $startHeaderSiswa = $currentRow;
                 $currentRow++;
 
-                foreach($this->permasalahanSiswa as $index => $problem) {
+                foreach ($this->permasalahanSiswa as $index => $problem) {
                     $sheet->fromArray([
                         $index + 1,
                         \Carbon\Carbon::parse($problem->tanggal)->format('d/m/Y'),
                         $problem->siswa->nama,
-                        "{$this->kelas} {$this->jurusan}",
+                        "{$this->kelas} {$this->kelompok} - {$this->jurusan}",
                         $problem->masalah,
                         $problem->tindakan_walas,
-                        '', // Kolom KET kosong
-                    ], null, "A{$currentRow}");
+                        '',
+                    ], null, "H{$currentRow}");
                     $currentRow++;
                 }
-
                 $endTableSiswa = $currentRow - 1;
-                $sheet->getStyle("A{$startHeaderSiswa}:G{$endTableSiswa}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
-                $sheet->getStyle("A{$startHeaderSiswa}:G{$startHeaderSiswa}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFC4D79B');
-                $sheet->getStyle("E".($startHeaderSiswa+1).":F{$endTableSiswa}")->getAlignment()->setWrapText(true);
-
-                // Atur Lebar Kolom
+                $sheet->getStyle("H{$startHeaderSiswa}:N{$endTableSiswa}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                $sheet->getStyle("H{$startHeaderSiswa}:N{$startHeaderSiswa}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFC4D79B');
+                $sheet->getStyle("H" . ($startHeaderSiswa + 1) . ":N{$endTableSiswa}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_TOP)->setWrapText(true);
+                $sheet->getStyle("H" . ($startHeaderSiswa) . ":N{$startHeaderSiswa}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+                
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $sheet->getColumnDimension('B')->setWidth(18);
-                $sheet->getColumnDimension('C')->setWidth(25);
+                $sheet->getColumnDimension('C')->setWidth(18);
                 $sheet->getColumnDimension('D')->setWidth(40);
                 $sheet->getColumnDimension('E')->setWidth(40);
-                $sheet->getColumnDimension('F')->setWidth(20);
-                $sheet->getColumnDimension('G')->setWidth(20);
+                $sheet->getColumnDimension('F')->setWidth(15);
 
-                // Atur Alignment
-                $sheet->getStyle("A1:G{$endTableSiswa}")->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $sheet->getColumnDimension('G')->setWidth(5);
+                
+                $sheet->getColumnDimension('H')->setWidth(5);
+                $sheet->getColumnDimension('I')->setWidth(18);
+                $sheet->getColumnDimension('J')->setWidth(18);
+                $sheet->getColumnDimension('K')->setWidth(18);
+                $sheet->getColumnDimension('L')->setWidth(40);
+                $sheet->getColumnDimension('M')->setWidth(40);
+                $sheet->getColumnDimension('N')->setWidth(15);
             },
         ];
     }

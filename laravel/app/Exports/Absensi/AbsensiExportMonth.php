@@ -21,6 +21,7 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 class AbsensiExportMonth implements FromCollection, WithStyles, WithEvents
 {
     protected $kelasNama;
+    protected $kelompok;
     protected $jurusanNama;
     protected $tahun;
     protected $bulanSlug;
@@ -30,9 +31,10 @@ class AbsensiExportMonth implements FromCollection, WithStyles, WithEvents
     protected $dataRowsCount = 0;
     protected $headingRowsCount = 6;
 
-    public function __construct($kelas, $jurusan, $tahun, $bulanSlug)
+    public function __construct($kelas, $kelompok, $jurusan, $tahun, $bulanSlug)
     {
         $this->kelasNama = $kelas;
+        $this->kelompok = $kelompok;
         $this->jurusanNama = $jurusan;
         $this->tahun = $tahun;
         $this->bulanSlug = $bulanSlug;
@@ -88,9 +90,9 @@ class AbsensiExportMonth implements FromCollection, WithStyles, WithEvents
         $exportData = new Collection();
         
         $namaBulan = Carbon::createFromDate($yearForQuery, $this->bulanNumber, 1)->translatedFormat('F');
-        $exportData->push(['DATA KEHADIRAN SISWA']);
+        $exportData->push(['DATA KEHADIRAN SISWA BULANAN']);
         $exportData->push(['SMK YAPIA PARUNG']);
-        $exportData->push(["Kelas {$this->kelasNama} {$this->jurusanNama}"]);
+        $exportData->push(["Kelas {$this->kelasNama} {$this->kelompok} {$this->jurusanNama}"]);
         $exportData->push(["Periode {$namaBulan} {$this->tahun}"]);
         $exportData->push(['']);
 
@@ -134,7 +136,7 @@ class AbsensiExportMonth implements FromCollection, WithStyles, WithEvents
                     $statusAbbr = '';
                 } else {
                     if ($status === '') {
-                        $statusAbbr = '-';
+                        $statusAbbr = '';
                     } else {
                         $statusUpper = strtoupper($status);
                         switch ($statusUpper) {

@@ -132,7 +132,7 @@ const Sidebar = ({ isOpen }) => {
                 <div className="py-6 px-4 md:p-6 border-b border-slate-200">
                     <div className="flex items-center gap-2 md:gap-4">
                         <img
-                            src="/images/logo-smk.png"
+                            src="/images/logo-jurusan.png"
                             alt="Logo"
                             className="w-10 md:w-14 object-cover"
                         />

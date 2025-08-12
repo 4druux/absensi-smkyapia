@@ -170,9 +170,13 @@ class RekapitulasiExportController extends Controller
             return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
         }
 
+        $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
+        ->where('nama_kelas', $kelas)->firstOrFail();
+        $kelompok = $selectedKelas->kelompok;
+
         return Excel::download(
-            new RekapitulasiExportYear($rekapData, $kelas, $jurusan, $tahun),
-            "Rekapitulasi-Tahunan-{$kelas}-{$jurusan}-{$tahun}.xlsx"
+            new RekapitulasiExportYear($rekapData, $kelas, $kelompok, $jurusan, $tahun),
+            "Rekapitulasi-Tahunan-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.xlsx"
         );
     }
 
@@ -185,13 +189,17 @@ class RekapitulasiExportController extends Controller
             return response()->json(['error' => "Tidak ada data rekapitulasi untuk diekspor."], 404);
         }
 
+        $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
+        ->where('nama_kelas', $kelas)->firstOrFail();
+        $kelompok = $selectedKelas->kelompok;
+
         $logoPath = 'images/logo-smk.png';
         
         $pdf = Pdf::loadView('exports.rekapitulasi.rekap-year', compact(
-            'rekapData', 'kelas', 'jurusan', 'tahun', 'logoPath', 'annualActiveDays'
+            'rekapData', 'kelas','kelompok', 'jurusan', 'tahun', 'logoPath', 'annualActiveDays'
         ))->setPaper('a3', 'landscape');
         
-        return $pdf->download("Rekapitulasi-Tahunan-{$kelas}-{$jurusan}-{$tahun}.pdf");
+        return $pdf->download("Rekapitulasi-Tahunan-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.pdf");
     }
 
     public function exportMonthExcel($kelas, $jurusan, $tahun, $bulanSlug)
@@ -200,6 +208,9 @@ class RekapitulasiExportController extends Controller
         if ($rekapData->isEmpty()) {
             return response()->json(['error' => "Tidak ada data untuk diekspor."], 404);
         }
+        $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
+        ->where('nama_kelas', $kelas)->firstOrFail();
+        $kelompok = $selectedKelas->kelompok;
 
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
         $year = $this->getCorrectYear($tahun, $monthNumber);
@@ -218,8 +229,8 @@ class RekapitulasiExportController extends Controller
         $namaBulan = Carbon::create($year, $monthNumber, 1)->translatedFormat('F');
 
         return Excel::download(
-            new RekapitulasiExportMonth($rekapData, $kelas, $jurusan, $tahun, "{$namaBulan} {$year}", $activeDaysInMonth),
-            "Rekapitulasi-Bulanan-{$kelas}-{$jurusan}-{$namaBulan}-{$year}.xlsx"
+            new RekapitulasiExportMonth($rekapData, $kelas, $kelompok, $jurusan, $tahun, "{$namaBulan} {$year}", $activeDaysInMonth),
+            "Rekapitulasi-Bulanan-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.xlsx"
         );
     }
 
@@ -229,6 +240,10 @@ class RekapitulasiExportController extends Controller
         if ($rekapData->isEmpty()) {
             return response()->json(['error' => "Tidak ada data rekapitulasi untuk diekspor."], 404);
         }
+
+        $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
+        ->where('nama_kelas', $kelas)->firstOrFail();
+        $kelompok = $selectedKelas->kelompok;
 
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
         $year = $this->getCorrectYear($tahun, $monthNumber);
@@ -250,6 +265,7 @@ class RekapitulasiExportController extends Controller
         $pdf = Pdf::loadView('exports.rekapitulasi.rekap-month', compact(
             'rekapData',
             'kelas',
+            'kelompok',
             'jurusan',
             'tahun',
             'namaBulan',
@@ -258,6 +274,6 @@ class RekapitulasiExportController extends Controller
             'logoPath'
         ))->setPaper('a4', 'landscape');
         
-        return $pdf->download("Rekapitulasi-Bulanan-{$kelas}-{$jurusan}-{$namaBulan}-{$year}.pdf");
+        return $pdf->download("Rekapitulasi-Bulanan-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.pdf");
     }
 }

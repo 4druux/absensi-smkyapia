@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Absensi</title>
+    <title>Laporan Absensi Bulanan</title>
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
@@ -81,9 +81,9 @@
             </div>
         @endif
         <div class="header-text">
-            <h1>DATA KEHADIRAN SISWA</h1>
+            <h1>DATA KEHADIRAN SISWA BULANAN</h1>
             <h2>SMK YAPIA PARUNG</h2>
-            <h2>Kelas {{ $kelas }} - {{ $jurusan }}</h2>
+            <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
             <h2>Periode {{ $namaBulan }} {{ $year }}</h2>
         </div>
     </div>
@@ -127,7 +127,7 @@
                     @endphp
                     @foreach (range(1, $daysInMonth) as $day)
                         @php
-                            $status = $absensiData->get($student->id . '_' . $day, '-');
+                            $status = $absensiData->get($student->id . '_' . $day, '');
                             $isHoliday = $allHolidays->contains($day);
                             $cellClass = '';
                             $displayStatus = '';
@@ -162,7 +162,7 @@
                                         $counts['B']++;
                                         break;
                                     default:
-                                        $displayStatus = '-';
+                                        $displayStatus = '';
                                         break;
                                 }
                             }

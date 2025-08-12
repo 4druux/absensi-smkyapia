@@ -11,23 +11,24 @@
         }
 
         .header {
+            text-align: left;
             margin-bottom: 20px;
         }
 
         .logo-container {
             display: inline-block;
             vertical-align: top;
-            width: 80px;
+            margin-right: 15px;
         }
 
         .logo-container img {
-            width: 100%;
+            height: 80px;
         }
 
         .header-text {
             display: inline-block;
             vertical-align: top;
-            margin-left: 15px;
+            text-align: left;
         }
 
         h1 {
@@ -50,7 +51,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            page-break-inside: avoid;
+            page-break-inside: auto;
             table-layout: fixed;
         }
 
@@ -75,89 +76,108 @@
         .table-wrapper {
             margin-bottom: 30px;
         }
+
+        .new-page {
+            page-break-after: always;
+        }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        @if (isset($logoPath) && file_exists(public_path($logoPath)))
-            <div class="logo-container"><img src="{{ public_path($logoPath) }}" alt="Logo"></div>
-        @endif
-        <div class="header-text">
-            <h1>LAPORAN PERMASALAHAN</h1>
-            <h2>SMK YAPIA PARUNG</h2>
-            <h2>KELAS: {{ $kelas }} - {{ $jurusan }} | TAHUN AJARAN: {{ $tahun }}</h2>
+    <div class="new-page">
+        <div class="header">
+            @if (isset($logoPath) && file_exists(public_path($logoPath)))
+                <div class="logo-container"><img src="{{ public_path($logoPath) }}" alt="Logo"></div>
+            @endif
+            <div class="header-text">
+                <h1>LAPORAN KEADAAN PERMASALAHAN KELAS</h1>
+                <h2>SMK YAPIA PARUNG</h2>
+                <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
+                <h2>Tahun Ajaran {{ $tahun }}</h2>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 4%;">NO</th>
+                        <th style="width: 15%;">TGL/BLN/TAHUN</th>
+                        <th style="width: 12%;">KELAS</th>
+                        <th style="width: 27%;">MASALAH KELAS</th>
+                        <th style="width: 27%;">PEMECAHAN MASALAH</th>
+                        <th style="width: 15%;">KET</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if ($permasalahanKelas->count() > 0)
+                        @foreach ($permasalahanKelas as $index => $problem)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ \Carbon\Carbon::parse($problem->tanggal)->format('d/m/Y') }}</td>
+                                <td>{{ $kelas }} {{ $jurusan }}</td>
+                                <td class="text-left">{{ $problem->masalah }}</td>
+                                <td class="text-left">{{ $problem->pemecahan }}</td>
+                                <td></td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="6">Tidak ada data permasalahan kelas.</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="table-wrapper">
-        <h3>LAPORAN KEADAAN PERMASALAHAN KELAS</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 4%;">NO</th>
-                    <th style="width: 15%;">TGL/BLN/TAHUN</th>
-                    <th style="width: 12%;">KELAS</th>
-                    <th style="width: 27%;">MASALAH KELAS</th>
-                    <th style="width: 27%;">PEMECAHAN MASALAH</th>
-                    <th style="width: 15%;">KET</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if ($permasalahanKelas->count() > 0)
-                    @foreach ($permasalahanKelas as $index => $problem)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ \Carbon\Carbon::parse($problem->tanggal)->format('d/m/Y') }}</td>
-                            <td>{{ $kelas }} {{ $jurusan }}</td>
-                            <td class="text-left">{{ $problem->masalah }}</td>
-                            <td class="text-left">{{ $problem->pemecahan }}</td>
-                            <td></td>
-                        </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="6">Tidak ada data permasalahan kelas.</td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
-    </div>
+    <div>
+        <div class="header">
+            @if (isset($logoPath) && file_exists(public_path($logoPath)))
+                <div class="logo-container"><img src="{{ public_path($logoPath) }}" alt="Logo"></div>
+            @endif
+            <div class="header-text">
+                <h1>LAPORAN KEADAAN PERMASALAHAN SISWA</h1>
+                <h2>SMK YAPIA PARUNG</h2>
+                <h2>Kelas {{ $kelas }} {{ $kelompok }} - {{ $jurusan }}</h2>
+                <h2>Tahun Ajaran {{ $tahun }}</h2>
+            </div>
+        </div>
 
-    <div class="table-wrapper">
-        <h3>LAPORAN KEADAAN PERMASALAHAN SISWA</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 4%;">NO</th>
-                    <th style="width: 15%;">TGL/BLN/TAHUN</th>
-                    <th style="width: 20%;">NAMA SISWA</th>
-                    <th style="width: 12%;">KELAS</th>
-                    <th style="width: 17%;">MASALAH</th>
-                    <th style="width: 17%;">TINDAKAN WALAS</th>
-                    <th style="width: 15%;">KET</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if ($permasalahanSiswa->count() > 0)
-                    @foreach ($permasalahanSiswa as $index => $problem)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ \Carbon\Carbon::parse($problem->tanggal)->format('d/m/Y') }}</td>
-                            <td class="text-left">{{ $problem->siswa->nama }}</td>
-                            <td>{{ $kelas }} {{ $jurusan }}</td>
-                            <td class="text-left">{{ $problem->masalah }}</td>
-                            <td class="text-left">{{ $problem->tindakan_walas }}</td>
-                            <td></td>
-                        </tr>
-                    @endforeach
-                @else
+        <div class="table-wrapper">
+            <table>
+                <thead>
                     <tr>
-                        <td colspan="7">Tidak ada data permasalahan siswa.</td>
+                        <th style="width: 4%;">NO</th>
+                        <th style="width: 15%;">TGL/BLN/TAHUN</th>
+                        <th style="width: 20%;">NAMA SISWA</th>
+                        <th style="width: 12%;">KELAS</th>
+                        <th style="width: 17%;">MASALAH</th>
+                        <th style="width: 17%;">TINDAKAN WALAS</th>
+                        <th style="width: 15%;">KET</th>
                     </tr>
-                @endif
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @if ($permasalahanSiswa->count() > 0)
+                        @foreach ($permasalahanSiswa as $index => $problem)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ \Carbon\Carbon::parse($problem->tanggal)->format('d/m/Y') }}</td>
+                                <td class="text-left">{{ $problem->siswa->nama }}</td>
+                                <td>{{ $kelas }} {{ $jurusan }}</td>
+                                <td class="text-left">{{ $problem->masalah }}</td>
+                                <td class="text-left">{{ $problem->tindakan_walas }}</td>
+                                <td></td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="7">Tidak ada data permasalahan siswa.</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 

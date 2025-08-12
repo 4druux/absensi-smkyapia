@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\DataSiswa;
 
 use Illuminate\Http\Request;
 use App\Models\Siswa;
@@ -10,6 +10,8 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
+
 
 class DataSiswaController extends Controller
 {

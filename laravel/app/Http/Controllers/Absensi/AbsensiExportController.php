@@ -38,6 +38,8 @@ class AbsensiExportController extends Controller
         
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
+
+        $kelompok = $selectedKelas->kelompok;
         
         $students = $selectedKelas->siswas->pluck('id');
         $absensiCount = Absensi::whereYear('tanggal', $year)
@@ -51,9 +53,9 @@ class AbsensiExportController extends Controller
             return response()->json(['error' => "Tidak ada data absensi untuk bulan {$namaBulan} {$year}."], 404);
         }
 
-        $fileName = "Absensi-{$kelas}-{$jurusan}-{$namaBulan}-{$year}.xlsx";
+        $fileName = "Absensi-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.xlsx";
 
-        return Excel::download(new AbsensiExportMonth($kelas, $jurusan, $year, $bulanSlug), $fileName);
+        return Excel::download(new AbsensiExportMonth($kelas, $kelompok,$jurusan, $year, $bulanSlug), $fileName);
     }
     
     public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
@@ -66,12 +68,14 @@ class AbsensiExportController extends Controller
         $year = $this->getCorrectYear($tahun, $monthNumber);
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_jurusan', $jurusan))
             ->where('nama_kelas', $kelas)->firstOrFail();
+
+        $kelompok = $selectedKelas->kelompok;
         
         $students = $selectedKelas->siswas;
         $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
 
         if ($students->isEmpty()) {
-            return response()->json(['error' => "Tidak ada data siswa di kelas {$kelas} {$jurusan}."], 404);
+            return response()->json(['error' => "Tidak ada data siswa di kelas {$kelas} {$kelompok} - {$jurusan}."], 404);
         }
 
         $absensiCount = Absensi::whereYear('tanggal', $year)
@@ -94,7 +98,7 @@ class AbsensiExportController extends Controller
                 ];
             });
 
-        $fileName = "Absensi-{$kelas}-{$jurusan}-{$namaBulan}-{$year}.pdf";
+        $fileName = "Absensi-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.pdf";
 
         $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
@@ -111,7 +115,7 @@ class AbsensiExportController extends Controller
 
         $logoPath = 'images/logo-smk.png'; 
         
-        $pdf = Pdf::loadView('exports.absensi.absensi-month', compact('students', 'kelas', 'jurusan', 'namaBulan', 'year', 'daysInMonth', 'absensiData', 'allHolidays', 'monthNumber', 'logoPath'));
+        $pdf = Pdf::loadView('exports.absensi.absensi-month', compact('students', 'kelas', 'kelompok', 'jurusan', 'namaBulan', 'year', 'daysInMonth', 'absensiData', 'allHolidays', 'monthNumber', 'logoPath'));
         
         return $pdf->download($fileName);
     }
@@ -122,9 +126,11 @@ class AbsensiExportController extends Controller
             ->where('nama_kelas', $kelas)->firstOrFail();
         
         $students = $selectedKelas->siswas;
+        $kelompok = $selectedKelas->kelompok;
+
 
         if ($students->isEmpty()) {
-            return response()->json(['error' => "Tidak ada data siswa di kelas {$kelas} {$jurusan}."], 404);
+            return response()->json(['error' => "Tidak ada data siswa di kelas {$kelas} {$kelompok} - {$jurusan}."], 404);
         }
 
         [$startYear, $endYear] = explode('-', $tahun);
@@ -171,9 +177,9 @@ class AbsensiExportController extends Controller
             return response()->json(['error' => "Tidak ada data absensi untuk tahun ajaran {$tahun}."], 404);
         }
         
-        $fileName = "Absensi-{$kelas}-{$jurusan}-{$tahun}.xlsx";
+        $fileName = "Absensi-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.xlsx";
 
-        return Excel::download(new AbsensiExportYear($rekapAbsensi, $kelas, $jurusan, $tahun), $fileName);
+        return Excel::download(new AbsensiExportYear($rekapAbsensi, $kelas, $kelompok, $jurusan, $tahun), $fileName);
     }
 
     public function exportYearPdf($kelas, $jurusan, $tahun)
@@ -181,9 +187,10 @@ class AbsensiExportController extends Controller
         $selectedKelas = Kelas::whereHas('jurusan', fn($query) => $query->where('nama_kelas', $kelas)->where('nama_jurusan', $jurusan))->firstOrFail();
         
         $students = $selectedKelas->siswas;
+        $kelompok = $selectedKelas->kelompok;        
 
         if ($students->isEmpty()) {
-            return response()->json(['error' => "Tidak ada data siswa di kelas {$kelas} {$jurusan}."], 404);
+            return response()->json(['error' => "Tidak ada data siswa di kelas {$kelas} {$kelompok} - {$jurusan}."], 404);
         }
 
         [$startYear, $endYear] = explode('-', $tahun);
@@ -238,10 +245,10 @@ class AbsensiExportController extends Controller
         }
 
         $namaBulan = Carbon::create(null, 7, 1)->translatedFormat('F') . ' - ' . Carbon::create(null, 6, 1)->translatedFormat('F');
-        $fileName = "Absensi-{$kelas}-{$jurusan}-{$tahun}.pdf";
+        $fileName = "Absensi-{$kelas} {$kelompok}-{$jurusan}-{$tahun}.pdf";
         $logoPath = 'images/logo-smk.png'; 
 
-        $pdf = Pdf::loadView('exports.absensi.absensi-year', compact('rekapAbsensi', 'grandTotals', 'kelas', 'jurusan', 'tahun', 'namaBulan', 'logoPath'));
+        $pdf = Pdf::loadView('exports.absensi.absensi-year', compact('rekapAbsensi', 'grandTotals', 'kelas','kelompok', 'jurusan', 'tahun', 'namaBulan', 'logoPath'));
         
         return $pdf->download($fileName);
     }

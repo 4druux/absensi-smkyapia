@@ -7,20 +7,20 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Events\AfterSheet;
 
 class KenaikanExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
 {
     protected $data;
     protected $kelas;
+    protected $kelompok;
     protected $jurusan;
     protected $tahun;
 
-    public function __construct($data, $kelas, $jurusan, $tahun)
+    public function __construct($data, $kelas, $kelompok, $jurusan, $tahun)
     {
         $this->data = $data;
         $this->kelas = $kelas;
+        $this->kelompok = $kelompok;
         $this->jurusan = $jurusan;
         $this->tahun = $tahun;
     }
@@ -28,9 +28,8 @@ class KenaikanExport implements FromArray, WithHeadings, WithStyles, ShouldAutoS
     public function array(): array
     {
         $rows = [];
-        // Method ini sekarang HANYA berisi data siswa
         foreach ($this->data as $index => $student) {
-             $rows[] = [
+            $rows[] = [
                 $index + 1,
                 $student['nama'],
                 $student['kehadiran_non_alfa'],
@@ -47,14 +46,12 @@ class KenaikanExport implements FromArray, WithHeadings, WithStyles, ShouldAutoS
 
     public function headings(): array
     {
-        // Baris 1-5 sengaja dibuat kosong untuk diisi oleh judul di method styles()
         return [
+            ['DATA SISWA NAIK KELAS BERSYARAT'],
+            ['SMK YAPIA PARUNG'],
+            ["Kelas {$this->kelas} {$this->kelompok} - {$this->jurusan}"],
+            ["TAHUN AJARAN {$this->tahun}"],
             [],
-            [],
-            [],
-            [],
-            [],
-            // Header tabel utama dimulai di sini (baris ke-6)
             ['NO', 'NAMA', 'SYARAT KENAIKAN KELAS', null, null, null, 'REKOMENDASI WALAS', null, 'KEPUTUSAN AKHIR'],
             [null, null, 'KEHADIRAN NON ALFA', 'JUMLAH NILAI KURANG DARI KKM', 'AKHLAQ', null, 'TIDAK NAIK', 'RAGU-RAGU', null],
             [null, null, null, null, 'Baik', 'Kurang', null, null, null]
@@ -63,13 +60,6 @@ class KenaikanExport implements FromArray, WithHeadings, WithStyles, ShouldAutoS
 
     public function styles(Worksheet $sheet)
     {
-        // Sisipkan dan tulis judul laporan utama
-        $sheet->setCellValue('A1', "DATA SISWA NAIK KELAS BERSYARAT");
-        $sheet->setCellValue('A2', "SMK YAPIA PARUNG");
-        $sheet->setCellValue('A3', "KELAS: {$this->kelas} - {$this->jurusan}");
-        $sheet->setCellValue('A4', "TAHUN AJARAN: {$this->tahun}");
-
-        // Merge sel untuk judul utama
         $sheet->mergeCells('A1:I1');
         $sheet->mergeCells('A2:I2');
         $sheet->mergeCells('A3:I3');
@@ -77,7 +67,6 @@ class KenaikanExport implements FromArray, WithHeadings, WithStyles, ShouldAutoS
         $sheet->getStyle('A1:I4')->getFont()->setBold(true);
         $sheet->getStyle('A1:I4')->getAlignment()->setHorizontal('center');
         
-        // Merge sel untuk header tabel
         $sheet->mergeCells('A6:A8');
         $sheet->mergeCells('B6:B8');
         $sheet->mergeCells('C6:F6');
@@ -89,10 +78,10 @@ class KenaikanExport implements FromArray, WithHeadings, WithStyles, ShouldAutoS
         $sheet->mergeCells('G7:G8');
         $sheet->mergeCells('H7:H8');
 
-        $lastRow = $this->data->count() + 8;
+        $lastRow = count($this->data) + 8;
         $sheet->getStyle("A6:I{$lastRow}")->getAlignment()->setHorizontal('center')->setVertical('center');
         $sheet->getStyle("B9:B{$lastRow}")->getAlignment()->setHorizontal('left');
-        $sheet->getStyle("I9:I{$lastRow}")->getAlignment()->setHorizontal('left')->setWrapText(true);
+        $sheet->getStyle("I9:I{$lastRow}")->getAlignment()->setHorizontal('center')->setWrapText(true);
         $sheet->getStyle("A6:I8")->getFont()->setBold(true);
         $sheet->getStyle("A6:I8")->getFill()->setFillType('solid')->getStartColor()->setARGB('FFC4D79B');
         $sheet->getStyle("A6:I{$lastRow}")->getBorders()->getAllBorders()->setBorderStyle('thin');

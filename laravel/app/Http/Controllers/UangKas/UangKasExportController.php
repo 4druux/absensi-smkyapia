@@ -38,6 +38,7 @@ class UangKasExportController extends Controller
             ->where('nama_kelas', $kelas)->firstOrFail();
             
         $students = $selectedKelas->siswas;
+        $kelompok = $selectedKelas->kelompok;
 
         if ($students->isEmpty()) {
             return response()->json(['error' => "Tidak ada data siswa di kelas ini."], 404);
@@ -84,9 +85,9 @@ class UangKasExportController extends Controller
         }
 
         $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
-        $fileName = "UangKas-{$kelas}-{$jurusan}-{$namaBulan}-{$year}.xlsx";
+        $fileName = "Uang Kas-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.xlsx";
 
-        return Excel::download(new UangKasExport($kelas, $jurusan, $tahun, $year, $bulanSlug, $weeksInMonth), $fileName);
+        return Excel::download(new UangKasExport($kelas, $kelompok, $jurusan, $tahun, $year, $bulanSlug, $weeksInMonth), $fileName);
     }
     
     public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
@@ -102,6 +103,7 @@ class UangKasExportController extends Controller
             ->where('nama_kelas', $kelas)->firstOrFail();
             
         $students = $selectedKelas->siswas;
+        $kelompok = $selectedKelas->kelompok;
         $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
 
         if ($students->isEmpty()) {
@@ -161,10 +163,10 @@ class UangKasExportController extends Controller
             return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan} {$year}."], 404);
         }
         
-        $fileName = "UangKas-{$kelas}-{$jurusan}-{$namaBulan}-{$year}.pdf";
+        $fileName = "Uang Kas-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.pdf";
         $logoPath = 'images/logo-smk.png';
 
-        $pdf = Pdf::loadView('exports.uang-kas.uangkas', compact('students', 'kelas', 'jurusan', 'namaBulan', 'year', 'uangKasData', 'weeksInMonth', 'logoPath'));
+        $pdf = Pdf::loadView('exports.uang-kas.uangkas', compact('students', 'kelas', 'kelompok', 'jurusan', 'namaBulan', 'year', 'uangKasData', 'weeksInMonth', 'logoPath'));
         
         return $pdf->download($fileName);
     }
