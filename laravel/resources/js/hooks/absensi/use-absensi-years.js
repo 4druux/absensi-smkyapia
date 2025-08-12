@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 import { storeAbsensiYear } from "@/services/absensi/absensi-service";
 
 export const useAbsensiYears = () => {

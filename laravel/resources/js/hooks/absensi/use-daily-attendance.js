@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
 import { router } from "@inertiajs/react";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 import { storeDailyAttendance } from "@/services/absensi/absensi-service";
 
 export const useDailyAttendance = (

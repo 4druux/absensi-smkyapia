@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 
 export const useAbsensiMonths = (kelas, jurusan, tahun) => {
     const swrKey = `/absensi/${kelas}/${jurusan}/months/${tahun}`;

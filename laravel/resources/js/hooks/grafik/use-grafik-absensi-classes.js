@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 
 export const useGrafikAbsensiClasses = () => {
     const swrKey = "/grafik/absensi/classes";

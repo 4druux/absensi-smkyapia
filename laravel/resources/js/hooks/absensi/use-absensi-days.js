@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 import toast from "react-hot-toast";
 import { storeHoliday } from "@/services/absensi/absensi-service";
 

@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 
 export const useRekapitulasiClasses = () => {
     const swrKey = "/rekapitulasi/classes";

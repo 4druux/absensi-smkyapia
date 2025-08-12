@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 import { storeKenaikanStudentData } from "@/services/kenaikan/kenaikan-service";
 import { router } from "@inertiajs/react";
 

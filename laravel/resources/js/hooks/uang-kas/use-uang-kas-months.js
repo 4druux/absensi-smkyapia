@@ -1,8 +1,7 @@
-// hooks/uang-kas/use-uang-kas-months.js
 import { useState } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 
 export const useUangKasMonths = (kelas, jurusan, tahun) => {
     const swrKey = `/uang-kas/${kelas}/${jurusan}/months/${tahun}`;

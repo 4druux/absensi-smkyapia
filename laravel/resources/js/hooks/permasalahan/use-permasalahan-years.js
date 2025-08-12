@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { fetcher } from "@/utils/api";
+import { fetcher } from '@/utils/api.js';
 import { storePermasalahanYear } from "@/services/permasalahan/permasalahan-service";
 
 export const usePermasalahanYears = () => {
