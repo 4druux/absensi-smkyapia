@@ -1,4 +1,3 @@
-// UangKas/UangKasPage.jsx
 import { useEffect } from "react";
 import { usePage } from "@inertiajs/react";
 import { Save, ArrowLeft } from "lucide-react";

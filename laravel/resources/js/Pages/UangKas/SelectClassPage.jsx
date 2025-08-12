@@ -1,4 +1,3 @@
-// Uangkas/SelectClassPage.jsx
 import MainLayout from "@/Layouts/MainLayout";
 import PageContent from "@/Components/ui/page-content";
 import CardContent from "@/Components/ui/card-content";
