@@ -2,10 +2,7 @@ import { useState } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
 import { fetcher } from "@/utils/api";
-import {
-    getRekapitulasiYears,
-    storeRekapitulasiYear,
-} from "@/services/rekapitulasi/rekap-service";
+import { storeRekapitulasiYear } from "@/services/rekapitulasi/rekap-service";
 
 export const useRekapitulasiYears = () => {
     const swrKey = "/rekapitulasi/years";

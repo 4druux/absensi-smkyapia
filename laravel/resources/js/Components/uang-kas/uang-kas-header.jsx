@@ -1,6 +1,6 @@
 import { FaMoneyBillWave } from "react-icons/fa6";
 import { Users, School, BookOpen } from "lucide-react";
-import { formatRupiah } from "@/Utils/formatRupiah";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const UangKasHeader = ({
     studentData,

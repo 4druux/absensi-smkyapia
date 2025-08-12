@@ -130,7 +130,8 @@ export const useDailyAttendance = (
 
         Object.values(attendance).forEach((status) => {
             if (status === null) summary.notMarked++;
-            else if (summary.hasOwnProperty(status)) summary[status]++;
+            else if (Object.prototype.hasOwnProperty.call(summary, status))
+                summary[status]++;
         });
 
         summary.present =
