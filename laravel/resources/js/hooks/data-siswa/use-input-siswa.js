@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
 import { router } from "@inertiajs/react";
-import { fetcher } from '@/utils/api.js';
+import { fetcher } from "@/utils/api.js";
 import {
     createJurusan,
     deleteJurusan,
@@ -112,7 +112,7 @@ const useInputSiswaForm = () => {
                 }
                 mutateJurusans();
             } catch (error) {
-                toast.error("Gagal menghapus jurusan.");
+                toast.error("Gagal menghapus jurusan."), error;
             } finally {
                 setIsProcessing(false);
             }
@@ -163,7 +163,7 @@ const useInputSiswaForm = () => {
                 }
                 mutateKelas();
             } catch (error) {
-                toast.error("Gagal menghapus kelas.");
+                toast.error("Gagal menghapus kelas."), error;
             } finally {
                 setIsProcessing(false);
             }
@@ -254,7 +254,8 @@ const useInputSiswaForm = () => {
                 } catch (err) {
                     setImportError(
                         "Gagal memproses file Excel. Pastikan formatnya benar."
-                    );
+                    ),
+                        err;
                 }
             };
             reader.readAsBinaryString(file);

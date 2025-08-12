@@ -1,12 +1,9 @@
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { fetcher } from '@/utils/api.js';
-import {
-    storeUangKasYear,
-    getUangKasYears,
-} from "@/services/uang-kas/uang-kas-service";
+import { fetcher } from "@/utils/api.js";
+import { storeUangKasYear } from "@/services/uang-kas/uang-kas-service";
 
-export const useUangKasYears = (selectedClass) => {
+export const useUangKasYears = () => {
     const swrKey = "/uang-kas/years";
     const { data: years, error, isLoading, mutate } = useSWR(swrKey, fetcher);
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { fetcher } from '@/utils/api.js';
+import { fetcher } from "@/utils/api.js";
 import { updateSiswa, deleteSiswa } from "@/services/data-siswa/siswa-service";
 
 export const useShowSiswa = (classId) => {
@@ -68,7 +68,7 @@ export const useShowSiswa = (classId) => {
                 toast.success(result.message);
                 mutate();
             } catch (error) {
-                toast.error("Gagal menghapus siswa.");
+                toast.error("Gagal menghapus siswa."), error;
             }
         }
     };
