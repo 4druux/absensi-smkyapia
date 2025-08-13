@@ -1,4 +1,3 @@
-import MainLayout from "@/Layouts/MainLayout";
 import PageContent from "@/Components/ui/page-content";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
@@ -56,7 +55,7 @@ const SelectClassPage = () => {
                             <div key={namaKelas} className="mb-8">
                                 <h4 className="text-md font-medium text-neutral-700 mb-4">{`Kelas ${namaKelas}`}</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {kelasList.map((c, index) => (
+                                    {kelasList.map((c) => (
                                         <CardContent
                                             key={c.id}
                                             href={route("uang-kas.class.show", {
@@ -82,9 +81,5 @@ const SelectClassPage = () => {
         </PageContent>
     );
 };
-
-SelectClassPage.layout = (page) => (
-    <MainLayout children={page} title="Pilih Kelas - Uang Kas" />
-);
 
 export default SelectClassPage;

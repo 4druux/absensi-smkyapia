@@ -59,3 +59,15 @@ export const storeHoliday = async (
         `/absensi/${kelas}/${jurusan}/holidays/${tahun}/${bulanSlug}/${tanggal}`
     );
 };
+
+export const deleteHoliday = async (
+    kelas,
+    jurusan,
+    tahun,
+    bulanSlug,
+    tanggal
+) => {
+    return await api.delete(
+        `/absensi/${kelas}/${jurusan}/holidays/${tahun}/${bulanSlug}/${tanggal}`
+    );
+};

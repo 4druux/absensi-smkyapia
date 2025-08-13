@@ -113,11 +113,13 @@ class AbsensiApiController extends Controller
             ->distinct()
             ->pluck(DB::raw('DAY(tanggal)'));
 
-        $dbHolidays = Holiday::whereYear('date', $year)
+        $dbHolidayOverrides = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
             ->get()
-            ->pluck('date')
-            ->map(fn($date) => Carbon::parse($date)->day);
+            ->map(fn($holiday) => [
+                'day' => Carbon::parse($holiday->date)->day,
+                'description' => $holiday->description
+            ]);
 
         $days = collect();
         $firstDayOfMonth = Carbon::create($year, $monthNumber, 1);
@@ -161,17 +163,27 @@ class AbsensiApiController extends Controller
             }
         }
         
-        $allHolidays = $days->filter(fn($day) => $day['is_weekend'] && !$day['is_outside_month'])
-                            ->pluck('nomor')
-                            ->filter()
-                            ->merge($dbHolidays)
-                            ->unique();
-                            
+        $finalHolidays = $days->filter(function($day) use ($dbHolidayOverrides) {
+            if ($day['is_outside_month']) return false;
+
+            $isDbHoliday = $dbHolidayOverrides->firstWhere('day', $day['nomor']);
+
+            if ($isDbHoliday && $isDbHoliday['description'] === 'Hari Masuk Tambahan') {
+                return false;
+            }
+
+            if ($isDbHoliday && $isDbHoliday['description'] === 'Hari Libur Tambahan') {
+                return true;
+            }
+
+            return $day['is_weekend'];
+        })->pluck('nomor');
                             
         return response()->json([
             'days' => $days,
             'absensiDays' => $absensiDays,
-            'holidays' => $allHolidays,
+            'holidays' => $finalHolidays,
+            'dbHolidayOverrides' => $dbHolidayOverrides->pluck('day', 'description'),
         ]);
     }
 
@@ -204,7 +216,7 @@ class AbsensiApiController extends Controller
         
         $tanggalAbsen = null;
         if ($existingAttendance->isNotEmpty()) {
-            $tanggalAbsen = Carbon::parse($existingAttendance->first()->updated_at)
+            $tanggalAbsen = Carbon::parse($existingAttendance->first()->created_at)
                 ->setTimezone('Asia/Jakarta')
                 ->translatedFormat('d-m-Y H:i:s');
         }
@@ -234,19 +246,16 @@ class AbsensiApiController extends Controller
         $targetDate = Carbon::create($year, $monthNumber, $tanggal)->toDateString();
 
         $allStudents = $selectedKelas->siswas;
-        $existingAttendance = Absensi::where('tanggal', $targetDate)->whereIn('siswa_id', $allStudents->pluck('id'))->exists();
-        if ($existingAttendance) {
-            return response()->json([
-                'message' => 'Absensi untuk hari ini sudah dicatat dan tidak bisa diubah.'
-            ], 409);
-        }
+        
+        DB::transaction(function () use ($request, $allStudents, $targetDate) {
+            Absensi::where('tanggal', $targetDate)
+                   ->whereIn('siswa_id', $allStudents->pluck('id'))
+                   ->delete();
 
-        $allStudentIdsOnPage = collect($request->all_student_ids);
-        $notPresentData = collect($request->attendance ?? []);
-        $notPresentIds = $notPresentData->pluck('siswa_id');
-        $presentIds = $allStudentIdsOnPage->diff($notPresentIds);
+            $notPresentData = collect($request->attendance ?? []);
+            $notPresentIds = $notPresentData->pluck('siswa_id');
+            $presentIds = collect($request->all_student_ids)->diff($notPresentIds);
 
-        DB::transaction(function () use ($notPresentData, $presentIds, $targetDate) {
             foreach ($notPresentData as $data) {
                 Absensi::create([
                     'siswa_id' => $data['siswa_id'],
@@ -266,22 +275,53 @@ class AbsensiApiController extends Controller
         return response()->json(['message' => 'Absensi berhasil disimpan!'], 201);
     }
     
-    public function storeHolidayApi($kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
+    public function storeHolidayApi(Request $request, $kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
     {
         $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
         $year = $this->getCorrectYear($tahun, $monthNumber);
-        $holidayDate = Carbon::create($year, $monthNumber, $tanggal)->toDateString();
+        $targetDate = Carbon::create($year, $monthNumber, $tanggal);
+        $holidayDate = $targetDate->toDateString();
 
-        $existingHoliday = Holiday::where('date', $holidayDate)->exists();
-        if ($existingHoliday) {
-            return response()->json(['message' => 'Tanggal ini sudah terdaftar sebagai hari libur.'], 409);
+        $existingHoliday = Holiday::where('date', $holidayDate)->first();
+
+        if ($targetDate->isWeekend()) {
+            if ($existingHoliday && $existingHoliday->description === 'Hari Masuk Tambahan') {
+                $existingHoliday->delete();
+                return response()->json(['message' => "Tanggal " . $targetDate->translatedFormat('d F Y') . " berhasil ditetapkan sebagai hari libur."], 200);
+            } else {
+                return response()->json(['message' => 'Tanggal ini sudah terdaftar sebagai hari libur.'], 409);
+            }
+        } else {
+            Holiday::updateOrCreate(
+                ['date' => $holidayDate],
+                ['description' => 'Hari Libur Tambahan']
+            );
+            return response()->json(['message' => "Tanggal " . $targetDate->translatedFormat('d F Y') . " berhasil ditetapkan sebagai hari libur."], 201);
+        }
+    }
+    
+    public function deleteHolidayApi(Request $request, $kelas, $jurusan, $tahun, $bulanSlug, $tanggal)
+    {
+        $monthNumber = $this->getMonthNumberFromSlug($bulanSlug);
+        $year = $this->getCorrectYear($tahun, $monthNumber);
+        $targetDate = Carbon::create($year, $monthNumber, $tanggal);
+        $holidayDate = $targetDate->toDateString();
+        
+        $existingHoliday = Holiday::where('date', $holidayDate)->first();
+
+        if ($targetDate->isWeekend()) {
+            Holiday::updateOrCreate(
+                ['date' => $holidayDate],
+                ['description' => 'Hari Masuk Tambahan']
+            );
+            return response()->json(['message' => "Tanggal " . $targetDate->translatedFormat('d F Y') . " berhasil ditetapkan sebagai hari masuk."], 200);
+        } else {
+            if ($existingHoliday && $existingHoliday->description === 'Hari Libur Tambahan') {
+                $existingHoliday->delete();
+                return response()->json(['message' => "Tanggal " . $targetDate->translatedFormat('d F Y') . " berhasil ditetapkan sebagai hari masuk."], 200);
+            }
         }
 
-        Holiday::create([
-            'date' => $holidayDate,
-            'description' => 'Hari Libur Tambahan',
-        ]);
-        
-        return response()->json(['message' => 'Tanggal berhasil ditetapkan sebagai hari libur.'], 201);
+        return response()->json(['message' => 'Tanggal ini bukan hari libur yang bisa dibatalkan.'], 404);
     }
 }

@@ -1,19 +1,12 @@
 import { useState } from "react";
-import { router } from "@inertiajs/react";
 import toast from "react-hot-toast";
-import {
-    storeClassProblem,
-    storeStudentProblem,
-} from "@/services/permasalahan/permasalahan-service";
+import { storePengeluaran } from "@/services/uang-kas/uang-kas-service";
 
-export const usePermasalahanForm = () => {
+export const usePengeluaranForm = () => {
     const [formData, setFormData] = useState({
         tanggal: "",
-        masalah: "",
-        pemecahan: "",
-        siswa_id: "",
-        tindakan_walas: "",
-        keterangan: "",
+        deskripsi: "",
+        nominal: "",
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
@@ -26,35 +19,30 @@ export const usePermasalahanForm = () => {
     };
 
     const resetForm = () => {
-        setFormData({
-            tanggal: "",
-            masalah: "",
-            pemecahan: "",
-            keterangan: "",
-            siswa_id: "",
-            tindakan_walas: "",
-        });
+        setFormData({ tanggal: "", deskripsi: "", nominal: "" });
         setErrors({});
     };
 
     const handleSubmit = async (
         e,
-        { isStudentProblem, kelas_id, tahun, onClose }
+        { kelas, jurusan, displayYear, bulanSlug, onClose, onSuccess }
     ) => {
         e.preventDefault();
         setIsSubmitting(true);
         setErrors({});
 
-        const payload = { ...formData, kelas_id, tahun };
-
         try {
-            const result = isStudentProblem
-                ? await storeStudentProblem(payload)
-                : await storeClassProblem(payload);
+            const result = await storePengeluaran(
+                formData,
+                kelas,
+                jurusan,
+                displayYear,
+                bulanSlug
+            );
 
             toast.success(result.message);
-            router.reload({ only: ["problems"] });
             resetForm();
+            await onSuccess();
             onClose();
         } catch (err) {
             if (err.response?.status === 422) {
@@ -72,9 +60,8 @@ export const usePermasalahanForm = () => {
 
     return {
         formData,
-        setFormData,
-        isSubmitting,
         errors,
+        isSubmitting,
         handleFormChange,
         handleSubmit,
         resetForm,

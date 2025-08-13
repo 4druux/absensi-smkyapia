@@ -24,7 +24,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
         hasAttendanceBeenSaved,
         attendance,
         attendanceStatuses,
-        summary,
+        initialSummary,
         handleAttendanceChange,
         handleSubmit,
     } = useDailyAttendance(
@@ -163,7 +163,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
     const absenHeaderData = {
         studentData,
         tanggalAbsen,
-        summary,
+        summary: initialSummary,
         selectedClass,
     };
     const absenDataProps = {
@@ -185,8 +185,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
                 <div>
                     <div className="px-1 py-4">
                         <h2 className="text-md md:text-lg text-neutral-800">
-                            Daftar Kehadiran {tanggal} {namaBulan}{" "}
-                            {displayYear}
+                            Daftar Kehadiran {tanggal} {namaBulan} {displayYear}
                         </h2>
                     </div>
 
@@ -217,7 +216,7 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
                     <ButtonRounded
                         type="submit"
                         variant="primary"
-                        disabled={isProcessing || hasAttendanceBeenSaved}
+                        disabled={isProcessing}
                     >
                         <Save className="w-4 h-4 mr-2" />
                         {isProcessing ? "Menyimpan..." : "Simpan"}

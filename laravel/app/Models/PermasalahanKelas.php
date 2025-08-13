@@ -17,5 +17,6 @@ class PermasalahanKelas extends Model
         'tanggal',
         'masalah',
         'pemecahan',
+        'keterangan',
     ];
 }

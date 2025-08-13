@@ -5,7 +5,6 @@ import ButtonRounded from "@/Components/common/button-rounded";
 import Select from "@/Components/common/select";
 import { usePermasalahanForm } from "@/hooks/permasalahan/use-permasalahan-form";
 
-
 const ProblemModal = ({
     isOpen,
     onClose,
@@ -64,7 +63,7 @@ const ProblemModal = ({
                                 })
                             }
                         >
-                            <div className="px-4 md:p-6 border-b border-slate-300 pb-4 md:pb-0">
+                            <div className="px-4 border-b border-slate-300 pb-4 md:p-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-medium text-neutral-700">
                                         {isStudentProblem
@@ -218,6 +217,35 @@ const ProblemModal = ({
                                         )}
                                     </div>
                                 )}
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-neutral-700">
+                                        Keterangan
+                                    </label>
+                                    <textarea
+                                        id="keterangan"
+                                        rows="3"
+                                        value={formData.keterangan}
+                                        onChange={(e) =>
+                                            handleFormChange(
+                                                "keterangan",
+                                                e.target.value
+                                            )
+                                        }
+                                        placeholder="Keterangan tambahan..."
+                                        className={`mt-1 w-full px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm min-h-[80px] max-h-[120px] ${
+                                            errors.keterangan
+                                                ? "border-red-500"
+                                                : "border-slate-300 focus:border-sky-500"
+                                        }`}
+                                    />
+                                    {errors.keterangan && (
+                                        <p className="text-xs text-red-500 mt-1">
+                                            {errors.keterangan}
+                                        </p>
+                                    )}
+                                </div>
+
                                 <div className="flex justify-end">
                                     <ButtonRounded
                                         type="submit"

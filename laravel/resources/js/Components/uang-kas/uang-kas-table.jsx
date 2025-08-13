@@ -1,11 +1,8 @@
-import { CheckCircle } from "lucide-react";
-
 const UangKasTable = ({
     students,
     payments,
     onPaymentChange,
     onSelectAllChange,
-    existingPayments,
     allStudentsPaidFromDb,
 }) => {
     const allSelected = students.every(
@@ -65,31 +62,25 @@ const UangKasTable = ({
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                 <div className="flex items-center justify-center">
-                                    {existingPayments[student.id]?.status ===
-                                    "paid" ? (
-                                        <CheckCircle className="w-5 h-5 text-green-600" />
-                                    ) : (
-                                        <label className="inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={
-                                                    payments[student.id]
-                                                        ?.status === "paid"
-                                                }
-                                                onChange={(e) =>
-                                                    onPaymentChange(
-                                                        student.id,
-                                                        "status",
-                                                        e.target.checked
-                                                            ? "paid"
-                                                            : "unpaid"
-                                                    )
-                                                }
-                                                disabled={false}
-                                                className="form-checkbox h-5 w-5 text-sky-600 rounded focus:ring-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            />
-                                        </label>
-                                    )}
+                                    <label className="inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={
+                                                payments[student.id]?.status ===
+                                                "paid"
+                                            }
+                                            onChange={(e) =>
+                                                onPaymentChange(
+                                                    student.id,
+                                                    "status",
+                                                    e.target.checked
+                                                        ? "paid"
+                                                        : "unpaid"
+                                                )
+                                            }
+                                            className="form-checkbox h-5 w-5 text-sky-600 rounded focus:ring-sky-500"
+                                        />
+                                    </label>
                                 </div>
                             </td>
                         </tr>

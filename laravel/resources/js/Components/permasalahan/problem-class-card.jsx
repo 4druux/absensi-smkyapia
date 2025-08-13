@@ -5,7 +5,7 @@ const ProblemClassCard = ({ problems, handleDelete }) => {
     return (
         <div className="grid grid-cols-1 gap-4">
             {problems && problems.length > 0 ? (
-                problems.map((problem, index) => (
+                problems.map((problem) => (
                     <div
                         key={problem.id}
                         className="p-4 border border-slate-300 rounded-lg space-y-3"
@@ -43,6 +43,14 @@ const ProblemClassCard = ({ problems, handleDelete }) => {
                             </p>
                             <p className="font-medium text-neutral-800 break-words">
                                 {problem.pemecahan}
+                            </p>
+                        </div>
+                        <div className="text-xs">
+                            <p className="font-medium text-neutral-500">
+                                Keterangan:
+                            </p>
+                            <p className="font-medium text-neutral-800 break-words">
+                                {problem.keterangan}
                             </p>
                         </div>
                     </div>

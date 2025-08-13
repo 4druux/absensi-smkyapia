@@ -23,6 +23,9 @@ const ProblemStudentTable = ({ problems, handleDelete }) => {
                             Tindakan Walas
                         </th>
                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-neutral-500 align-top">
+                            Keterangan
+                        </th>
+                        <th className="px-6 py-3 text-xs font-medium tracking-wider text-left uppercase text-neutral-500 align-top">
                             Aksi
                         </th>
                     </tr>
@@ -55,6 +58,9 @@ const ProblemStudentTable = ({ problems, handleDelete }) => {
                                 <td className="px-6 py-4 text-sm text-neutral-700 break-words max-w-xs text-left align-top">
                                     {problem.tindakan_walas}
                                 </td>
+                                <td className="px-6 py-4 text-sm text-neutral-700 break-words max-w-xs text-left align-top">
+                                    {problem.keterangan}
+                                </td>
                                 <td className="px-6 py-4 text-sm text-neutral-700 text-left align-top">
                                     <ButtonRounded
                                         size="sm"
@@ -68,7 +74,10 @@ const ProblemStudentTable = ({ problems, handleDelete }) => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="7" className="text-center py-24 text-neutral-500">
+                            <td
+                                colSpan="7"
+                                className="text-center py-24 text-neutral-500 text-sm"
+                            >
                                 Tidak ada data permasalahan siswa.
                             </td>
                         </tr>

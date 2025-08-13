@@ -1,7 +1,10 @@
 import useSWR from "swr";
-import { fetcher } from '@/utils/api.js';
+import { fetcher } from "@/utils/api.js";
 import toast from "react-hot-toast";
-import { storeHoliday } from "@/services/absensi/absensi-service";
+import {
+    storeHoliday,
+    deleteHoliday,
+} from "@/services/absensi/absensi-service";
 
 export const useAbsensiDays = (kelas, jurusan, tahun, bulanSlug) => {
     const swrKey = `/absensi/${kelas}/${jurusan}/days/${tahun}/${bulanSlug}`;
@@ -31,6 +34,30 @@ export const useAbsensiDays = (kelas, jurusan, tahun, bulanSlug) => {
         }
     };
 
+    const handleCancelHoliday = async (dayNumber) => {
+        const confirmCancel = confirm(
+            `Apakah Anda yakin ingin membatalkan hari libur pada tanggal ${dayNumber}?`
+        );
+        if (confirmCancel) {
+            try {
+                const result = await deleteHoliday(
+                    kelas,
+                    jurusan,
+                    tahun,
+                    bulanSlug,
+                    dayNumber
+                );
+                toast.success(result.message);
+                mutate();
+            } catch (err) {
+                toast.error(
+                    err.response?.data?.message ||
+                        "Gagal membatalkan hari libur."
+                );
+            }
+        }
+    };
+
     return {
         days: data?.days,
         absensiDays: data?.absensiDays,
@@ -38,6 +65,7 @@ export const useAbsensiDays = (kelas, jurusan, tahun, bulanSlug) => {
         isLoading,
         error,
         handleSetHoliday,
+        handleCancelHoliday,
         mutate,
     };
 };

@@ -15,6 +15,7 @@ class PermasalahanSiswa extends Model
         'tanggal',
         'masalah',
         'tindakan_walas',
+        'keterangan',
     ];
 
     public function siswa()

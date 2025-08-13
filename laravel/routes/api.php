@@ -10,7 +10,9 @@ use App\Http\Controllers\Grafik\GrafikApiController;
 use App\Http\Controllers\Kenaikan\KenaikanApiController;
 use App\Http\Controllers\Permasalahan\PermasalahanApiController;
 use App\Http\Controllers\Rekapitulasi\RekapitulasiApiController;
+use App\Http\Controllers\UangKas\PengeluaranApiController;
 use App\Http\Controllers\UangKas\UangKasApiController;
+use App\Http\Controllers\UangKas\UangKasOtherApiController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -41,6 +43,7 @@ Route::prefix('absensi')->name('api.absensi.')->group(function () {
     Route::get('/{kelas}/{jurusan}/attendance/{tahun}/{bulanSlug}/{tanggal}', [AbsensiApiController::class, 'getAttendance'])->name('attendance');
     Route::post('/{kelas}/{jurusan}/attendance/{tahun}/{bulanSlug}/{tanggal}', [AbsensiApiController::class, 'storeAttendance'])->name('storeAttendance');
     Route::post('/{kelas}/{jurusan}/holidays/{tahun}/{bulanSlug}/{tanggal}', [AbsensiApiController::class, 'storeHolidayApi'])->name('storeHoliday');
+    Route::delete('/{kelas}/{jurusan}/holidays/{tahun}/{bulanSlug}/{tanggal}', [AbsensiApiController::class, 'deleteHolidayApi'])->name('deleteHoliday');
 });
 
 // Uang Kas
@@ -53,6 +56,19 @@ Route::prefix('uang-kas')->name('api.uang-kas.')->group(function () {
     Route::get('/{kelas}/{jurusan}/payments/{tahun}/{bulanSlug}/{minggu}', [UangKasApiController::class, 'getPayments'])->name('payments');
     Route::post('/{kelas}/{jurusan}/payments/{tahun}/{bulanSlug}/{minggu}', [UangKasApiController::class, 'storePayments'])->name('storePayments');
     Route::post('/{kelas}/{jurusan}/holidays/{tahun}/{bulanSlug}/{minggu}', [UangKasApiController::class, 'storeHolidayApi'])->name('storeHoliday');
+
+    Route::get('/{kelas}/{jurusan}/other-cash/{iuran}/payments', [UangKasOtherApiController::class, 'getPayments'])->name('api.other-cash.payments');
+    Route::post('/{kelas}/{jurusan}/other-cash/{iuran}/payments', [UangKasOtherApiController::class, 'storePayments'])->name('api.other-cash.storePayments');
+    Route::post('/{kelas}/{jurusan}/other-cash/{displayYear}/{bulanSlug}', [UangKasOtherApiController::class, 'store'])->name('api.other-cash.store');
+    Route::get('/{kelas}/{jurusan}/other-cash/{tahun}/{bulanSlug}', [UangKasOtherApiController::class, 'getOtherCash'])->name('other-cash.index');
+    Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/summary', [UangKasApiController::class, 'getSummary'])->name('api.summary');
+
+});
+
+// Pengeluaran Kas
+Route::prefix('pengeluaran')->name('api.pengeluaran.')->group(function () {
+    Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}', [PengeluaranApiController::class, 'index'])->name('index');
+    Route::post('/{kelas}/{jurusan}/{displayYear}/{bulanSlug}', [PengeluaranApiController::class, 'store'])->name('store');
 });
 
 // Rekapitulasi
@@ -77,9 +93,7 @@ Route::prefix('kenaikan-bersyarat')->name('api.kenaikan-bersyarat.')->group(func
     Route::get('/years', [KenaikanApiController::class, 'getYears'])->name('years');
     Route::post('/years', [KenaikanApiController::class, 'storeYearApi'])->name('storeYear');
     Route::get('/student-data/{siswa}/{tahun}', [KenaikanApiController::class, 'getStudentData'])->name('student.data');
-    Route::post('/student-data/{siswa}/{tahun}', [App\Http\Controllers\Kenaikan\KenaikanApiController::class, 'storeStudentData'])->name('student.data.store');
-
-
+    Route::post('/student-data/{siswa}/{tahun}', [KenaikanApiController::class, 'storeStudentData'])->name('student.data.store');
 });
 
 // Laporan Permasalahan

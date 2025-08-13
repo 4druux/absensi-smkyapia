@@ -1,7 +1,6 @@
 import { ArrowLeft, CalendarDays, PlusCircle } from "lucide-react";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
@@ -16,7 +15,7 @@ const SelectYearPage = ({ selectedClass }) => {
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
         {
-            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
             href: route("uang-kas.index"),
         },
         { label: "Pilih Tahun Ajaran", href: null },
@@ -100,12 +99,5 @@ const SelectYearPage = ({ selectedClass }) => {
         </PageContent>
     );
 };
-
-SelectYearPage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Pilih Tahun - ${page.props.selectedClass.kelas} ${page.props.selectedClass.jurusan}`}
-    />
-);
 
 export default SelectYearPage;

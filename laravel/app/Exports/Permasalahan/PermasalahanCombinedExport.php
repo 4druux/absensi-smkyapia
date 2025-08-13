@@ -75,7 +75,8 @@ class PermasalahanCombinedExport implements WithEvents, WithTitle
                         "{$this->kelas} {$this->kelompok} - {$this->jurusan}",
                         $problem->masalah,
                         $problem->pemecahan,
-                        '',
+                        $problem->keterangan,
+
                     ], null, "A{$currentRow}");
                     $currentRow++;
                 }
@@ -101,7 +102,7 @@ class PermasalahanCombinedExport implements WithEvents, WithTitle
                         "{$this->kelas} {$this->kelompok} - {$this->jurusan}",
                         $problem->masalah,
                         $problem->tindakan_walas,
-                        '',
+                        $problem->keterangan,
                     ], null, "H{$currentRow}");
                     $currentRow++;
                 }
@@ -116,7 +117,7 @@ class PermasalahanCombinedExport implements WithEvents, WithTitle
                 $sheet->getColumnDimension('C')->setWidth(18);
                 $sheet->getColumnDimension('D')->setWidth(40);
                 $sheet->getColumnDimension('E')->setWidth(40);
-                $sheet->getColumnDimension('F')->setWidth(15);
+                $sheet->getColumnDimension('F')->setWidth(40);
 
                 $sheet->getColumnDimension('G')->setWidth(5);
                 
@@ -126,7 +127,7 @@ class PermasalahanCombinedExport implements WithEvents, WithTitle
                 $sheet->getColumnDimension('K')->setWidth(18);
                 $sheet->getColumnDimension('L')->setWidth(40);
                 $sheet->getColumnDimension('M')->setWidth(40);
-                $sheet->getColumnDimension('N')->setWidth(15);
+                $sheet->getColumnDimension('N')->setWidth(40);
             },
         ];
     }

@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { router } from "@inertiajs/react";
-import { fetcher } from "@/utils/api.js";
-import { storeWeeklyPayments } from "@/services/uang-kas/uang-kas-service";
+import { fetcher } from "@/utils/api";
+import { storeOtherPayments } from "@/services/uang-kas/uang-kas-service";
 
-export const useWeeklyPayments = (kelas, jurusan, tahun, bulanSlug, minggu) => {
+export const useOtherPayments = (kelas, jurusan, iuranId) => {
     const swrKey =
-        kelas && jurusan && tahun && bulanSlug && minggu
-            ? `/uang-kas/${kelas}/${jurusan}/payments/${tahun}/${bulanSlug}/${minggu}`
+        kelas && jurusan && iuranId
+            ? `/uang-kas/${kelas}/${jurusan}/other-cash/${iuranId}/payments`
             : null;
 
     const {
@@ -23,8 +22,11 @@ export const useWeeklyPayments = (kelas, jurusan, tahun, bulanSlug, minggu) => {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const hasAnyPaymentBeenSaved = !!(
-        paymentsData && Object.keys(paymentsData.existingPayments).length > 0
+        paymentsData &&
+        Object.keys(paymentsData.existingPayments).length > 0 &&
+        Object.values(paymentsData.existingPayments).some((p) => p.nominal > 0)
     );
+
     const allStudentsPaidFromDb =
         hasAnyPaymentBeenSaved &&
         paymentsData.students?.every(
@@ -45,9 +47,11 @@ export const useWeeklyPayments = (kelas, jurusan, tahun, bulanSlug, minggu) => {
             setPayments(initialState);
             const firstPaidPayment = Object.values(
                 paymentsData.existingPayments
-            ).find((p) => p.status === "paid");
+            ).find((p) => p.status === "paid" && p.nominal > 0);
             if (firstPaidPayment) {
                 setFixedNominal(firstPaidPayment.nominal);
+            } else {
+                setFixedNominal(0);
             }
         }
     }, [paymentsData]);
@@ -86,7 +90,7 @@ export const useWeeklyPayments = (kelas, jurusan, tahun, bulanSlug, minggu) => {
         e.preventDefault();
 
         if (parseInt(fixedNominal) <= 0) {
-            toast.error("Nominal uang kas harus lebih dari 0.");
+            toast.error("Nominal iuran harus lebih dari 0.");
             window.scrollTo({ top: 0, behavior: "smooth" });
             return;
         }
@@ -101,28 +105,17 @@ export const useWeeklyPayments = (kelas, jurusan, tahun, bulanSlug, minggu) => {
 
         setIsProcessing(true);
         try {
-            const response = await storeWeeklyPayments(
+            const response = await storeOtherPayments(
                 kelas,
                 jurusan,
-                tahun,
-                bulanSlug,
-                minggu,
+                iuranId,
                 payload
             );
             toast.success(
-                response.message || "Pembayaran uang kas berhasil diperbarui!"
+                response.message || "Pembayaran iuran berhasil diperbarui!"
             );
             window.scrollTo({ top: 0, behavior: "smooth" });
             mutate();
-            router.visit(
-                route("uang-kas.week.show", {
-                    kelas,
-                    jurusan,
-                    tahun,
-                    bulanSlug,
-                    minggu,
-                })
-            );
         } catch (err) {
             toast.error(
                 err.response?.data?.message || "Gagal menyimpan pembayaran."
@@ -133,20 +126,14 @@ export const useWeeklyPayments = (kelas, jurusan, tahun, bulanSlug, minggu) => {
     };
 
     const getDbSummary = () => {
-        if (!paymentsData || !paymentsData.students) {
-            return {};
-        }
-
+        if (!paymentsData || !paymentsData.students) return {};
         const paidStudentsCount = Object.values(
             paymentsData.existingPayments
         ).filter((payment) => payment.status === "paid").length;
-
         const nominalFromDb =
             Object.values(paymentsData.existingPayments)[0]?.nominal || 0;
-
         const totalCollected =
             paidStudentsCount * (parseInt(nominalFromDb) || 0);
-
         return {
             totalStudents: paymentsData.students.length,
             paidStudents: paidStudentsCount,
@@ -158,16 +145,12 @@ export const useWeeklyPayments = (kelas, jurusan, tahun, bulanSlug, minggu) => {
     };
 
     const hasChanges = () => {
-        if (!paymentsData || !paymentsData.students) {
-            return false;
-        }
+        if (!paymentsData || !paymentsData.students) return false;
         for (const student of paymentsData.students) {
             const currentStatus = payments[student.id]?.status || "unpaid";
             const existingStatus =
                 paymentsData.existingPayments[student.id]?.status || "unpaid";
-            if (currentStatus !== existingStatus) {
-                return true;
-            }
+            if (currentStatus !== existingStatus) return true;
         }
         return false;
     };

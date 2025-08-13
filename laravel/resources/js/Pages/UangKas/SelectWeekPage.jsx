@@ -1,39 +1,64 @@
-import { useEffect } from "react";
-import { ArrowLeft, CheckCircle } from "lucide-react";
-import toast from "react-hot-toast";
-import { usePage } from "@inertiajs/react";
+import { useState } from "react";
+import {
+    ArrowLeft,
+    ArrowUpDown,
+    CheckCircle,
+    MinusCircle,
+    PlusCircle,
+} from "lucide-react";
 
-// Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import PageContent from "@/Components/ui/page-content";
 import CardContent from "@/Components/ui/card-content";
 import DotLoader from "@/Components/ui/dot-loader";
 import { useUangKasWeeks } from "@/hooks/uang-kas/use-uang-kas-weeks";
+import { useUangKasOther } from "@/hooks/uang-kas/use-uang-kas-other";
+import UangKasOtherModal from "@/Components/uang-kas/uang-kas-other-modal";
+import { FaMoneyBillWave } from "react-icons/fa6";
+import { useUangKasSummary } from "@/hooks/uang-kas/use-uang-kas-summary";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
-    const { flash } = usePage().props;
+    const [isOpenModal, setIsOpenModal] = useState(false);
 
-    const { weeks, isLoading, error } = useUangKasWeeks(
+    const {
+        weeks: weeklyData,
+        isLoading: isLoadingWeeks,
+        error: errorWeeks,
+    } = useUangKasWeeks(
         selectedClass.kelas,
         selectedClass.jurusan,
         tahun,
         bulanSlug
     );
 
-    useEffect(() => {
-        if (flash && flash.success) {
-            toast.success(flash.success);
-        }
-        if (flash && flash.error) {
-            toast.error(flash.error);
-        }
-    }, [flash]);
+    const {
+        otherCashData,
+        isLoading: isLoadingOther,
+        error: errorOther,
+        mutate: mutateOtherCash,
+    } = useUangKasOther(
+        selectedClass.kelas,
+        selectedClass.jurusan,
+        tahun,
+        bulanSlug
+    );
+
+    // Panggil hook baru untuk summary
+    const { summary, isLoading: isLoadingSummary } = useUangKasSummary(
+        selectedClass.kelas,
+        selectedClass.jurusan,
+        tahun,
+        bulanSlug
+    );
+
+    const isLoading = isLoadingWeeks || isLoadingOther || isLoadingSummary;
+    const error = errorWeeks || errorOther;
 
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <DotLoader text="Memuat data mingguan..." />
+                <DotLoader text="Memuat data..." />
             </div>
         );
     }
@@ -41,7 +66,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
     if (error) {
         return (
             <div className="flex items-center justify-center h-screen">
-                Gagal memuat data minggu.
+                Gagal memuat data.
             </div>
         );
     }
@@ -51,12 +76,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
     const month = namaBulan.toLowerCase();
 
     if (
-        month === "januari" ||
-        month === "februari" ||
-        month === "maret" ||
-        month === "april" ||
-        month === "mei" ||
-        month === "juni"
+        ["januari", "februari", "maret", "april", "mei", "juni"].includes(month)
     ) {
         displayYear = endYear;
     } else {
@@ -66,7 +86,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
         {
-            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
             href: route("uang-kas.index"),
         },
         {
@@ -84,7 +104,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                 tahun: tahun,
             }),
         },
-        { label: "Pilih Minggu", href: null },
+        { label: "Pilih Iuran", href: null },
     ];
 
     return (
@@ -92,49 +112,169 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
             breadcrumbItems={breadcrumbItems}
             pageClassName="-mt-16 md:-mt-20"
         >
-            <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Minggu ({namaBulan} {displayYear})
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {weeks &&
-                    weeks.map((week) => (
-                        <CardContent
-                            key={week.id}
-                            href={
-                                week.is_paid || week.is_holiday
-                                    ? null
-                                    : route("uang-kas.week.show", {
-                                          kelas: selectedClass.kelas,
-                                          jurusan: selectedClass.jurusan,
-                                          tahun,
-                                          bulanSlug: bulanSlug,
-                                          minggu: week.id,
-                                      })
-                            }
-                            variant={
-                                week.is_paid
-                                    ? "success"
-                                    : week.is_holiday
-                                    ? "error"
-                                    : "default"
-                            }
-                            title={week.label}
-                            subtitle={
-                                week.display_date_range || week.display_date
-                            }
-                        >
-                            {week.is_paid && (
-                                <div className="absolute -top-4 -right-3">
-                                    <CheckCircle className="w-5 h-5 text-green-600" />
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 md:mb-6 gap-6">
+                <div className="flex items-center space-x-2 md:space-x-3">
+                    <div className="p-3 rounded-lg bg-sky-100">
+                        <FaMoneyBillWave className="w-5 h-5 md:w-6 md:h-6 text-sky-600" />
+                    </div>
+                    <div>
+                        <h3 className="text-md md:text-lg font-medium text-neutral-700">
+                            Pilih Iuran ({namaBulan} {displayYear})
+                        </h3>
+                        <div className="flex flex-row gap-4 md:items-center">
+                            <div
+                                className={`flex items-center space-x-1 ${
+                                    summary?.total_pemasukan > 0
+                                        ? "text-green-600"
+                                        : "text-neutral-500"
+                                }`}
+                            >
+                                <ArrowUpDown className="w-5 h-5" />
+                                <div className="flex flex-col text-xs md:text-sm">
+                                    Pemasukan
+                                    <span className="font-medium text-center">
+                                        {summary?.total_pemasukan
+                                            ? formatRupiah(
+                                                  summary.total_pemasukan
+                                              )
+                                            : "-"}
+                                    </span>
                                 </div>
-                            )}
-                            {week.is_holiday && (
-                                <div className="absolute -top-4 -right-4 text-sm font-semibold text-red-600">
-                                    LIBUR
+                            </div>
+                            <div
+                                className={`flex items-center space-x-1 ${
+                                    summary?.total_pengeluaran > 0
+                                        ? "text-red-500"
+                                        : "text-neutral-500"
+                                }`}
+                            >
+                                <ArrowUpDown className="w-5 h-5" />
+                                <div className="flex flex-col text-xs md:text-sm">
+                                    Pengeluaran
+                                    <span className="font-medium text-center">
+                                        {summary?.total_pengeluaran
+                                            ? formatRupiah(
+                                                  summary.total_pengeluaran
+                                              )
+                                            : "-"}
+                                    </span>
                                 </div>
-                            )}
-                        </CardContent>
-                    ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-2">
+                    <ButtonRounded
+                        as="link"
+                        variant="outline"
+                        size="sm"
+                        href={route("uang-kas.pengeluaran.index", {
+                            kelas: selectedClass.kelas,
+                            jurusan: selectedClass.jurusan,
+                            tahun: tahun,
+                            bulanSlug: bulanSlug,
+                        })}
+                    >
+                        <MinusCircle className="w-4 h-4 mr-1 md:mr-2" />
+                        <span className="text-xs md:text-sm font-medium">
+                            Pengeluaran kas
+                        </span>
+                    </ButtonRounded>
+                    <ButtonRounded
+                        disabled={isLoading}
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setIsOpenModal(true)}
+                    >
+                        <PlusCircle className="w-4 h-4 mr-1 md:mr-2" />
+                        <span className="text-xs md:text-sm font-medium">
+                            Tambah Iuran Lain
+                        </span>
+                    </ButtonRounded>
+                </div>
+            </div>
+
+            <div>
+                <h4 className="text-base font-medium text-neutral-600 mb-4">
+                    Iuran Mingguan
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {weeklyData &&
+                        weeklyData.map((card) => (
+                            <CardContent
+                                key={`weekly-${card.id}`}
+                                href={
+                                    card.is_holiday
+                                        ? null
+                                        : route("uang-kas.week.show", {
+                                              kelas: selectedClass.kelas,
+                                              jurusan: selectedClass.jurusan,
+                                              tahun,
+                                              bulanSlug,
+                                              minggu: card.id,
+                                          })
+                                }
+                                variant={
+                                    card.is_paid
+                                        ? "success"
+                                        : card.is_holiday
+                                        ? "error"
+                                        : "default"
+                                }
+                                title={card.label}
+                                subtitle={
+                                    card.display_date_range || card.display_date
+                                }
+                            >
+                                {card.is_paid && (
+                                    <div className="absolute -top-4 -right-3">
+                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                    </div>
+                                )}
+                                {card.is_holiday && (
+                                    <div className="absolute -top-4 -right-4 text-sm font-semibold text-red-600">
+                                        LIBUR
+                                    </div>
+                                )}
+                            </CardContent>
+                        ))}
+                </div>
+            </div>
+
+            <div className="mt-8">
+                <h4 className="text-base font-medium text-neutral-600 mb-4">
+                    Iuran Lainnya
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {otherCashData && otherCashData.length > 0 ? (
+                        otherCashData.map((card) => (
+                            <CardContent
+                                key={card.id}
+                                href={route("uang-kas.other-cash.show", {
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
+                                    tahun: tahun,
+                                    bulanSlug: bulanSlug,
+                                    iuran: card.other_id,
+                                })}
+                                variant={card.is_paid ? "success" : "default"}
+                                title={card.label}
+                                subtitle={card.display_date}
+                            >
+                                {card.is_paid && (
+                                    <div className="absolute -top-4 -right-3">
+                                        <CheckCircle className="w-5 h-5 text-green-600" />
+                                    </div>
+                                )}
+                            </CardContent>
+                        ))
+                    ) : (
+                        <div className="col-span-4 text-center py-24 text-neutral-500 text-sm">
+                            Belum ada iuran lainnya di bulan ini.
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="flex justify-start mt-8">
@@ -151,15 +291,18 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                     Kembali
                 </ButtonRounded>
             </div>
+
+            <UangKasOtherModal
+                isOpen={isOpenModal}
+                onClose={() => setIsOpenModal(false)}
+                selectedClass={selectedClass}
+                onSuccess={() => mutateOtherCash()}
+                displayYear={displayYear}
+                bulanSlug={bulanSlug}
+                namaBulan={namaBulan}
+            />
         </PageContent>
     );
 };
-
-SelectWeekPage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Pilih Minggu - ${page.props.namaBulan}`}
-    />
-);
 
 export default SelectWeekPage;

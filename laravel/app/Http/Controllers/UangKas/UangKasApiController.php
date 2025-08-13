@@ -7,6 +7,8 @@ use App\Models\AcademicYear;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\Holiday;
+use App\Models\Iuran;
+use App\Models\Pengeluaran;
 use App\Models\UangKasPayment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -303,4 +305,53 @@ class UangKasApiController extends Controller
 
         return response()->json(['message' => 'Minggu berhasil ditetapkan sebagai hari libur.'], 201);
     }
+
+    public function getSummary($kelas, $jurusan, $tahun, $bulanSlug)
+{
+    $monthMap = [
+        'januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4, 'mei' => 5, 'juni' => 6,
+        'juli' => 7, 'agustus' => 8, 'september' => 9, 'oktober' => 10, 'november' => 11, 'desember' => 12,
+    ];
+    $monthNumber = $monthMap[strtolower($bulanSlug)] ?? null;
+
+    if (!$monthNumber) {
+        return response()->json(['message' => 'Bulan tidak valid'], 404);
+    }
+
+    [$startYear, $endYear] = explode('-', $tahun);
+    $year = $monthNumber >= 7 ? $startYear : $endYear;
+
+    $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
+        ->where('nama_kelas', $kelas)->firstOrFail();
+    $siswaIds = $selectedKelas->siswas()->pluck('id');
+
+    $totalPemasukanMingguan = UangKasPayment::whereIn('siswa_id', $siswaIds)
+        ->where('tahun', $tahun)
+        ->where('bulan_slug', $bulanSlug)
+        ->where('status', 'paid')
+        ->sum('nominal');
+
+    $totalPemasukanLainnya = Iuran::where('kelas_id', $selectedKelas->id)
+        ->whereHas('payments', function ($query) use ($year, $monthNumber) {
+            $query->whereYear('tanggal', $year)->whereMonth('tanggal', $monthNumber);
+        })
+        ->with('payments')
+        ->get()
+        ->flatMap(fn($iuran) => $iuran->payments)
+        ->where('status', 'paid')
+        ->sum('nominal');
+
+    $totalPengeluaran = Pengeluaran::where('kelas_id', $selectedKelas->id)
+        ->where('status', 'approved')
+        ->whereYear('tanggal', $year)
+        ->whereMonth('tanggal', $monthNumber)
+        ->sum('nominal');
+
+    $totalPemasukan = $totalPemasukanMingguan + $totalPemasukanLainnya;
+
+    return response()->json([
+        'total_pemasukan' => $totalPemasukan,
+        'total_pengeluaran' => $totalPengeluaran,
+    ]);
+}
 }

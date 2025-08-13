@@ -11,8 +11,10 @@ use App\Http\Controllers\Kenaikan\KenaikanExportController;
 use App\Http\Controllers\Permasalahan\PermasalahanController;
 use App\Http\Controllers\Rekapitulasi\RekapitulasiController;
 use App\Http\Controllers\Rekapitulasi\RekapitulasiExportController;
+use App\Http\Controllers\UangKas\PengeluaranController;
 use App\Http\Controllers\UangKas\UangKasController; 
-use App\Http\Controllers\UangKas\UangKasExportController; 
+use App\Http\Controllers\UangKas\UangKasExportController;
+use App\Http\Controllers\UangKas\UangKasOtherController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -46,21 +48,33 @@ Route::controller(AbsensiController::class)->prefix('absensi')->name('absensi.')
 Route::controller(AbsensiExportController::class)->prefix('absensi')->name('absensi.')->group(function () {
     Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/excel', 'exportMonthExcel')->name('month.export.excel');
     Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/export/pdf', 'exportMonthPdf')->name('month.export.pdf');
-    Route::get('/{kelas}/{jurusan}/{tahun}/export/rekap/excel', 'exportYearExcel')->name('year.export.rekap.excel'); // Rute baru untuk ekspor Excel tahunan
+    Route::get('/{kelas}/{jurusan}/{tahun}/export/rekap/excel', 'exportYearExcel')->name('year.export.rekap.excel');
     Route::get('/{kelas}/{jurusan}/{tahun}/export/rekap/pdf', 'exportYearPdf')->name('year.export.rekap.pdf');
 });
 
 
 // Uang Kas
-Route::controller(UangKasController::class)->prefix('uang-kas')->name('uang-kas.')->group(function () {
-    Route::get('/', 'selectClass')->name('index');
-    Route::get('/{kelas}/{jurusan}', 'selectYear')->name('class.show');
-    Route::get('/{kelas}/{jurusan}/{tahun}', 'selectMonth')->name('year.show');
-    Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}', 'showMonth')->name('month.show');
-    Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}', 'showWeek')->name('week.show');
-    Route::post('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}', 'store')->name('week.store');
-    Route::post('/year', 'storeYear')->name('year.store');
-    Route::post('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}/holiday', 'storeHoliday')->name('holiday.store');
+Route::prefix('uang-kas')->name('uang-kas.')->group(function () {
+    Route::controller(PengeluaranController::class)->group(function () {
+        Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/pengeluaran', 'index')->name('pengeluaran.index');
+        Route::post('/{kelas}/{jurusan}/pengeluaran', 'store')->name('pengeluaran.store');
+    });
+
+     Route::controller(UangKasOtherController::class)->group(function () {
+        Route::post('/{kelas}/{jurusan}/other-cash', 'store')->name('other-cash.store');
+        Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/other-cash/{iuran}', 'show')->name('other-cash.show');
+    });
+
+    Route::controller(UangKasController::class)->group(function () {
+        Route::get('/', 'selectClass')->name('index');
+        Route::get('/{kelas}/{jurusan}', 'selectYear')->name('class.show');
+        Route::get('/{kelas}/{jurusan}/{tahun}', 'selectMonth')->name('year.show');
+        Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}', 'showMonth')->name('month.show');
+        Route::get('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}', 'showWeek')->name('week.show');
+        Route::post('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}', 'store')->name('week.store');
+        Route::post('/year', 'storeYear')->name('year.store');
+        Route::post('/{kelas}/{jurusan}/{tahun}/{bulanSlug}/{minggu}/holiday', 'storeHoliday')->name('holiday.store');
+    });
 });
 
 // Uang Kas Exports

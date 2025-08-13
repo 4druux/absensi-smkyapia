@@ -1,4 +1,3 @@
-// useKelas.js
 import useSWR from "swr";
 import toast from "react-hot-toast";
 import { getKelas, deleteKelas } from "@/services/data-siswa/kelas-service";
@@ -23,7 +22,7 @@ export const useKelas = () => {
                 toast.success(result.message);
                 mutate();
             } catch (error) {
-                toast.error("Gagal menghapus kelas.");
+                toast.error("Gagal menghapus kelas."), error;
             }
         }
     };

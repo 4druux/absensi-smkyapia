@@ -5,12 +5,8 @@ const AbsensiTable = ({
     attendance,
     onStatusChange,
     statuses,
-    isReadOnly,
+    hasAttendanceBeenSaved,
 }) => {
-    const selectableStatuses = isReadOnly
-        ? statuses
-        : statuses.filter((status) => status.key !== "hadir");
-
     return (
         <div className="overflow-x-auto">
             <table className="w-full">
@@ -51,49 +47,43 @@ const AbsensiTable = ({
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex flex-wrap justify-center gap-2">
-                                    {isReadOnly ? (
-                                        <div
-                                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
-                                                attendance[student.id]
-                                                    ? statuses.find(
-                                                          (s) =>
-                                                              s.key ===
-                                                              attendance[
-                                                                  student.id
-                                                              ]
-                                                      )?.color
-                                                    : "bg-green-100 text-green-800 border-green-300"
-                                            }`}
-                                        >
-                                            <CheckCircle className="w-3 h-3 mr-1.5" />
-                                            {attendance[student.id]
-                                                ? statuses.find(
-                                                      (s) =>
-                                                          s.key ===
-                                                          attendance[student.id]
-                                                  )?.label
-                                                : "Hadir"}
-                                        </div>
-                                    ) : (
-                                        selectableStatuses.map(
-                                            ({ key, label, color }) => (
+                                    {statuses.map(({ key, label, color }) => {
+                                        if (
+                                            key === "hadir" &&
+                                            !hasAttendanceBeenSaved &&
+                                            attendance[student.id] === null
+                                        ) {
+                                            return null;
+                                        }
+
+                                        const isSelected =
+                                            attendance[student.id] === key ||
+                                            (!hasAttendanceBeenSaved &&
+                                                attendance[student.id] ===
+                                                    null &&
+                                                key === "hadir");
+
+                                        const displayLabel =
+                                            key === "hadir" &&
+                                            attendance[student.id] === null &&
+                                            !hasAttendanceBeenSaved ? (
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border bg-green-100 text-green-800 border-green-300">
+                                                    <CheckCircle className="w-3 h-3 mr-1.5" />{" "}
+                                                    Hadir
+                                                </span>
+                                            ) : (
                                                 <label
-                                                    key={key}
-                                                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 border ${
-                                                        attendance[
-                                                            student.id
-                                                        ] === key
-                                                            ? `${color}`
-                                                            : "bg-slate-50 text-slate-500 border-slate-300 hover:bg-slate-200"
-                                                    }`}
+                                                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all duration-200 border
+                                                        ${
+                                                            isSelected
+                                                                ? `${color}`
+                                                                : "bg-slate-50 text-slate-500 border-slate-300 hover:bg-slate-200"
+                                                        }
+                                                    `}
                                                 >
                                                     <input
                                                         type="checkbox"
-                                                        checked={
-                                                            attendance[
-                                                                student.id
-                                                            ] === key
-                                                        }
+                                                        checked={isSelected}
                                                         onChange={() =>
                                                             onStatusChange(
                                                                 student.id,
@@ -102,15 +92,15 @@ const AbsensiTable = ({
                                                         }
                                                         className="sr-only"
                                                     />
-                                                    {attendance[student.id] ===
-                                                        key && (
+                                                    {isSelected && (
                                                         <CheckCircle className="w-3 h-3 mr-1.5" />
                                                     )}
                                                     {label}
                                                 </label>
-                                            )
-                                        )
-                                    )}
+                                            );
+
+                                        return displayLabel;
+                                    })}
                                 </div>
                             </td>
                         </tr>

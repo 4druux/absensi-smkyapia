@@ -59,3 +59,48 @@ export const storeHoliday = async (
         `/uang-kas/${kelas}/${jurusan}/holidays/${tahun}/${bulanSlug}/${minggu}`
     );
 };
+
+export const getUangKasOther = async (kelas, jurusan, tahun, bulanSlug) => {
+    return await api.get(
+        `/uang-kas/${kelas}/${jurusan}/other-cash/${tahun}/${bulanSlug}`
+    );
+};
+
+export const storeUangKasOther = async (
+    payload,
+    kelas,
+    jurusan,
+    displayYear,
+    bulanSlug
+) => {
+    return await api.post(
+        `/uang-kas/${kelas}/${jurusan}/other-cash/${displayYear}/${bulanSlug}`,
+        payload
+    );
+};
+
+export const getOtherPayments = async (kelas, jurusan, iuranId) => {
+    return await api.get(
+        `/uang-kas/${kelas}/${jurusan}/other-cash/${iuranId}/payments`
+    );
+};
+
+export const storeOtherPayments = async (kelas, jurusan, iuranId, payload) => {
+    return await api.post(
+        `/uang-kas/${kelas}/${jurusan}/other-cash/${iuranId}/payments`,
+        payload
+    );
+};
+
+export const storePengeluaran = async (
+    payload,
+    kelas,
+    jurusan,
+    displayYear,
+    bulanSlug
+) => {
+    return await api.post(
+        `/pengeluaran/${kelas}/${jurusan}/${displayYear}/${bulanSlug}`,
+        payload
+    );
+};

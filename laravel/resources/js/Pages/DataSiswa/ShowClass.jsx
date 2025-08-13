@@ -1,7 +1,6 @@
 import { ArrowLeft, Users } from "lucide-react";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -103,12 +102,5 @@ const ShowClass = ({ selectedClass }) => {
         </PageContent>
     );
 };
-
-ShowClass.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Siswa Kelas ${page.props.selectedClass.nama_kelas} ${page.props.selectedClass.kelompok}`}
-    />
-);
 
 export default ShowClass;

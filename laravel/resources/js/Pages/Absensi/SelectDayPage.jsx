@@ -18,13 +18,20 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
     const { flash } = usePage().props;
     const { isOpen, setIsOpen, dropdownRef } = useDropdown();
 
-    const { days, absensiDays, holidays, isLoading, error, handleSetHoliday } =
-        useAbsensiDays(
-            selectedClass.kelas,
-            selectedClass.jurusan,
-            tahun,
-            bulan
-        );
+    const {
+        days,
+        absensiDays,
+        holidays,
+        isLoading,
+        error,
+        handleSetHoliday,
+        handleCancelHoliday,
+    } = useAbsensiDays(
+        selectedClass.kelas,
+        selectedClass.jurusan,
+        tahun,
+        bulan
+    );
 
     useEffect(() => {
         if (flash && flash.success) {
@@ -100,6 +107,7 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
         tahun,
         bulan,
         handleSetHoliday,
+        handleCancelHoliday,
         isOpen,
         setIsOpen,
         dropdownRef,

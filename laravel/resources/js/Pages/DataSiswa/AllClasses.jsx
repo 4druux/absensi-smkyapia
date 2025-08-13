@@ -1,7 +1,6 @@
 import { School, PlusCircle, Trash2 } from "lucide-react";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
@@ -116,9 +115,5 @@ const AllClasses = () => {
         </PageContent>
     );
 };
-
-AllClasses.layout = (page) => (
-    <MainLayout children={page} title="Daftar Kelas" />
-);
 
 export default AllClasses;

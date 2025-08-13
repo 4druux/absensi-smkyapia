@@ -102,11 +102,11 @@
                 <thead>
                     <tr>
                         <th style="width: 4%;">NO</th>
-                        <th style="width: 15%;">TGL/BLN/TAHUN</th>
+                        <th style="width: 10%;">TGL/BLN/TAHUN</th>
                         <th style="width: 12%;">KELAS</th>
                         <th style="width: 27%;">MASALAH KELAS</th>
                         <th style="width: 27%;">PEMECAHAN MASALAH</th>
-                        <th style="width: 15%;">KET</th>
+                        <th style="width: 20%;">KET</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -118,7 +118,7 @@
                                 <td>{{ $kelas }} {{ $jurusan }}</td>
                                 <td class="text-left">{{ $problem->masalah }}</td>
                                 <td class="text-left">{{ $problem->pemecahan }}</td>
-                                <td></td>
+                                <td class="text-left">{{ $problem->keterangan }}</td>
                             </tr>
                         @endforeach
                     @else
@@ -149,12 +149,12 @@
                 <thead>
                     <tr>
                         <th style="width: 4%;">NO</th>
-                        <th style="width: 15%;">TGL/BLN/TAHUN</th>
+                        <th style="width: 10%;">TGL/BLN/TAHUN</th>
                         <th style="width: 20%;">NAMA SISWA</th>
                         <th style="width: 12%;">KELAS</th>
                         <th style="width: 17%;">MASALAH</th>
                         <th style="width: 17%;">TINDAKAN WALAS</th>
-                        <th style="width: 15%;">KET</th>
+                        <th style="width: 20%;">KET</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -167,7 +167,7 @@
                                 <td>{{ $kelas }} {{ $jurusan }}</td>
                                 <td class="text-left">{{ $problem->masalah }}</td>
                                 <td class="text-left">{{ $problem->tindakan_walas }}</td>
-                                <td></td>
+                                <td class="text-left">{{ $problem->keterangan }}</td>
                             </tr>
                         @endforeach
                     @else

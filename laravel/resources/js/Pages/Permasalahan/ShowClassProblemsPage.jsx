@@ -10,7 +10,6 @@ import ProblemClassCard from "@/Components/permasalahan/problem-class-card";
 import ProblemClassTable from "@/Components/permasalahan/problem-class-table";
 import ProblemModal from "@/Components/permasalahan/problem-modal";
 import PageContent from "@/Components/ui/page-content";
-import MainLayout from "@/Layouts/MainLayout";
 import { deleteClassProblem } from "@/services/permasalahan/permasalahan-service";
 
 const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
@@ -140,12 +139,5 @@ const ShowClassProblemsPage = ({ tahun, selectedClass, problems }) => {
         </>
     );
 };
-
-ShowClassProblemsPage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Permasalahan Kelas - ${page.props.tahun}`}
-    />
-);
 
 export default ShowClassProblemsPage;

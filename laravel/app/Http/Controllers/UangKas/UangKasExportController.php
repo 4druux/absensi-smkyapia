@@ -7,9 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\UangKasPayment;
 use App\Models\Holiday;
+use App\Models\Iuran;
+use App\Models\Pengeluaran;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UangKasExportController extends Controller
 {
@@ -49,6 +52,21 @@ class UangKasExportController extends Controller
             ->where('bulan_slug', $bulanSlug)
             ->get();
         
+        $iuranData = Iuran::where('kelas_id', $selectedKelas->id)
+            ->with(['payments' => function ($query) use ($year, $monthNumber) {
+                $query->whereYear('tanggal', $year)->whereMonth('tanggal', $monthNumber);
+            }])
+            ->whereHas('payments', function ($query) use ($year, $monthNumber) {
+                $query->whereYear('tanggal', $year)->whereMonth('tanggal', $monthNumber);
+            })
+            ->get();
+
+        $pengeluaranData = Pengeluaran::where('kelas_id', $selectedKelas->id)
+            ->whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $monthNumber)
+            ->where('status', 'approved')
+            ->get();
+        
         $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
             ->get()
@@ -81,13 +99,16 @@ class UangKasExportController extends Controller
 
         if ($uangKasData->isEmpty() && count(array_filter($weeksInMonth, fn($isHoliday) => !$isHoliday)) > 0) {
             $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
-            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan} {$year}."], 404);
+            if ($iuranData->isEmpty()) {
+            } else {
+                return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan} {$year}."], 404);
+            }
         }
 
         $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
         $fileName = "Uang Kas-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.xlsx";
 
-        return Excel::download(new UangKasExport($kelas, $kelompok, $jurusan, $tahun, $year, $bulanSlug, $weeksInMonth), $fileName);
+        return Excel::download(new UangKasExport($kelas, $kelompok, $jurusan, $tahun, $year, $bulanSlug, $weeksInMonth, $iuranData, $pengeluaranData), $fileName);
     }
     
     public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
@@ -119,6 +140,21 @@ class UangKasExportController extends Controller
                     $item->siswa_id . '_' . $item->minggu => $item,
                 ];
             });
+
+        $iuranData = Iuran::where('kelas_id', $selectedKelas->id)
+            ->with(['payments' => function ($query) use ($year, $monthNumber) {
+                $query->whereYear('tanggal', $year)->whereMonth('tanggal', $monthNumber);
+            }])
+            ->whereHas('payments', function ($query) use ($year, $monthNumber) {
+                $query->whereYear('tanggal', $year)->whereMonth('tanggal', $monthNumber);
+            })
+            ->get();
+            
+        $pengeluaranData = Pengeluaran::where('kelas_id', $selectedKelas->id)
+            ->whereYear('tanggal', $year)
+            ->whereMonth('tanggal', $monthNumber)
+            ->where('status', 'approved')
+            ->get();
 
         $dbHolidays = Holiday::whereYear('date', $year)
             ->whereMonth('date', $monthNumber)
@@ -160,13 +196,17 @@ class UangKasExportController extends Controller
         }
         
         if ($uangKasData->isEmpty() && $paidWeeksCount === 0) {
-            return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan} {$year}."], 404);
+            $namaBulan = Carbon::createFromDate($year, $monthNumber)->translatedFormat('F');
+             if ($iuranData->isEmpty()) {
+            } else {
+                return response()->json(['error' => "Tidak ada data uang kas untuk bulan {$namaBulan} {$year}."], 404);
+            }
         }
         
         $fileName = "Uang Kas-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.pdf";
         $logoPath = 'images/logo-smk.png';
 
-        $pdf = Pdf::loadView('exports.uang-kas.uangkas', compact('students', 'kelas', 'kelompok', 'jurusan', 'namaBulan', 'year', 'uangKasData', 'weeksInMonth', 'logoPath'));
+        $pdf = Pdf::loadView('exports.uang-kas.uangkas', compact('students', 'kelas', 'kelompok', 'jurusan', 'namaBulan', 'year', 'uangKasData', 'weeksInMonth', 'logoPath', 'iuranData', 'pengeluaranData'));
         
         return $pdf->download($fileName);
     }

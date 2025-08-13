@@ -58,6 +58,7 @@ class UangKasController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
         ]);
@@ -91,6 +92,7 @@ class UangKasController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
         ]);
@@ -215,6 +217,7 @@ class UangKasController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,     
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
             'tahun' => $tahun,
@@ -254,6 +257,7 @@ class UangKasController extends Controller
             'selectedClass' => [
                 'id' => $selectedKelas->id,
                 'kelas' => $selectedKelas->nama_kelas,
+                'kelompok' => $selectedKelas->kelompok,
                 'jurusan' => $selectedKelas->jurusan->nama_jurusan,
             ],
             'tahun' => $tahun,

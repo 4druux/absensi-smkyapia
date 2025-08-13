@@ -45,6 +45,7 @@ class PermasalahanApiController extends Controller
             'tanggal' => 'required|date',
             'masalah' => 'required|string',
             'pemecahan' => 'required|string',
+            'keterangan' => 'required|string',
         ]);
         PermasalahanKelas::create($validated);
         return response()->json(['message' => 'Laporan permasalahan kelas berhasil disimpan!'], 201);
@@ -65,6 +66,7 @@ class PermasalahanApiController extends Controller
             'tanggal' => 'required|date',
             'masalah' => 'required|string',
             'tindakan_walas' => 'required|string',
+            'keterangan' => 'required|string',            
         ]);
         PermasalahanSiswa::create($validated);
         return response()->json(['message' => 'Laporan permasalahan siswa berhasil disimpan!'], 201);

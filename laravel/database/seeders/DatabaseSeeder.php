@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\AcademicYear;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +13,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        $startYear = 2022;
+        $currentYear = now()->month >= 7 ? now()->year : now()->year - 1;
+
+        for ($year = $startYear; $year <= $currentYear; $year++) {
+            AcademicYear::firstOrCreate(['year' => $year]);
+        }
     }
 }

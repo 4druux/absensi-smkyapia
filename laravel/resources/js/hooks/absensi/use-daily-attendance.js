@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import toast from "react-hot-toast";
-import { router } from "@inertiajs/react";
-import { fetcher } from '@/utils/api.js';
+import { fetcher } from "@/utils/api.js";
 import { storeDailyAttendance } from "@/services/absensi/absensi-service";
 
 export const useDailyAttendance = (
@@ -25,6 +24,14 @@ export const useDailyAttendance = (
     } = useSWR(swrKey, fetcher);
     const [isProcessing, setIsProcessing] = useState(false);
     const [attendance, setAttendance] = useState({});
+    const [initialSummary, setInitialSummary] = useState({
+        present: null,
+        telat: null,
+        sakit: null,
+        izin: null,
+        alfa: null,
+        bolos: null,
+    });
 
     useEffect(() => {
         if (attendanceData && attendanceData.students) {
@@ -34,18 +41,60 @@ export const useDailyAttendance = (
                     attendanceData.existingAttendance[student.id] || null;
             });
             setAttendance(initialState);
+            if (attendanceData.tanggalAbsen) {
+                setInitialSummary(
+                    getAttendanceSummaryFromData(
+                        attendanceData.existingAttendance,
+                        attendanceData.students.length
+                    )
+                );
+            } else {
+                setInitialSummary({
+                    present: 0,
+                    telat: 0,
+                    sakit: 0,
+                    izin: 0,
+                    alfa: 0,
+                    bolos: 0,
+                });
+            }
         }
     }, [attendanceData]);
+    const getAttendanceSummaryFromData = (
+        existingAttendance,
+        totalStudents
+    ) => {
+        const summary = {
+            present: 0,
+            telat: 0,
+            sakit: 0,
+            izin: 0,
+            alfa: 0,
+            bolos: 0,
+        };
+
+        Object.values(existingAttendance).forEach((status) => {
+            if (Object.prototype.hasOwnProperty.call(summary, status)) {
+                summary[status]++;
+            }
+        });
+
+        summary.present =
+            totalStudents -
+            (summary.telat +
+                summary.sakit +
+                summary.izin +
+                summary.alfa +
+                summary.bolos);
+
+        return summary;
+    };
 
     const hasAttendanceBeenSaved = !!(
         attendanceData && attendanceData.tanggalAbsen
     );
 
     const handleAttendanceChange = (studentId, status) => {
-        if (hasAttendanceBeenSaved) {
-            return;
-        }
-
         setAttendance((prev) => {
             const newAttendance = { ...prev };
             newAttendance[studentId] =
@@ -56,13 +105,6 @@ export const useDailyAttendance = (
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (hasAttendanceBeenSaved) {
-            toast.error(
-                "Absensi untuk hari ini sudah dicatat dan tidak bisa diubah."
-            );
-            return;
-        }
 
         if (
             !attendanceData ||
@@ -97,16 +139,8 @@ export const useDailyAttendance = (
                 payload
             );
             toast.success("Absensi berhasil disimpan!");
+            window.scrollTo({ top: 0, behavior: "smooth" });
             mutate();
-            router.visit(
-                route("absensi.day.show", {
-                    kelas,
-                    jurusan,
-                    tahun,
-                    bulanSlug,
-                    tanggal,
-                })
-            );
         } catch (err) {
             toast.error(
                 err.response?.data?.message || "Gagal menyimpan absensi."
@@ -124,14 +158,16 @@ export const useDailyAttendance = (
             izin: 0,
             alfa: 0,
             bolos: 0,
-            notMarked: 0,
         };
         const totalStudents = attendanceData?.students?.length || 0;
 
+        let notMarkedCount = 0;
         Object.values(attendance).forEach((status) => {
-            if (status === null) summary.notMarked++;
-            else if (Object.prototype.hasOwnProperty.call(summary, status))
+            if (status === null) {
+                notMarkedCount++;
+            } else if (Object.prototype.hasOwnProperty.call(summary, status)) {
                 summary[status]++;
+            }
         });
 
         summary.present =
@@ -141,7 +177,7 @@ export const useDailyAttendance = (
                 summary.izin +
                 summary.alfa +
                 summary.bolos +
-                summary.notMarked);
+                notMarkedCount);
         return summary;
     };
 
@@ -170,6 +206,7 @@ export const useDailyAttendance = (
         attendance,
         attendanceStatuses,
         summary: getAttendanceSummary(),
+        initialSummary,
         handleAttendanceChange,
         handleSubmit,
         mutate,

@@ -5,7 +5,6 @@ import { usePage } from "@inertiajs/react";
 import { Save, Users, PlusCircle, Upload, ArrowLeft } from "lucide-react";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import Select from "@/Components/common/select";
 import PageContent from "@/Components/ui/page-content";
@@ -220,9 +219,5 @@ const InputData = () => {
         </PageContent>
     );
 };
-
-InputData.layout = (page) => (
-    <MainLayout children={page} title="Input Data Siswa" />
-);
 
 export default InputData;
