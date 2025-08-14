@@ -149,7 +149,7 @@ const UangKasPage = ({
                             Daftar Pembayaran
                         </h2>
                     </div>
-                    <div className="hidden lg:-block">
+                    <div className="hidden lg:block">
                         <UangKasTable
                             students={studentData.students}
                             payments={payments}

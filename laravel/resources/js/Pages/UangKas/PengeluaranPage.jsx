@@ -120,14 +120,14 @@ const PengeluaranPage = ({ selectedClass, tahun, bulanSlug }) => {
             breadcrumbItems={breadcrumbItems}
             pageClassName="-mt-16 md:-mt-20"
         >
-            <div className="flex justify-between items-start">
-                <div className="flex items-center space-x-2 md:space-x-3 mb-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items- mb-6">
+                <div className="flex items-center space-x-2 md:space-x-3">
                     <div className="p-3 rounded-lg bg-sky-100">
                         <FaMoneyBillWave className="w-5 h-5 md:w-6 md:h-6 text-sky-600" />
                     </div>
                     <div>
                         <h3 className="text-md md:text-lg font-medium text-neutral-700">
-                            Pengajuan Pengeluaran ({namaBulan} {displayYear})
+                             Pengeluaran ({namaBulan} {displayYear})
                         </h3>
                         <div className="flex flex-row gap-2 md:mt-1 md:items-center">
                             <div className="flex items-center space-x-1 md:space-x-2 text-neutral-500">
@@ -148,7 +148,7 @@ const PengeluaranPage = ({ selectedClass, tahun, bulanSlug }) => {
                     </div>
                 </div>
 
-                <div className="flex items-center space-x-1 text-red-500 ml-4">
+                <div className="flex items-center justify-end space-x-1 text-red-500">
                     <ArrowUpDown className="w-5 h-5" />
                     <div className="flex flex-col text-xs md:text-sm">
                         Total Disetujui

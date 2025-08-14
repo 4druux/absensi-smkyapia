@@ -3,13 +3,13 @@ import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
-import { usePermasalahanClasses } from "@/hooks/permasalahan/use-permasalahan-classes";
+import { useIndisiplinerClasses } from "@/hooks/indisipliner/use-indisipliner-classes";
 
 const SelectClassPage = () => {
-    const { classes, isLoading, error } = usePermasalahanClasses();
+    const { classes, isLoading, error } = useIndisiplinerClasses();
 
     const breadcrumbItems = [
-        { label: "Permasalahan", href: route("permasalahan.index") },
+        { label: "Data Indisipliner", href: route("indisipliner.index") },
         { label: "Pilih Kelas", href: null },
     ];
 
@@ -45,7 +45,7 @@ const SelectClassPage = () => {
     return (
         <PageContent breadcrumbItems={breadcrumbItems} pageClassName="-mt-20">
             <h3 className="text-md md:text-lg font-medium text-neutral-700 mb-4 md:mb-6">
-                Pilih Kelas Untuk Laporan Permasalahan
+                Pilih Kelas Untuk Data Indisipliner
             </h3>
             {classes && classes.length > 0 ? (
                 <>
@@ -58,7 +58,7 @@ const SelectClassPage = () => {
                                         <CardContent
                                             key={c.id}
                                             href={route(
-                                                "permasalahan.class.show",
+                                                "indisipliner.class.show",
                                                 {
                                                     kelas: c.kelas,
                                                     jurusan: c.jurusan,
@@ -83,5 +83,7 @@ const SelectClassPage = () => {
         </PageContent>
     );
 };
+
+
 
 export default SelectClassPage;

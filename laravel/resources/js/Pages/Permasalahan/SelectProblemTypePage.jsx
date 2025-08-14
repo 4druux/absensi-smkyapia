@@ -1,7 +1,6 @@
 import { ArrowLeft, Users, UserX, Loader2 } from "lucide-react";
 import { FaFilePdf } from "react-icons/fa6";
 import { RiFileExcel2Line } from "react-icons/ri";
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import PageContent from "@/Components/ui/page-content";
@@ -35,11 +34,11 @@ const SelectProblemTypePage = ({ tahun, selectedClass }) => {
             breadcrumbItems={breadcrumbItems}
             pageClassName="-mt-16 md:-mt-20"
         >
-            <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 md:mb-6 gap-4">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 md:mb-6 gap-4">
                 <h3 className="text-md md:text-lg font-medium text-neutral-700">
                     Pilih Jenis Laporan Permasalahan
                 </h3>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-end gap-2">
                     <ButtonRounded
                         variant="outline"
                         size="sm"
@@ -112,12 +111,5 @@ const SelectProblemTypePage = ({ tahun, selectedClass }) => {
         </PageContent>
     );
 };
-
-SelectProblemTypePage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Pilih Jenis Laporan - ${page.props.tahun}`}
-    />
-);
 
 export default SelectProblemTypePage;

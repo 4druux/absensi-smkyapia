@@ -7,6 +7,7 @@ use App\Http\Controllers\DataSiswa\JurusanController;
 use App\Http\Controllers\DataSiswa\KelasController;
 use App\Http\Controllers\Absensi\AbsensiApiController;
 use App\Http\Controllers\Grafik\GrafikApiController;
+use App\Http\Controllers\Indisipliner\IndisiplinerApiController;
 use App\Http\Controllers\Kenaikan\KenaikanApiController;
 use App\Http\Controllers\Permasalahan\PermasalahanApiController;
 use App\Http\Controllers\Rekapitulasi\RekapitulasiApiController;
@@ -106,4 +107,14 @@ Route::prefix('permasalahan')->name('api.permasalahan.')->group(function () {
     Route::post('/student-problems', [PermasalahanApiController::class, 'storeStudentProblem'])->name('student-problems.store');
     Route::delete('/student-problems/{id}', [PermasalahanApiController::class, 'deleteStudentProblem'])->name('student-problems.destroy');
 
+});
+
+// Data Indisipliner
+Route::prefix('indisipliner')->name('api.indisipliner.')->group(function () {
+    Route::get('/classes', [IndisiplinerApiController::class, 'getClasses'])->name('classes');
+    Route::get('/years', [IndisiplinerApiController::class, 'getYears'])->name('years');
+    Route::post('/years', [IndisiplinerApiController::class, 'storeYearApi'])->name('storeYear');
+    Route::get('/data', [IndisiplinerApiController::class, 'getIndisiplinerData'])->name('data');
+    Route::post('/data', [IndisiplinerApiController::class, 'storeIndisiplinerData'])->name('store');
+    Route::delete('/data/{id}', [IndisiplinerApiController::class, 'deleteIndisiplinerData'])->name('destroy');
 });

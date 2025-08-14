@@ -164,7 +164,7 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex flex-col md:flex-row items-end md:items-center justify-end gap-2">
                     <ButtonRounded
                         as="link"
                         variant="outline"

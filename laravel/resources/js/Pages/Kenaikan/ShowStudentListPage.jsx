@@ -1,7 +1,6 @@
 import { ArrowLeft, User, Loader2 } from "lucide-react";
 import { FaFilePdf } from "react-icons/fa6";
 import { RiFileExcel2Line } from "react-icons/ri";
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
@@ -123,9 +122,5 @@ const ShowStudentListPage = ({ tahun, selectedClass, students }) => {
         </PageContent>
     );
 };
-
-ShowStudentListPage.layout = (page) => (
-    <MainLayout children={page} title={`Pilih Siswa - ${page.props.tahun}`} />
-);
 
 export default ShowStudentListPage;

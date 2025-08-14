@@ -29,6 +29,18 @@ const PengeluaranModal = ({
         }
     }, [isOpen]);
 
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [isOpen]);
+
     const submit = (e) => {
         handleSubmit(e, {
             kelas: selectedClass.kelas,

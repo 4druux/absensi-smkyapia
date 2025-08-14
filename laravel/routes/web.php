@@ -6,9 +6,12 @@ use App\Http\Controllers\Absensi\AbsensiController;
 use App\Http\Controllers\Absensi\AbsensiExportController;
 use App\Http\Controllers\Grafik\GrafikController;
 use App\Http\Controllers\Grafik\GrafikExportController;
+use App\Http\Controllers\Indisipliner\IndisiplinerController;
+use App\Http\Controllers\Indisipliner\IndisiplinerExportController;
 use App\Http\Controllers\Kenaikan\KenaikanController;
 use App\Http\Controllers\Kenaikan\KenaikanExportController;
 use App\Http\Controllers\Permasalahan\PermasalahanController;
+use App\Http\Controllers\Permasalahan\PermasalahanExportController;
 use App\Http\Controllers\Rekapitulasi\RekapitulasiController;
 use App\Http\Controllers\Rekapitulasi\RekapitulasiExportController;
 use App\Http\Controllers\UangKas\PengeluaranController;
@@ -134,7 +137,21 @@ Route::controller(PermasalahanController::class)->prefix('permasalahan')->name('
     Route::get('/{kelas}/{jurusan}/{tahun}/class-problems', 'showClassProblems')->name('class-problems.show');
     Route::get('/{kelas}/{jurusan}/{tahun}/student-problems', 'showStudentProblems')->name('student-problems.show');
 });
-Route::controller(App\Http\Controllers\Permasalahan\PermasalahanExportController::class)->prefix('permasalahan')->name('permasalahan.')->group(function () {
+Route::controller(PermasalahanExportController::class)->prefix('permasalahan')->name('permasalahan.')->group(function () {
     Route::get('/{kelas}/{jurusan}/{tahun}/export/excel', 'exportCombinedExcel')->name('export.excel');
     Route::get('/{kelas}/{jurusan}/{tahun}/export/pdf', 'exportCombinedPdf')->name('export.pdf');
+});
+
+// Data Indisipliner
+Route::controller(IndisiplinerController::class)->prefix('data-indisipliner')->name('indisipliner.')->group(function () {
+    Route::get('/', 'selectClass')->name('index');
+    Route::get('/{kelas}/{jurusan}', 'selectYear')->name('class.show');
+    Route::get('/{kelas}/{jurusan}/{tahun}', 'showYear')->name('year.show');
+});
+
+// Data Indisipliner Exports
+Route::controller(IndisiplinerExportController::class)->prefix('data-indisipliner')->name('indisipliner.')->group(function () {
+    Route::get('/{kelas}/{jurusan}/{tahun}/export/excel', 'exportExcel')->name('export.excel');
+    Route::get('/{kelas}/{jurusan}/{tahun}/export/pdf', 'exportPdf')->name('export.pdf');
+    Route::get('/siswa/{siswa}/{tahun}/{noUrut}/export/pdf', 'exportStudentPdf')->name('student.export.pdf');
 });

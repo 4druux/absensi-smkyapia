@@ -21,7 +21,7 @@ const Sidebar = ({ isOpen }) => {
         };
 
         window.addEventListener("resize", handleResize);
-        handleResize(); 
+        handleResize();
 
         return () => window.removeEventListener("resize", handleResize);
     }, [isOpen]);
@@ -73,6 +73,11 @@ const Sidebar = ({ isOpen }) => {
                     id: "permasalahan",
                     label: "Permasalahan Kelas & Siswa",
                     href: "/permasalahan",
+                },
+                {
+                    id: "data-indisipliner",
+                    label: "Data Indisipliner",
+                    href: "/data-indisipliner",
                 },
             ],
         },

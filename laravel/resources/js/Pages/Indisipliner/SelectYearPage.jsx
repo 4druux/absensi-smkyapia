@@ -8,24 +8,25 @@ import { RiFileExcel2Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 
 // Components
+import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
-import { useAbsensiYears } from "@/hooks/absensi/use-absensi-years";
+import { useIndisiplinerYears } from "@/hooks/indisipliner/use-indisipliner-years";
 import { dropdownAnimation } from "@/hooks/use-dropdown";
 
-const SelectYearPage = ({ selectedClass }) => {
+const SelectYearPage = ({ selectedClass, years: initialYears }) => {
     const { flash } = usePage().props;
     const {
-        years,
+        years = initialYears,
         isLoading,
         error,
         handleAddYear,
         handleExportYear,
         downloadingStatus,
-    } = useAbsensiYears();
+    } = useIndisiplinerYears(initialYears);
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(null);
     const dropdownRef = useRef(null);
@@ -67,10 +68,10 @@ const SelectYearPage = ({ selectedClass }) => {
     };
 
     const breadcrumbItems = [
-        { label: "Absensi", href: route("absensi.index") },
+        { label: "Data Indisipliner", href: route("indisipliner.index") },
         {
             label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
-            href: route("absensi.index"),
+            href: route("indisipliner.index"),
         },
         { label: "Pilih Tahun Ajaran", href: null },
     ];
@@ -117,7 +118,7 @@ const SelectYearPage = ({ selectedClass }) => {
                     {years.map((year, index) => (
                         <CardContent
                             key={index}
-                            href={route("absensi.year.show", {
+                            href={route("indisipliner.year.show", {
                                 kelas: selectedClass.kelas,
                                 jurusan: selectedClass.jurusan,
                                 tahun: year.nomor,
@@ -249,7 +250,7 @@ const SelectYearPage = ({ selectedClass }) => {
                 <ButtonRounded
                     as="link"
                     variant="outline"
-                    href={route("absensi.index")}
+                    href={route("indisipliner.index")}
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali
@@ -258,5 +259,9 @@ const SelectYearPage = ({ selectedClass }) => {
         </PageContent>
     );
 };
+
+SelectYearPage.layout = (page) => (
+    <MainLayout children={page} title="Pilih Tahun Data Indisipliner" />
+);
 
 export default SelectYearPage;

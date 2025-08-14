@@ -23,7 +23,7 @@ const AbsensiCard = ({
                                 NIS: {student.nis}
                             </span>
                         </div>
-                        <div className="flex flex-wrap justify-end gap-2 mt-2 sm:mt-0">
+                        <div className="flex flex-wrap justify-start gap-2 mt-2 sm:mt-0">
                             {statuses.map(({ key, label, color }) => {
                                 if (
                                     key === "hadir" &&

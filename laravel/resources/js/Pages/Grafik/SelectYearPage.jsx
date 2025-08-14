@@ -4,7 +4,6 @@ import { ArrowLeft, CalendarDays, PlusCircle } from "lucide-react";
 import toast from "react-hot-toast";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
@@ -112,9 +111,5 @@ const SelectYearPage = ({ selectedClass, years: initialYears }) => {
         </PageContent>
     );
 };
-
-SelectYearPage.layout = (page) => (
-    <MainLayout children={page} title="Pilih Tahun Grafik" />
-);
 
 export default SelectYearPage;
