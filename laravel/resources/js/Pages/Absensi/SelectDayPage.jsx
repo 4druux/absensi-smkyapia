@@ -5,7 +5,6 @@ import { usePage } from "@inertiajs/react";
 import { ArrowLeft } from "lucide-react";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import DotLoader from "@/Components/ui/dot-loader";
 import PageContent from "@/Components/ui/page-content";
@@ -143,12 +142,5 @@ const SelectDayPage = ({ tahun, bulan, namaBulan, selectedClass }) => {
         </PageContent>
     );
 };
-
-SelectDayPage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Pilih Tanggal - ${page.props.namaBulan}`}
-    />
-);
 
 export default SelectDayPage;

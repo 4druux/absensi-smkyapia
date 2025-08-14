@@ -1,5 +1,4 @@
 import { School } from "lucide-react";
-import MainLayout from "@/Layouts/MainLayout";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -88,8 +87,5 @@ const SelectClassPage = () => {
     );
 };
 
-SelectClassPage.layout = (page) => (
-    <MainLayout children={page} title="Pilih Kelas Kenaikan Bersyarat" />
-);
 
 export default SelectClassPage;

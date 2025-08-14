@@ -5,7 +5,6 @@ import { usePage } from "@inertiajs/react";
 import { Save, ArrowLeft } from "lucide-react";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import AbsensiTable from "@/Components/absensi/absensi-table";
 import AbsensiCard from "@/Components/absensi/absensi-card";
 import AbsensiHeader from "@/Components/absensi/absensi-header";
@@ -226,12 +225,5 @@ const AbsensiPage = ({ tanggal, bulan, namaBulan, tahun, selectedClass }) => {
         </form>
     );
 };
-
-AbsensiPage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Absensi ${page.props.tanggal} ${page.props.namaBulan}`}
-    />
-);
 
 export default AbsensiPage;

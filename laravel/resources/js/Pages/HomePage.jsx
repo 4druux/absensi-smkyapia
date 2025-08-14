@@ -1,4 +1,3 @@
-import MainLayout from "@/Layouts/MainLayout";
 import BreadcrumbNav from "@/Components/ui/breadcrumb-nav";
 
 const InputData = () => {
@@ -16,9 +15,5 @@ const InputData = () => {
         </div>
     );
 };
-
-InputData.layout = (page) => (
-    <MainLayout children={page} title="Input Data Siswa" />
-);
 
 export default InputData;

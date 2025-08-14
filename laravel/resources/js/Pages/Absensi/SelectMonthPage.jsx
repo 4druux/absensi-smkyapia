@@ -9,7 +9,6 @@ import { IoIosMore } from "react-icons/io";
 import { RiFileExcel2Line } from "react-icons/ri";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -248,9 +247,5 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
         </PageContent>
     );
 };
-
-SelectMonthPage.layout = (page) => (
-    <MainLayout children={page} title={`Pilih Bulan - ${page.props.tahun}`} />
-);
 
 export default SelectMonthPage;

@@ -1,5 +1,4 @@
 import { ArrowLeft, Loader2, Save, Users } from "lucide-react";
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import PageContent from "@/Components/ui/page-content";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -241,11 +240,6 @@ const ShowStudentFormPage = ({ tahun, selectedClass, student }) => {
     );
 };
 
-ShowStudentFormPage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Form Kenaikan - ${page.props.student.nama}`}
-    />
-);
+
 
 export default ShowStudentFormPage;

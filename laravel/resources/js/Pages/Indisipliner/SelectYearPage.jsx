@@ -8,7 +8,6 @@ import { RiFileExcel2Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import ButtonRounded from "@/Components/common/button-rounded";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
@@ -260,8 +259,6 @@ const SelectYearPage = ({ selectedClass, years: initialYears }) => {
     );
 };
 
-SelectYearPage.layout = (page) => (
-    <MainLayout children={page} title="Pilih Tahun Data Indisipliner" />
-);
+
 
 export default SelectYearPage;

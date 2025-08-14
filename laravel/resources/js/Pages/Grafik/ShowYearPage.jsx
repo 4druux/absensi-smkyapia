@@ -4,7 +4,6 @@ import { RiFileExcel2Line } from "react-icons/ri";
 import { IoStatsChart } from "react-icons/io5";
 
 // Components
-import MainLayout from "@/Layouts/MainLayout";
 import BarChart from "@/Components/ui/bar-chart";
 import ButtonRounded from "@/Components/common/button-rounded";
 import DataNotFound from "@/Components/ui/data-not-found";
@@ -215,11 +214,6 @@ const ShowYearPage = ({ tahun, selectedClass }) => {
     );
 };
 
-ShowYearPage.layout = (page) => (
-    <MainLayout
-        children={page}
-        title={`Grafik Absensi - ${page.props.tahun}`}
-    />
-);
+
 
 export default ShowYearPage;

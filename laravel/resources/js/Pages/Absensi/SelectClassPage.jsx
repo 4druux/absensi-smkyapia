@@ -1,5 +1,4 @@
 import { School } from "lucide-react";
-import MainLayout from "@/Layouts/MainLayout";
 import CardContent from "@/Components/ui/card-content";
 import DataNotFound from "@/Components/ui/data-not-found";
 import DotLoader from "@/Components/ui/dot-loader";
@@ -55,7 +54,7 @@ const SelectClassPage = () => {
                             <div key={namaKelas} className="mb-8">
                                 <h4 className="text-md font-medium text-neutral-700 mb-4">{`Kelas ${namaKelas}`}</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {kelasList.map((c, index) => (
+                                    {kelasList.map((c) => (
                                         <CardContent
                                             key={c.id}
                                             href={route("absensi.class.show", {
@@ -81,9 +80,5 @@ const SelectClassPage = () => {
         </PageContent>
     );
 };
-
-SelectClassPage.layout = (page) => (
-    <MainLayout children={page} title="Pilih Kelas Absensi" />
-);
 
 export default SelectClassPage;
