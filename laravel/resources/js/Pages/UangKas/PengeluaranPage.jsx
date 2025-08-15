@@ -3,6 +3,8 @@ import { ArrowLeft, PlusCircle } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 import { FaMoneyBillWave } from "react-icons/fa6";
 import { BookOpen, School, ArrowUpDown } from "lucide-react";
+import toast from "react-hot-toast";
+import api from "@/utils/api.js";
 
 import PageContent from "@/Components/ui/page-content";
 import ButtonRounded from "@/Components/common/button-rounded";
@@ -25,15 +27,31 @@ const PengeluaranPage = ({ selectedClass, tahun, bulanSlug }) => {
             bulanSlug
         );
 
-    const currentUserRole =
-        pageProps.auth?.user?.role === "admin" ? "wali_kelas" : "bendahara";
+    const userRole = pageProps.auth?.user?.role;
+    const normalizedRole = userRole
+        ? userRole.toLowerCase().replace(" ", "")
+        : null;
 
-    const handleApprove = (id) => {
-        alert(`API untuk menyetujui ID: ${id} akan dibuat.`);
+    const handleApprove = async (id) => {
+        try {
+            await api.put(route("api.pengeluaran.approve", id));
+            toast.success("Pengeluaran berhasil disetujui!");
+            mutate();
+        } catch (error) {
+            console.error("Error approving pengeluaran:", error);
+            toast.error("Gagal menyetujui pengeluaran.");
+        }
     };
 
-    const handleReject = (id) => {
-        alert(`API untuk menolak ID: ${id} akan dibuat.`);
+    const handleReject = async (id) => {
+        try {
+            await api.put(route("api.pengeluaran.reject", id));
+            toast.success("Pengeluaran berhasil ditolak!");
+            mutate();
+        } catch (error) {
+            console.error("Error rejecting pengeluaran:", error);
+            toast.error("Gagal menolak pengeluaran.");
+        }
     };
 
     const monthMap = {
@@ -127,7 +145,7 @@ const PengeluaranPage = ({ selectedClass, tahun, bulanSlug }) => {
                     </div>
                     <div>
                         <h3 className="text-md md:text-lg font-medium text-neutral-700">
-                             Pengeluaran ({namaBulan} {displayYear})
+                            Pengeluaran ({namaBulan} {displayYear})
                         </h3>
                         <div className="flex flex-row gap-2 md:mt-1 md:items-center">
                             <div className="flex items-center space-x-1 md:space-x-2 text-neutral-500">
@@ -159,25 +177,27 @@ const PengeluaranPage = ({ selectedClass, tahun, bulanSlug }) => {
                 </div>
             </div>
 
-            <div className="flex items-center justify-end mb-6">
-                <ButtonRounded
-                    variant="primary"
-                    size="sm"
-                    onClick={() => setIsModalOpen(true)}
-                >
-                    <PlusCircle className="w-4 h-4 mr-1 md:mr-2" />
-                    <span className="text-xs md:text-sm font-medium">
-                        Tambah Pengeluaran
-                    </span>
-                </ButtonRounded>
-            </div>
+            {normalizedRole === "bendaharakelas" && (
+                <div className="flex items-center justify-end mb-6">
+                    <ButtonRounded
+                        variant="primary"
+                        size="sm"
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        <PlusCircle className="w-4 h-4 mr-1 md:mr-2" />
+                        <span className="text-xs md:text-sm font-medium">
+                            Tambah Pengeluaran
+                        </span>
+                    </ButtonRounded>
+                </div>
+            )}
 
             {!isLoading && !error && pengeluarans?.length > 0 ? (
                 <>
                     <div className="hidden lg:block">
                         <PengeluaranTable
                             pengeluarans={pengeluarans}
-                            role={currentUserRole}
+                            role={normalizedRole}
                             onApprove={handleApprove}
                             onReject={handleReject}
                         />
@@ -185,7 +205,7 @@ const PengeluaranPage = ({ selectedClass, tahun, bulanSlug }) => {
                     <div className="lg:hidden">
                         <PengeluaranCard
                             pengeluarans={pengeluarans}
-                            role={currentUserRole}
+                            role={normalizedRole}
                             onApprove={handleApprove}
                             onReject={handleReject}
                         />

@@ -105,7 +105,7 @@ const SelectDayMobile = ({
                                             );
                                         }}
                                     >
-                                        <IoIosMore size={16} />
+                                        <IoIosMore className="w-4 h-4" />
                                     </ButtonRounded>
                                     <AnimatePresence>
                                         {isOpen === day.nomor && (
@@ -166,7 +166,7 @@ const SelectDayMobile = ({
                                             );
                                         }}
                                     >
-                                        <IoIosMore size={16} />
+                                        <IoIosMore className="w-4 h-4" />
                                     </ButtonRounded>
                                     <AnimatePresence>
                                         {isOpen === day.nomor && (

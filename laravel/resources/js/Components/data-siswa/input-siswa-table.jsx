@@ -98,7 +98,7 @@ const InputSiswaTable = ({
                                     variant="primary"
                                     onClick={() => removeStudentRow(student.id)}
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 className="w-4 h-4" />
                                 </ButtonRounded>
                             </td>
                         </tr>

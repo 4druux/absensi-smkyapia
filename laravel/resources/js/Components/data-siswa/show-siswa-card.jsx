@@ -112,7 +112,7 @@ const ShowSiswaCard = ({
                                     variant="outline"
                                     onClick={() => handleEditClick(student)}
                                 >
-                                    <Edit size={16} className="mr-1" />
+                                    <Edit sclassName="w-4 h-4 mr-1" />
                                     Edit
                                 </ButtonRounded>
                                 <ButtonRounded
@@ -120,7 +120,7 @@ const ShowSiswaCard = ({
                                     variant="primary"
                                     onClick={(e) => handleDelete(e, student.id)}
                                 >
-                                    <Trash2 size={16} className="mr-1" />
+                                    <Trash2 className="w-4 h-4 mr-1" />
                                     Hapus
                                 </ButtonRounded>
                             </div>

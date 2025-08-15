@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 import MainLayout from "./Layouts/MainLayout";
 
 const pageTitles = {
-    "/": "Absensi SMK Yapia",
+    "/beranda": "Absensi SMK Yapia",
 };
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
@@ -22,12 +22,18 @@ createInertiaApp({
         const pages = import.meta.glob("./Pages/**/*.jsx", { eager: true });
         let page = pages[`./Pages/${name}.jsx`];
 
-        page.default.layout ??= (page) => <MainLayout children={page} />;
+        if (page.default.layout === undefined) {
+            page.default.layout = (page) => <MainLayout>{page}</MainLayout>;
+        }
 
         return page;
     },
+    progress: {
+        color: "#4B5563",
+    },
     setup({ el, App, props }) {
         const root = createRoot(el);
+
         root.render(
             <>
                 <App {...props} />
@@ -39,8 +45,5 @@ createInertiaApp({
                 />
             </>
         );
-    },
-    progress: {
-        color: "#4B5563",
     },
 });

@@ -1,4 +1,3 @@
-import { FaCheck, FaTimes } from "react-icons/fa";
 import { formatRupiah } from "@/utils/formatRupiah";
 import ButtonRounded from "@/Components/common/button-rounded";
 
@@ -42,7 +41,7 @@ const PengeluaranTable = ({ pengeluarans, role, onApprove, onReject }) => {
                         <th className="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase text-neutral-500">
                             Status
                         </th>
-                        {role === "wali_kelas" && (
+                        {(role === "walikelas" || role === "superadmin") && (
                             <th className="px-6 py-3 text-xs font-medium tracking-wider text-center uppercase text-neutral-500">
                                 Aksi
                             </th>
@@ -70,29 +69,28 @@ const PengeluaranTable = ({ pengeluarans, role, onApprove, onReject }) => {
                             <td className="px-6 py-4 whitespace-nowrap text-center">
                                 <StatusBadge status={item.status} />
                             </td>
-                            {role === "wali_kelas" && (
+                            {(role === "walikelas" ||
+                                role === "superadmin") && (
                                 <td className="px-6 py-4 whitespace-nowrap text-center">
                                     {item.status === "pending" ? (
                                         <div className="flex items-center justify-center space-x-2">
                                             <ButtonRounded
-                                                variant="success"
-                                                size="sm"
-                                                onClick={() =>
-                                                    onApprove(item.id)
-                                                }
-                                                icon={FaCheck}
-                                            >
-                                                Setujui
-                                            </ButtonRounded>
-                                            <ButtonRounded
-                                                variant="destructive"
+                                                variant="outline"
                                                 size="sm"
                                                 onClick={() =>
                                                     onReject(item.id)
                                                 }
-                                                icon={FaTimes}
                                             >
                                                 Tolak
+                                            </ButtonRounded>
+                                            <ButtonRounded
+                                                variant="primary"
+                                                size="sm"
+                                                onClick={() =>
+                                                    onApprove(item.id)
+                                                }
+                                            >
+                                                <span>Setujui</span>
                                             </ButtonRounded>
                                         </div>
                                     ) : (

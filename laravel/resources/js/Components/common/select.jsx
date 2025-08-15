@@ -222,8 +222,9 @@ const Select = forwardRef(
                                                 onClick={handleAddNewOption}
                                                 className="flex items-center gap-2 p-3 hover:bg-green-50 text-green-600 cursor-pointer rounded-lg text-sm"
                                             >
-                                                <PlusCircle size={16} />
-                                                Tambah "{searchTerm.trim()}"
+                                                <PlusCircle className="w-4 h-4" />
+                                                Tambah &ldquo;
+                                                {searchTerm.trim()}&rdquo;
                                             </div>
                                         )}
                                         {filteredOptions.length > 0 ? (

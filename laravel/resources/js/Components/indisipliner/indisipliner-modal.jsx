@@ -41,6 +41,28 @@ const IndisiplinerModal = ({
         };
     }, [isOpen]);
 
+    const handleKeyPress = (event) => {
+        const charCode = event.which || event.keyCode;
+        const currentValue = event.target.value;
+
+        if (charCode >= 48 && charCode <= 57) {
+            return true;
+        }
+
+        if (charCode === 44 || charCode === 46) {
+            if (currentValue.includes(",") || currentValue.includes(".")) {
+                event.preventDefault();
+            }
+            return true;
+        }
+
+        if ([8, 9, 13, 37, 39, 46].includes(charCode)) {
+            return true;
+        }
+
+        event.preventDefault();
+    };
+
     const suratOptions = [
         { value: "Surat Peringatan 1", label: "Surat Peringatan 1" },
         { value: "Surat Peringatan 2", label: "Surat Peringatan 2" },
@@ -127,7 +149,6 @@ const IndisiplinerModal = ({
                                     <h3 className="text-lg font-medium text-neutral-700">
                                         Tambah Data Indisipliner
                                     </h3>
-
                                     <div
                                         onClick={onClose}
                                         className="p-2 hover:bg-slate-50 rounded-full group cursor-pointer"
@@ -136,7 +157,6 @@ const IndisiplinerModal = ({
                                     </div>
                                 </div>
                             </div>
-
                             <div className="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 md:gap-4">
                                 <div>
                                     <Select
@@ -154,7 +174,6 @@ const IndisiplinerModal = ({
                                         error={errors.siswa_id}
                                     />
                                 </div>
-
                                 <div className="mb-6 md:mb-0">
                                     <label className="block text-sm font-medium text-neutral-700">
                                         Tanggal Surat
@@ -181,7 +200,6 @@ const IndisiplinerModal = ({
                                         </p>
                                     )}
                                 </div>
-
                                 <div>
                                     <Select
                                         label="Jenis Surat"
@@ -198,7 +216,6 @@ const IndisiplinerModal = ({
                                         error={errors.jenis_surat}
                                     />
                                 </div>
-
                                 <div className="mb-6 md:mb-0">
                                     <label className="block text-sm font-medium text-neutral-700">
                                         Nomor Surat
@@ -226,12 +243,10 @@ const IndisiplinerModal = ({
                                         </p>
                                     )}
                                 </div>
-
                                 <div className="md:col-span-2">
                                     <h4 className="text-sm font-medium text-neutral-700 mb-4">
                                         Pelanggaran Utama
                                     </h4>
-
                                     <div className="flex flex-row items-start gap-2 mb-4">
                                         <div className="flex-1">
                                             <label className="block text-xs font-medium text-neutral-700">
@@ -268,20 +283,21 @@ const IndisiplinerModal = ({
                                             </label>
                                             <input
                                                 type="text"
-                                                inputMode="numeric"
+                                                inputMode="decimal"
                                                 id="terlambat_poin"
                                                 value={formData.terlambat_poin}
+                                                onKeyPress={handleKeyPress}
                                                 onChange={(e) =>
                                                     handleFormChange(
                                                         "terlambat_poin",
                                                         e.target.value.replace(
-                                                            /[^0-9]/g,
-                                                            ""
+                                                            ",",
+                                                            "."
                                                         )
                                                     )
                                                 }
                                                 placeholder="Poin"
-                                                className={`mt-1 w-full px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
+                                                className={`mt-1 w-full text-center px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
                                                     errors.terlambat_poin
                                                         ? "border-red-500"
                                                         : "border-slate-300 focus:border-sky-500"
@@ -294,7 +310,6 @@ const IndisiplinerModal = ({
                                             )}
                                         </div>
                                     </div>
-
                                     <div className="flex flex-row items-start gap-2 mb-4">
                                         <div className="flex-1">
                                             <label className="block text-xs font-medium text-neutral-700">
@@ -329,20 +344,21 @@ const IndisiplinerModal = ({
                                             </label>
                                             <input
                                                 type="text"
-                                                inputMode="numeric"
+                                                inputMode="decimal"
                                                 id="alfa_poin"
                                                 value={formData.alfa_poin}
+                                                onKeyPress={handleKeyPress}
                                                 onChange={(e) =>
                                                     handleFormChange(
                                                         "alfa_poin",
                                                         e.target.value.replace(
-                                                            /[^0-9]/g,
-                                                            ""
+                                                            ",",
+                                                            "."
                                                         )
                                                     )
                                                 }
                                                 placeholder="Poin"
-                                                className={`mt-1 w-full px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
+                                                className={`mt-1 w-full text-center px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
                                                     errors.alfa_poin
                                                         ? "border-red-500"
                                                         : "border-slate-300 focus:border-sky-500"
@@ -355,7 +371,6 @@ const IndisiplinerModal = ({
                                             )}
                                         </div>
                                     </div>
-
                                     <div className="flex flex-row items-start gap-2 mb-4">
                                         <div className="flex-1">
                                             <label className="block text-xs font-medium text-neutral-700">
@@ -390,20 +405,21 @@ const IndisiplinerModal = ({
                                             </label>
                                             <input
                                                 type="text"
-                                                inputMode="numeric"
+                                                inputMode="decimal"
                                                 id="bolos_poin"
                                                 value={formData.bolos_poin}
+                                                onKeyPress={handleKeyPress}
                                                 onChange={(e) =>
                                                     handleFormChange(
                                                         "bolos_poin",
                                                         e.target.value.replace(
-                                                            /[^0-9]/g,
-                                                            ""
+                                                            ",",
+                                                            "."
                                                         )
                                                     )
                                                 }
                                                 placeholder="Poin"
-                                                className={`mt-1 w-full px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
+                                                className={`mt-1 w-full text-center px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
                                                     errors.bolos_poin
                                                         ? "border-red-500"
                                                         : "border-slate-300 focus:border-sky-500"
@@ -417,7 +433,6 @@ const IndisiplinerModal = ({
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="md:col-span-2">
                                     <div className="flex justify-between items-center mb-2">
                                         <label className="block text-sm font-medium text-neutral-700">
@@ -475,20 +490,23 @@ const IndisiplinerModal = ({
                                                 <div className="w-20 space-y-1">
                                                     <input
                                                         type="text"
-                                                        inputMode="numeric"
+                                                        inputMode="decimal"
                                                         value={item.poin}
+                                                        onKeyPress={
+                                                            handleKeyPress
+                                                        }
                                                         onChange={(e) =>
                                                             handleOtherIndisiplinerChange(
                                                                 index,
                                                                 "poin",
                                                                 e.target.value.replace(
-                                                                    /[^0-9]/g,
-                                                                    ""
+                                                                    ",",
+                                                                    "."
                                                                 )
                                                             )
                                                         }
                                                         placeholder="Poin"
-                                                        className={`w-full px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
+                                                        className={`w-full text-center px-3 py-2 rounded-xl border focus:outline-none placeholder:text-sm ${
                                                             errors[
                                                                 `details.${index}.poin`
                                                             ]

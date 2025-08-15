@@ -9,7 +9,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-
 class PengeluaranApiController extends Controller
 {
     public function index($kelas, $jurusan, $tahun, $bulanSlug)
@@ -57,37 +56,51 @@ class PengeluaranApiController extends Controller
     }
 
     public function store(Request $request, $kelas, $jurusan, $displayYear, $bulanSlug)
-{
-    $validated = $request->validate([
-        'tanggal' => 'required|date',
-        'deskripsi' => 'required|string|max:255',
-        'nominal' => 'required|numeric|min:1',
-    ]);
-
-    $monthMap = [
-        'januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4, 'mei' => 5, 'juni' => 6,
-        'juli' => 7, 'agustus' => 8, 'september' => 9, 'oktober' => 10, 'november' => 11, 'desember' => 12,
-    ];
-    $monthNumber = $monthMap[strtolower($bulanSlug)] ?? null;
-    $namaBulan = Carbon::createFromDate(null, $monthNumber, 1)->translatedFormat('F');
-    $submittedDate = Carbon::parse($validated['tanggal']);
-
-    if ($submittedDate->year != $displayYear || $submittedDate->month !== $monthNumber) {
-        throw ValidationException::withMessages([
-           'tanggal' => "Tanggal pengeluaran harus berada di dalam bulan {$namaBulan} {$displayYear}.",
+    {
+        $validated = $request->validate([
+            'tanggal' => 'required|date',
+            'deskripsi' => 'required|string|max:255',
+            'nominal' => 'required|numeric|min:1',
         ]);
+
+        $monthMap = [
+            'januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4, 'mei' => 5, 'juni' => 6,
+            'juli' => 7, 'agustus' => 8, 'september' => 9, 'oktober' => 10, 'november' => 11, 'desember' => 12,
+        ];
+        $monthNumber = $monthMap[strtolower($bulanSlug)] ?? null;
+        $namaBulan = Carbon::createFromDate(null, $monthNumber, 1)->translatedFormat('F');
+        $submittedDate = Carbon::parse($validated['tanggal']);
+
+        if ($submittedDate->year != $displayYear || $submittedDate->month !== $monthNumber) {
+            throw ValidationException::withMessages([
+               'tanggal' => "Tanggal pengeluaran harus berada di dalam bulan {$namaBulan} {$displayYear}.",
+            ]);
+        }
+
+        $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
+            ->where('nama_kelas', $kelas)->firstOrFail();
+
+        Pengeluaran::create([
+            'kelas_id' => $selectedKelas->id,
+            'tanggal' => $validated['tanggal'],
+            'deskripsi' => $validated['deskripsi'],
+            'nominal' => $validated['nominal'],
+        ]);
+
+        return response()->json(['message' => 'Pengajuan pengeluaran berhasil dibuat.'], 201);
+    }
+    
+    public function approve($id)
+    {
+        $pengeluaran = Pengeluaran::findOrFail($id);
+        $pengeluaran->update(['status' => 'approved']);
+        return response()->json(['message' => 'Pengeluaran berhasil disetujui.'], 200);
     }
 
-    $selectedKelas = Kelas::whereHas('jurusan', fn($q) => $q->where('nama_jurusan', $jurusan))
-        ->where('nama_kelas', $kelas)->firstOrFail();
-
-    Pengeluaran::create([
-        'kelas_id' => $selectedKelas->id,
-        'tanggal' => $validated['tanggal'],
-        'deskripsi' => $validated['deskripsi'],
-        'nominal' => $validated['nominal'],
-    ]);
-
-    return response()->json(['message' => 'Pengajuan pengeluaran berhasil dibuat.'], 201);
-}
+    public function reject($id)
+    {
+        $pengeluaran = Pengeluaran::findOrFail($id);
+        $pengeluaran->update(['status' => 'rejected']);
+        return response()->json(['message' => 'Pengeluaran berhasil ditolak.'], 200);
+    }
 }

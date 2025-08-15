@@ -94,7 +94,7 @@ const UangKasPage = ({
     const breadcrumbItems = [
         { label: "Uang Kas", href: route("uang-kas.index") },
         {
-            label: `${selectedClass.kelas} - ${selectedClass.jurusan}`,
+            label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
             href: route("uang-kas.index"),
         },
         {

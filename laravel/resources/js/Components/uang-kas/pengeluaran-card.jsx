@@ -1,4 +1,3 @@
-import { FaCheck, FaTimes } from "react-icons/fa";
 import { formatRupiah } from "@/utils/formatRupiah";
 import ButtonRounded from "@/Components/common/button-rounded";
 
@@ -48,26 +47,25 @@ const PengeluaranCard = ({ pengeluarans, role, onApprove, onReject }) => {
                             </p>
                         </div>
                     </div>
-                    {role === "wali_kelas" && item.status === "pending" && (
-                        <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200">
-                            <ButtonRounded
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => onReject(item.id)}
-                                icon={FaTimes}
-                            >
-                                Tolak
-                            </ButtonRounded>
-                            <ButtonRounded
-                                variant="success"
-                                size="sm"
-                                onClick={() => onApprove(item.id)}
-                                icon={FaCheck}
-                            >
-                                Setujui
-                            </ButtonRounded>
-                        </div>
-                    )}
+                    {(role === "walikelas" || role === "superadmin") &&
+                        item.status === "pending" && (
+                            <div className="flex items-center justify-end space-x-2 pt-2 border-t border-slate-200">
+                                <ButtonRounded
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onReject(item.id)}
+                                >
+                                    <span className="text-xs">Tolak</span>
+                                </ButtonRounded>
+                                <ButtonRounded
+                                    variant="primary"
+                                    size="sm"
+                                    onClick={() => onApprove(item.id)}
+                                >
+                                    <span className="text-xs">Setujui</span>
+                                </ButtonRounded>
+                            </div>
+                        )}
                 </div>
             ))}
         </div>

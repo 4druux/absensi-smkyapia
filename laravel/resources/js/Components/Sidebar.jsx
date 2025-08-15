@@ -1,11 +1,30 @@
 import { useEffect, useState } from "react";
-import { Users, ClipboardCheck, FileText, ChevronDown } from "lucide-react";
+import {
+    Users,
+    ClipboardCheck,
+    FileText,
+    ChevronDown,
+    HomeIcon,
+} from "lucide-react";
 import { CiBank } from "react-icons/ci";
 import { Link } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
+import { usePage } from "@inertiajs/react";
 
 const Sidebar = ({ isOpen }) => {
     const [openSubMenu, setOpenSubMenu] = useState(null);
+    const { auth = { user: null } } = usePage().props;
+
+    const userRole = auth.user?.role;
+    const normalizedRole = userRole
+        ? userRole.toLowerCase().replace(" ", "")
+        : null;
+
+    const hasAccess = (allowedRoles) => {
+        if (!normalizedRole) return false;
+        if (normalizedRole === "superadmin") return true;
+        return allowedRoles.includes(normalizedRole);
+    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -26,13 +45,32 @@ const Sidebar = ({ isOpen }) => {
         return () => window.removeEventListener("resize", handleResize);
     }, [isOpen]);
 
+    const getIsActive = (href) => {
+        if (href === "/" || href === "/beranda") {
+            return (
+                window.location.pathname === "/" ||
+                window.location.pathname === "/beranda"
+            );
+        }
+        return window.location.pathname.startsWith(href);
+    };
+
     const menuItems = [
+        {
+            id: "home",
+            label: "Beranda",
+            icon: HomeIcon,
+            description: "Halaman utama",
+            href: "/beranda",
+            canView: true,
+        },
         {
             id: "data-siswa",
             label: "Data Kelas & Siswa",
             icon: Users,
             description: "Kelola data kelas & siswa",
             href: "/data-siswa",
+            canView: auth.user && hasAccess(["admin"]),
         },
         {
             id: "absensi",
@@ -40,6 +78,7 @@ const Sidebar = ({ isOpen }) => {
             icon: ClipboardCheck,
             description: "Kelola absensi siswa",
             href: "/absensi",
+            canView: auth.user && hasAccess(["walikelas", "admin"]),
         },
         {
             id: "uang-kas",
@@ -47,12 +86,14 @@ const Sidebar = ({ isOpen }) => {
             icon: CiBank,
             description: "Kelola uang kas",
             href: "/uang-kas",
+            canView: auth.user && hasAccess(["walikelas", "bendaharakelas"]),
         },
         {
             id: "laporan",
             label: "Laporan",
             icon: FileText,
             description: "Kelola laporan tahunan",
+            canView: auth.user && hasAccess(["admin"]),
             subMenu: [
                 {
                     id: "rekapitulasi",
@@ -131,7 +172,7 @@ const Sidebar = ({ isOpen }) => {
             className={`
                 fixed top-0 left-0 h-screen bg-white shadow-lg rounded-r-2xl xl:rounded-none transition-transform duration-300 ease-in-out z-50
                 ${isOpen ? "translate-x-0" : "-translate-x-full"}
-            w-72 xl:w-80`}
+                w-72 xl:w-80`}
         >
             <div className="xl:w-80 h-full flex flex-col">
                 <div className="py-6 px-4 md:p-6 border-b border-slate-200">
@@ -143,7 +184,7 @@ const Sidebar = ({ isOpen }) => {
                         />
                         <div>
                             <h1 className="text-md md:text-lg uppercase font-medium text-neutral-700">
-                                tkj
+                                tkj {new Date().getFullYear()}
                             </h1>
                             <p className="text-xs md:text-sm text-neutral-600">
                                 Manajemen Siswa
@@ -163,13 +204,13 @@ const Sidebar = ({ isOpen }) => {
                                 variants={listVariants}
                             >
                                 {menuItems.map((item) => {
+                                    if (!item.canView) return null;
+
                                     const Icon = item.icon;
                                     const isParentActive =
                                         item.subMenu &&
                                         item.subMenu.some((subItem) =>
-                                            window.location.pathname.startsWith(
-                                                subItem.href
-                                            )
+                                            getIsActive(subItem.href)
                                         );
 
                                     if (item.subMenu) {
@@ -262,7 +303,7 @@ const Sidebar = ({ isOpen }) => {
                                                             {item.subMenu.map(
                                                                 (subItem) => {
                                                                     const isSubActive =
-                                                                        window.location.pathname.startsWith(
+                                                                        getIsActive(
                                                                             subItem.href
                                                                         );
                                                                     return (
@@ -298,10 +339,7 @@ const Sidebar = ({ isOpen }) => {
                                         );
                                     }
 
-                                    const isActive =
-                                        window.location.pathname.startsWith(
-                                            item.href
-                                        );
+                                    const isActive = getIsActive(item.href);
                                     return (
                                         <motion.li
                                             key={item.id}

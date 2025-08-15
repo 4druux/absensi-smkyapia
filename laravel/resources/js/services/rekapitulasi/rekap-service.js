@@ -15,3 +15,19 @@ export const storeRekapitulasiYear = async () => {
 export const getRekapitulasiMonths = async (kelas, jurusan, tahun) => {
     return await api.get(`/rekapitulasi/${kelas}/${jurusan}/months/${tahun}`);
 };
+
+export const storeSiswaNote = async (
+    siswa_id,
+    tahun,
+    bulan_slug,
+    poin_tambahan,
+    keterangan
+) => {
+    return await api.post(route("rekapitulasi.store.note"), {
+        siswa_id,
+        tahun,
+        bulan_slug,
+        poin_tambahan,
+        keterangan,
+    });
+};

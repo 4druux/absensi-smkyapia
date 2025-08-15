@@ -49,7 +49,7 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
         $exportData->push(["Periode {$this->namaBulan}"]);
         $exportData->push(['']);
 
-        $exportData->push(['NO', 'NAMA', 'REKAPITULASI', null, null, null, null, null, null, null, null, "Point Lainnya", "KETERANGAN (Tulis Jenis Pelanggaran Disertai dengan Tanggal Kejadian)", "Total Point Bulan Lalu", "Total Point Sampai Bulan Ini", "Deskripsi"]);
+        $exportData->push(['NO', 'NAMA', 'REKAPITULASI', null, null, null, null, null, null, null, null, "Poin Tambahan", "KETERANGAN (Tulis Jenis Pelanggaran Disertai dengan Tanggal Kejadian)", "Total Poin Bulan Lalu", "Total Poin Sampai Bulan Ini", "Deskripsi"]);
         $exportData->push([
             '', '',
             'Telat', 'Alfa', 'Sakit', 'Izin', 'Bolos',
@@ -67,10 +67,15 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                 $absensi['sakit'],
                 $absensi['izin'],
                 $absensi['bolos'],
-                '', '', '', '', 
-                '', '', 
+                null, 
+                null, 
+                null, 
+                null, 
+                $student['poin_tambahan'],
+                $student['keterangan'],
                 $student['total_point_bulan_lalu'] == 0 ? '0' : $student['total_point_bulan_lalu'],
-                '', ''
+                null, 
+                null, 
             ]);
         }
 
@@ -112,7 +117,7 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FFC4D79B');
         
-        $lastDataRow = $headerEndRow + $this->dataRowsCount + 1;
+        $lastDataRow = $headerEndRow + $this->dataRowsCount;
         $sheet->getStyle("A{$headerStartRow}:{$lastCol}{$lastDataRow}")
             ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
     }
@@ -134,9 +139,9 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                 $sheet->getStyle("M{$firstDataRow}:M{$lastDataRow}")->getAlignment()->setWrapText(true);
                 $sheet->getStyle("P{$firstDataRow}:P{$lastDataRow}")->getAlignment()->setWrapText(true);
                 $sheet->getStyle("L{$headerStartRow}:P{$headerStartRow}")
-                      ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                      ->setVertical(Alignment::VERTICAL_CENTER)
-                      ->setWrapText(true);
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                        ->setVertical(Alignment::VERTICAL_CENTER)
+                        ->setWrapText(true);
 
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $sheet->getColumnDimension('B')->setAutoSize(true);
@@ -157,7 +162,7 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                     $sheet->setCellValue("H{$row}", "=C{$row}*0.5");
                     $sheet->setCellValue("I{$row}", "=D{$row}*1.5");
                     $sheet->setCellValue("J{$row}", "=G{$row}*2");
-                    $sheet->setCellValue("O{$row}", "=SUM(H{$row}:I{$row},J{$row},L{$row},N{$row})");
+                    $sheet->setCellValue("O{$row}", "=SUM(H{$row}:I{$row},J{$row},N{$row})"); 
 
                     if ($this->activeDaysInMonth > 0) {
                         $sheet->setCellValue("K{$row}", "=(" . $this->activeDaysInMonth . "-(D{$row}+E{$row}+F{$row}))/" . $this->activeDaysInMonth);
@@ -166,31 +171,33 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                     }
                     
                     $deskripsiFormula = '=IF(O'.$row.'>=50, "Ananda diberikan Surat Peringatan 3", '.
-                                        'IF(O'.$row.'>=43, "Ananda diberikan Surat Peringatan 2", '.
-                                        'IF(O'.$row.'>=35, "Ananda diberikan Surat Peringatan 2", '.
-                                        'IF(O'.$row.'>=28, "Ananda diberikan Surat Peringatan 1", '.
-                                        'IF(O'.$row.'>=20, "Ananda diberikan Surat Peringatan 1", '.
-                                        'IF(O'.$row.'>=15, "Ananda diberikan Surat Komitmen Ke-3", '.
-                                        'IF(O'.$row.'>=10, "Ananda diberikan Surat Komitmen Ke-2", '.
-                                        'IF(O'.$row.'>=5, "Ananda diberikan Surat Komitmen Ke-1", '.
-                                        'IF(O'.$row.'>=1, "Motivasi dan Teguran dari Wali Kelas", "Aman")'.
-                                        ')))))))))';
+                                         'IF(O'.$row.'>=43, "Ananda diberikan Surat Peringatan 2", '.
+                                         'IF(O'.$row.'>=35, "Ananda diberikan Surat Peringatan 2", '.
+                                         'IF(O'.$row.'>=28, "Ananda diberikan Surat Peringatan 1", '.
+                                         'IF(O'.$row.'>=20, "Ananda diberikan Surat Peringatan 1", '.
+                                         'IF(O'.$row.'>=15, "Ananda diberikan Surat Komitmen Ke-3", '.
+                                         'IF(O'.$row.'>=10, "Ananda diberikan Surat Komitmen Ke-2", '.
+                                         'IF(O'.$row.'>=5, "Ananda diberikan Surat Komitmen Ke-1", '.
+                                         'IF(O'.$row.'>=1, "Motivasi dan Teguran dari Wali Kelas", "Aman")'.
+                                         ')))))))))';
                     $sheet->setCellValue("P{$row}", $deskripsiFormula);
                     $sheet->getRowDimension($row)->setRowHeight(25);
+                }
 
-                    $footerRow = $lastDataRow + 1;
-                    $sheet->mergeCells("A{$footerRow}:J{$footerRow}");
-                    $sheet->setCellValue("K{$footerRow}", "=AVERAGE(K{$firstDataRow}:K{$lastDataRow})");
-                    $sheet->getStyle("A{$footerRow}:P{$footerRow}")->getFill()
+                $footerRow = $lastDataRow + 1;
+                $sheet->mergeCells("A{$footerRow}:J{$footerRow}");
+                $sheet->setCellValue("K{$footerRow}", "=AVERAGE(K{$firstDataRow}:K{$lastDataRow})");
+                $sheet->getStyle("A{$footerRow}:P{$footerRow}")->getFill()
                         ->setFillType(Fill::FILL_SOLID)
                         ->getStartColor()->setARGB('FFFABF8F');
-                    $sheet->getStyle("A{$footerRow}")->getFont()->setBold(true);
-                    $sheet->getStyle("K{$footerRow}")->getFont()->setBold(true)->setSize(12);
-                    $sheet->getRowDimension($footerRow)->setRowHeight(30);
-                    $sheet->getStyle("A{$footerRow}:P{$footerRow}")
+                $sheet->getStyle("A{$footerRow}")->getFont()->setBold(true);
+                $sheet->getStyle("K{$footerRow}")->getFont()->setBold(true)->setSize(12);
+                $sheet->getRowDimension($footerRow)->setRowHeight(30);
+                $sheet->getStyle("A{$footerRow}:P{$footerRow}")
                         ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
                         ->setVertical(Alignment::VERTICAL_CENTER);
-                }
+                $sheet->getStyle("A{$footerRow}:P{$footerRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
 
                 $conditionalRules = [
                     ['operator' => Conditional::OPERATOR_GREATERTHANOREQUAL, 'value' => 50, 'color' => 'FFFF0000'],
@@ -211,7 +218,7 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                     $condition->addCondition('=$O' . $firstDataRow . '>=' . $rule['value']);
                     
                     $condition->getStyle()->getFill()->setFillType(Fill::FILL_SOLID)
-                              ->getStartColor()->setARGB($rule['color']);
+                             ->getStartColor()->setARGB($rule['color']);
                     
                     $conditionalStyles[] = $condition;
                 }
@@ -250,8 +257,8 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                         
                         if ($item['color']) {
                             $sheet->getStyle("{$legendStartCol}{$currentLegendRow}:{$legendDataCol}".($currentLegendRow + 1))
-                                  ->getFill()->setFillType(Fill::FILL_SOLID)
-                                  ->getStartColor()->setARGB($item['color']);
+                                    ->getFill()->setFillType(Fill::FILL_SOLID)
+                                    ->getStartColor()->setARGB($item['color']);
                         }
                         $currentLegendRow++;
                     } else {
@@ -260,8 +267,8 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                         
                         if ($item['color']) {
                             $sheet->getStyle("{$legendStartCol}{$currentLegendRow}:{$legendDataCol}{$currentLegendRow}")
-                                  ->getFill()->setFillType(Fill::FILL_SOLID)
-                                  ->getStartColor()->setARGB($item['color']);
+                                    ->getFill()->setFillType(Fill::FILL_SOLID)
+                                    ->getStartColor()->setARGB($item['color']);
                         }
                     }
                     $currentLegendRow++;
@@ -271,15 +278,15 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                 $sheet->getColumnDimension($legendStartCol)->setWidth(18);
                 $sheet->getColumnDimension($legendDataCol)->setWidth(60);
                 $sheet->getStyle("S{$legendStartRow}:T{$legendEndRow}")
-                      ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                        ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 $sheet->getStyle("S{$legendStartRow}:T{$legendEndRow}")
-                      ->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                        ->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle("S{$legendStartRow}:T{$legendStartRow}")
-                      ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle("S" . ($legendStartRow + 2) . ":S{$legendEndRow}")
-                      ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle("T" . ($legendStartRow + 2) . ":T{$legendEndRow}")
-                      ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT)->setWrapText(true);
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT)->setWrapText(true);
 
                 
                 $efektifStartRow = $legendEndRow + 2;
@@ -289,20 +296,20 @@ class RekapitulasiExportMonth implements FromCollection, WithStyles, WithEvents,
                 $sheet->setCellValue("S{$efektifStartRow}", "HARI EFEKTIF");
                 $sheet->getStyle("S{$efektifStartRow}:T{$efektifStartRow}")->getFont()->setBold(true);
                 $sheet->getStyle("S{$efektifStartRow}:T{$efektifStartRow}")
-                      ->getFill()->setFillType(Fill::FILL_SOLID)
-                      ->getStartColor()->setARGB('FFC4D79B');
+                        ->getFill()->setFillType(Fill::FILL_SOLID)
+                        ->getStartColor()->setARGB('FFC4D79B');
 
                 $sheet->setCellValue("S{$efektifEndRow}", "Jumlah");
                 $sheet->setCellValue("T{$efektifEndRow}", $this->activeDaysInMonth);
                 $sheet->getStyle("T{$efektifEndRow}")->getFont()->setBold(bold: true)->setSize(16);
 
                 $sheet->getStyle("S{$efektifStartRow}:T{$efektifEndRow}")
-                      ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+                        ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
                 $sheet->getStyle("S{$efektifStartRow}:T{$efektifEndRow}")
-                      ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                      ->setVertical(Alignment::VERTICAL_CENTER);
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)
+                        ->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle("S{$efektifEndRow}")
-                      ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             },
         ];
     }

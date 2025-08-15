@@ -63,26 +63,26 @@ class IndisiplinerApiController extends Controller
             'siswa_id' => 'required|exists:siswas,id',
             'kelas_id' => 'required|exists:kelas,id',
             'tahun' => 'required|string',
-            'jenis_surat' => 'nullable|string',
-            'nomor_surat' => 'nullable|string',
-            'tanggal_surat' => 'nullable|date',
+            'jenis_surat' => 'required|string',
+            'nomor_surat' => 'required|string',
+            'tanggal_surat' => 'required|date',
             
             'terlambat_alasan' => 'nullable|string',
-            'terlambat_poin' => 'nullable|integer',
+            'terlambat_poin' => 'nullable|numeric',
             'alfa_alasan' => 'nullable|string',
-            'alfa_poin' => 'nullable|integer',
+            'alfa_poin' => 'nullable|numeric',
             'bolos_alasan' => 'nullable|string',
-            'bolos_poin' => 'nullable|integer',
+            'bolos_poin' => 'nullable|numeric',
             
             'details' => 'nullable|array',
             'details.*.jenis_pelanggaran' => 'nullable|string', 
             'details.*.alasan' => 'nullable|string',
-            'details.*.poin' => 'nullable|integer',
+            'details.*.poin' => 'nullable|numeric',
         ], [
             'siswa_id.required' => 'Kolom siswa wajib diisi.',
             'details.*.jenis_pelanggaran.required_with' => 'Jenis pelanggaran tidak boleh kosong.',
             'details.*.poin.required_with' => 'Poin pelanggaran tidak boleh kosong.',
-            'details.*.poin.integer' => 'Poin pelanggaran harus berupa angka.',
+            'details.*.poin.numeric' => 'Poin pelanggaran harus berupa angka.',
         ]);
 
         DB::beginTransaction();

@@ -115,6 +115,12 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
                         return (
                             <CardContent
                                 key={month.slug}
+                                href={route("rekapitulasi.month.show", {
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
+                                    tahun,
+                                    bulanSlug: month.slug,
+                                })}
                                 icon={CalendarDays}
                                 title={month.nama}
                                 subtitle={displayYear}
@@ -250,6 +256,5 @@ const SelectMonthPage = ({ tahun, selectedClass }) => {
         </PageContent>
     );
 };
-
 
 export default SelectMonthPage;

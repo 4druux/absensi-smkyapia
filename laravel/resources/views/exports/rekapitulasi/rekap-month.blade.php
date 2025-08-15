@@ -133,7 +133,7 @@
                     <th rowspan="2" class="main-header-bg" style="width: 3%;">NO</th>
                     <th rowspan="2" class="main-header-bg" style="width: 12%;">NAMA SISWA</th>
                     <th colspan="9" class="main-header-bg">REKAPITULASI</th>
-                    <th rowspan="2" class="alt-header-bg" style="width: 6%;">POINT <br>LAINNYA</th>
+                    <th rowspan="2" class="alt-header-bg" style="width: 6%;">POIN <br>TAMBAHAN</th>
                     <th rowspan="2" class="alt-header-bg" style="width: 15%;">KETERANGAN<br>(Tulis Jenis Pelanggaran
                         Disertai dengan Tanggal Kejadian)</th>
                     <th rowspan="2" class="main-header-bg" style="width: 6%;">TOTAL POINT<br>BULAN LALU</th>
@@ -171,7 +171,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($rekapData as $index => $student)
+                @foreach ($rekapDataWithNotes as $index => $student)
                     @php
                         $absensi = $student['absensi'];
                         $pointTelat = $absensi['telat'] * 0.5;
@@ -246,8 +246,8 @@
                         <td>{{ $pointBolos > 0 ? ($pointBolos == (int) $pointBolos ? number_format($pointBolos, 0, ',', '.') : number_format($pointBolos, 1, ',', '.')) : '' }}
                         </td>
                         <td>{{ round($persentase) }}%</td>
-                        <td></td>
-                        <td></td>
+                        <td>{{ $student['poin_tambahan'] > 0 ? $student['poin_tambahan'] : '' }}</td>
+                        <td>{{ $student['keterangan'] ?: '' }}</td>
                         <td>{{ $student['total_point_bulan_lalu'] > 0 ? ($student['total_point_bulan_lalu'] == (int) $student['total_point_bulan_lalu'] ? number_format($student['total_point_bulan_lalu'], 0, ',', '.') : number_format($student['total_point_bulan_lalu'], 1, ',', '.')) : '' }}
                         </td>
                         <td>{{ $totalPointSampaiBulanIni > 0 ? ($totalPointSampaiBulanIni == (int) $totalPointSampaiBulanIni ? number_format($totalPointSampaiBulanIni, 0, ',', '.') : number_format($totalPointSampaiBulanIni, 1, ',', '.')) : '' }}
@@ -260,8 +260,8 @@
                     </td>
                     @php
                         $totalPersentase = 0;
-                        if ($rekapData->count() > 0) {
-                            foreach ($rekapData as $student) {
+                        if ($rekapDataWithNotes->count() > 0) {
+                            foreach ($rekapDataWithNotes as $student) {
                                 $totalAbsen =
                                     $student['absensi']['alfa'] +
                                     $student['absensi']['sakit'] +
@@ -271,7 +271,7 @@
                                         ? (($activeDaysInMonth - $totalAbsen) / $activeDaysInMonth) * 100
                                         : 0;
                             }
-                            $rataRata = $totalPersentase / $rekapData->count();
+                            $rataRata = $totalPersentase / $rekapDataWithNotes->count();
                         } else {
                             $rataRata = 0;
                         }

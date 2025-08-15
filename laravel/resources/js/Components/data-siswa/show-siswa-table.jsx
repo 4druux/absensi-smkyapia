@@ -106,7 +106,7 @@ const ShowSiswaTable = ({
                                             variant="outline"
                                             onClick={handleCancelEdit}
                                         >
-                                            <X size={16} />
+                                            <X className="w-4 h-4" />
                                         </ButtonRounded>
                                         <ButtonRounded
                                             size="sm"
@@ -115,7 +115,7 @@ const ShowSiswaTable = ({
                                                 handleUpdate(e, student.id)
                                             }
                                         >
-                                            <Save size={16} />
+                                            <Save className="w-4 h-4" />
                                         </ButtonRounded>
                                     </div>
                                 ) : (
@@ -127,7 +127,7 @@ const ShowSiswaTable = ({
                                                 handleEditClick(student)
                                             }
                                         >
-                                            <Edit size={16} />
+                                            <Edit className="w-4 h-4" />
                                         </ButtonRounded>
                                         <ButtonRounded
                                             size="sm"
@@ -136,7 +136,7 @@ const ShowSiswaTable = ({
                                                 handleDelete(e, student.id)
                                             }
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 className="w-4 h-4" />
                                         </ButtonRounded>
                                     </div>
                                 )}

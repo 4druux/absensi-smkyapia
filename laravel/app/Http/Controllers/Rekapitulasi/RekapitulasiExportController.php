@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\Absensi;
 use App\Models\Holiday;
+use App\Models\SiswaNoteRekap;
 use App\Exports\Rekapitulasi\RekapitulasiExportMonth;
 use App\Exports\Rekapitulasi\RekapitulasiExportYear;
 use Illuminate\Support\Facades\DB;
@@ -88,6 +89,7 @@ class RekapitulasiExportController extends Controller
             }
 
             $rekapData->push([
+                'id' => $student->id,
                 'nama' => $student->nama,
                 'nis' => $student->nis,
                 'absensi' => [
@@ -205,10 +207,27 @@ class RekapitulasiExportController extends Controller
     public function exportMonthExcel($kelas, $jurusan, $tahun, $bulanSlug)
     {
         $rekapData = $this->getRekapitulasiDataMonth($kelas, $jurusan, $tahun, $bulanSlug);
+        
+        if ($rekapData->isEmpty()) {
+            return response()->json(['error' => "Tidak ada data rekapitulasi untuk bulan {$bulanSlug} {$tahun}."], 404);
+        }
+
+        $siswaNotes = SiswaNoteRekap::where('tahun', $tahun)
+                                ->where('bulan_slug', $bulanSlug)
+                                ->get()
+                                ->keyBy('siswa_id');
+
+        $rekapDataWithNotes = $rekapData->map(function ($item) use ($siswaNotes) {
+            $note = $siswaNotes->get($item['id']);
+            $item['poin_tambahan'] = $note ? $note->poin_tambahan : 0;
+            $item['keterangan'] = $note ? $note->keterangan : '';
+            return $item;
+        });
 
         $totalAbsensi = $rekapData->sum(fn($item) => collect($item['absensi'])->only(['telat', 'alfa', 'sakit', 'izin', 'bolos'])->sum());
-    
-        if ($rekapData->isEmpty() || $totalAbsensi === 0) {
+        $totalTambahan = $rekapDataWithNotes->sum('poin_tambahan');
+
+        if ($rekapData->isEmpty() || ($totalAbsensi === 0 && $totalTambahan === 0)) {
             return response()->json(['error' => "Tidak ada data rekapitulasi untuk bulan {$bulanSlug} {$tahun}."], 404);
         }
 
@@ -233,7 +252,7 @@ class RekapitulasiExportController extends Controller
         $namaBulan = Carbon::create($year, $monthNumber, 1)->translatedFormat('F');
 
         return Excel::download(
-            new RekapitulasiExportMonth($rekapData, $kelas, $kelompok, $jurusan, $tahun, "{$namaBulan} {$year}", $activeDaysInMonth),
+            new RekapitulasiExportMonth($rekapDataWithNotes, $kelas, $kelompok, $jurusan, $tahun, "{$namaBulan} {$year}", $activeDaysInMonth),
             "Rekapitulasi-Bulanan-{$kelas} {$kelompok}-{$jurusan}-{$namaBulan}-{$year}.xlsx"
         );
     }
@@ -241,10 +260,27 @@ class RekapitulasiExportController extends Controller
     public function exportMonthPdf($kelas, $jurusan, $tahun, $bulanSlug)
     {
         $rekapData = $this->getRekapitulasiDataMonth($kelas, $jurusan, $tahun, $bulanSlug);
+    
+        if ($rekapData->isEmpty()) {
+            return response()->json(['error' => "Tidak ada data rekapitulasi untuk bulan {$bulanSlug} {$tahun}."], 404);
+        }
+
+        $siswaNotes = SiswaNoteRekap::where('tahun', $tahun)
+                                ->where('bulan_slug', $bulanSlug)
+                                ->get()
+                                ->keyBy('siswa_id');
+
+        $rekapDataWithNotes = $rekapData->map(function ($item) use ($siswaNotes) {
+            $note = $siswaNotes->get($item['id']);
+            $item['poin_tambahan'] = $note ? $note->poin_tambahan : 0;
+            $item['keterangan'] = $note ? $note->keterangan : '';
+            return $item;
+        });
 
         $totalAbsensi = $rekapData->sum(fn($item) => collect($item['absensi'])->only(['telat', 'alfa', 'sakit', 'izin', 'bolos'])->sum());
+        $totalTambahan = $rekapDataWithNotes->sum('poin_tambahan');
     
-        if ($rekapData->isEmpty() || $totalAbsensi === 0) {
+        if ($rekapData->isEmpty() || ($totalAbsensi === 0 && $totalTambahan === 0)) {
             return response()->json(['error' => "Tidak ada data rekapitulasi untuk bulan {$bulanSlug} {$tahun}."], 404);
         }
 
@@ -270,7 +306,7 @@ class RekapitulasiExportController extends Controller
         $logoPath = 'images/logo-smk.png';
 
         $pdf = Pdf::loadView('exports.rekapitulasi.rekap-month', compact(
-            'rekapData',
+            'rekapDataWithNotes',
             'kelas',
             'kelompok',
             'jurusan',
