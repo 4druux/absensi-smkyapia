@@ -1,29 +1,27 @@
 import { Menu, User, Settings, LogIn, LogOut, FileText } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDropdown, dropdownAnimation } from "@/hooks/use-dropdown";
-import { usePage, Link, useForm } from "@inertiajs/react";
+import { usePage, Link, router } from "@inertiajs/react";
 import { toast } from "react-hot-toast";
 
 const Header = ({ onMenuClick }) => {
     const { isOpen, setIsOpen, dropdownRef } = useDropdown();
-    const { auth = { user: null }, csrf_token } = usePage().props;
-
-    const { post } = useForm({
-        _token: csrf_token,
-    });
+    const { auth = { user: null } } = usePage().props;
 
     const handleLogout = (e) => {
         e.preventDefault();
-        post(route("logout"), {
-            replace: true,
-            preserveState: false,
-            onSuccess: () => {
-                toast.success("Anda berhasil keluar!");
-            },
-            onError: () => {
-                toast.error("Gagal keluar, silakan coba lagi.");
-            },
-        });
+        router.post(
+            route("logout"),
+            {},
+            {
+                onSuccess: () => {
+                    window.location.href = route("login");
+                },
+                onError: () => {
+                    toast.error("Gagal keluar, silakan coba lagi.");
+                },
+            }
+        );
     };
 
     return (
@@ -100,6 +98,7 @@ const Header = ({ onMenuClick }) => {
                         </AnimatePresence>
                     </div>
                 ) : (
+                    // ... sisa kode tidak berubah
                     <div
                         ref={dropdownRef}
                         className="relative flex items-center"

@@ -2,7 +2,7 @@ import "./bootstrap";
 import "../css/app.css";
 
 import { createRoot } from "react-dom/client";
-import { createInertiaApp } from "@inertiajs/react";
+import { createInertiaApp, router } from "@inertiajs/react";
 import { Toaster } from "react-hot-toast";
 import MainLayout from "./Layouts/MainLayout";
 
@@ -46,4 +46,15 @@ createInertiaApp({
             </>
         );
     },
+});
+
+router.on("navigate", (event) => {
+    const newCsrfToken = event.detail.page.props.csrf_token;
+    const csrfMetaTag = document.head.querySelector('meta[name="csrf-token"]');
+
+    if (newCsrfToken && csrfMetaTag) {
+        if (csrfMetaTag.getAttribute("content") !== newCsrfToken) {
+            csrfMetaTag.setAttribute("content", newCsrfToken);
+        }
+    }
 });

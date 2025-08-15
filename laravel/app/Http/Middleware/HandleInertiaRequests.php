@@ -44,11 +44,11 @@ class HandleInertiaRequests extends Middleware
                     'role' => $request->user()->role,
                 ] : null,
             ],
+            'csrf_token' => csrf_token(),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
-            'csrf_token' => csrf_token(),
         ]);
     }
 }

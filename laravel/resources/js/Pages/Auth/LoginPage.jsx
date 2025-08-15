@@ -5,25 +5,23 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
 const LoginPage = () => {
-    const { props } = usePage();
-    const { success, error } = props.flash;
+    const { flash } = usePage().props;
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         email: "",
         password: "",
-        _token: props.csrf_token,
     });
 
     const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
-        if (success) {
-            toast.success(success);
+        if (flash.success) {
+            toast.success(flash.success);
         }
-        if (error) {
-            toast.error(error);
+        if (flash.error) {
+            toast.error(flash.error);
         }
-    }, [success, error]);
+    }, [flash.success, flash.error]);
 
     useEffect(() => {
         if (errors.email) {
@@ -32,12 +30,6 @@ const LoginPage = () => {
             toast.error(errors.password);
         }
     }, [errors]);
-
-    useEffect(() => {
-        return () => {
-            reset("password");
-        };
-    }, [reset]);
 
     const submit = (e) => {
         e.preventDefault();

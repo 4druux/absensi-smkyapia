@@ -15,16 +15,13 @@ export default function AccessDenied() {
                 </h1>
 
                 <p className="mt-2 text-md font-medium text-neutral-500">
-                    Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.
+                    Maaf, Anda tidak memiliki izin untuk mengakses halaman yang diminta.
                 </p>
 
                 <p className="text-sm mt-2 text-neutral-500">
-                    Halaman
-                    <span className="text-neutral-600 px-2 tracking-wider font-semibold">
-                        &ldquo;{location.pathname}&rdquo;
-                    </span>
-                    yang Anda cari sepertinya tidak tersedia. Tapi tenang, Anda
-                    selalu bisa kembali ke beranda untuk melanjutkan.
+                    Halaman yang Anda cari sepertinya tidak tersedia. Tapi
+                    tenang, Anda selalu bisa kembali ke beranda untuk
+                    melanjutkan.
                 </p>
             </div>
 

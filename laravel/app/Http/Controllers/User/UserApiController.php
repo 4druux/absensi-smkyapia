@@ -13,7 +13,7 @@ class UserApiController extends Controller
         $users = User::where('is_approved', false)
             ->where('role', '!=', 'Super Admin')
             ->get();
-
+            
         return response()->json($users);
     }
 
@@ -22,19 +22,27 @@ class UserApiController extends Controller
         $users = User::where('is_approved', true)
             ->where('role', '!=', 'Super Admin')
             ->get();
-
+            
         return response()->json($users);
     }
 
     public function approveUser(User $user)
     {
-        $user->update(['is_approved' => true]);
-        return response()->json(['message' => 'Pengguna berhasil disetujui.']);
+        try {
+            $user->update(['is_approved' => true]);
+            return response()->json(['message' => 'Pengguna berhasil disetujui.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan di server.'], 500);
+        }
     }
 
     public function rejectUser(User $user)
     {
-        $user->delete();
-        return response()->json(['message' => 'Pengguna berhasil ditolak dan dihapus.']);
+        try {
+            $user->delete();
+            return response()->json(['message' => 'Pengguna berhasil ditolak dan dihapus.']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Terjadi kesalahan di server.'], 500);
+        }
     }
 }

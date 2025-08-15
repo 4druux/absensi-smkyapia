@@ -20,8 +20,8 @@ use App\Http\Controllers\UangKas\UangKasExportController;
 use App\Http\Controllers\UangKas\UangKasOtherController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\HomeController;
 use App\Http\Controllers\User\UserApiController;
+use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -30,15 +30,15 @@ Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/register', [RegisterController::class, 'showRegister'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
-Route::get('/access-denied', function () {
+Route::get('/akses-ditolak', function () {
     return Inertia::render('AccessDenied');
 })->name('access.denied');
 
-Route::get('/beranda', [HomeController::class, 'showHomePage'])->name('home');
+Route::get('/beranda', action: [UserController::class, 'showDataUser'])->name('home')->middleware(['auth']);
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    
+
     Route::middleware(['role:superadmin'])->prefix('api/users')->group(function () {
         Route::get('/pending', [UserApiController::class, 'getPendingUsers'])->name('api.users.pending');
         Route::get('/approved', [UserApiController::class, 'getApprovedUsers'])->name('api.users.approved');

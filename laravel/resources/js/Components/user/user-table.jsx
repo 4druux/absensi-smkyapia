@@ -52,6 +52,19 @@ const UserTable = ({ users, type, onApprove, onReject, isProcessing }) => {
                                             <ButtonRounded
                                                 type="button"
                                                 size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    onReject(user.id)
+                                                }
+                                                disabled={isProcessing}
+                                            >
+                                                <span className="text-sm">
+                                                    Tolak
+                                                </span>
+                                            </ButtonRounded>
+                                            <ButtonRounded
+                                                type="button"
+                                                size="sm"
                                                 variant="primary"
                                                 onClick={() =>
                                                     onApprove(user.id)
@@ -61,17 +74,6 @@ const UserTable = ({ users, type, onApprove, onReject, isProcessing }) => {
                                                 <span className="text-sm">
                                                     Setujui
                                                 </span>
-                                            </ButtonRounded>
-                                            <ButtonRounded
-                                                type="button"
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    onReject(user.id)
-                                                }
-                                                disabled={isProcessing}
-                                            >
-                                                <Trash2 size={16} />
                                             </ButtonRounded>
                                         </>
                                     )}
