@@ -78,7 +78,7 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                         <div>
                             <label
                                 htmlFor="name"
-                                className="block text-sm font-medium text-gray-700"
+                                className="block text-sm font-medium text-neutral-700"
                             >
                                 Nama Lengkap
                             </label>
@@ -93,10 +93,10 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                                         setData("name", e.target.value)
                                     }
                                     required
-                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-gray-400 placeholder:text-sm ${
+                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-neutral-400 placeholder:text-sm ${
                                         errors.name
                                             ? "border-red-500"
-                                            : "border-gray-300 focus:border-sky-500"
+                                            : "border-slate-300 focus:border-sky-500"
                                     }`}
                                     placeholder="Nama Anda"
                                 />
@@ -105,7 +105,7 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                         <div>
                             <label
                                 htmlFor="email"
-                                className="block text-sm font-medium text-gray-700"
+                                className="block text-sm font-medium text-neutral-700"
                             >
                                 Email
                             </label>
@@ -120,10 +120,10 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                                         setData("email", e.target.value)
                                     }
                                     required
-                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-gray-400 placeholder:text-sm ${
+                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-neutral-400 placeholder:text-sm ${
                                         errors.email
                                             ? "border-red-500"
-                                            : "border-gray-300 focus:border-sky-500"
+                                            : "border-slate-300 focus:border-sky-500"
                                     }`}
                                     placeholder="Email Anda"
                                 />
@@ -132,7 +132,7 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                         <div className="relative">
                             <label
                                 htmlFor="password"
-                                className="block text-sm font-medium text-gray-700"
+                                className="block text-sm font-medium text-neutral-700"
                             >
                                 Password
                             </label>
@@ -147,10 +147,10 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                                         setData("password", e.target.value)
                                     }
                                     required
-                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-gray-400 placeholder:text-sm ${
+                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-neutral-400 placeholder:text-sm ${
                                         errors.password
                                             ? "border-red-500"
-                                            : "border-gray-300 focus:border-sky-500"
+                                            : "border-slate-300 focus:border-sky-500"
                                     }`}
                                     placeholder="Password Anda"
                                 />
@@ -159,7 +159,7 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                                     onClick={() =>
                                         setShowPassword(!showPassword)
                                     }
-                                    className="absolute inset-y-0 right-0 top-6 flex items-center px-3 text-gray-500 cursor-pointer"
+                                    className="absolute inset-y-0 right-0 top-6 flex items-center px-3 text-neutral-500 cursor-pointer"
                                 >
                                     {showPassword ? (
                                         <EyeOff size={20} />
@@ -172,7 +172,7 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                         <div className="relative">
                             <label
                                 htmlFor="password_confirmation"
-                                className="block text-sm font-medium text-gray-700"
+                                className="block text-sm font-medium text-neutral-700"
                             >
                                 Konfirmasi Password
                             </label>
@@ -194,10 +194,10 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                                         )
                                     }
                                     required
-                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-gray-400 placeholder:text-sm ${
+                                    className={`w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none placeholder:text-neutral-400 placeholder:text-sm ${
                                         errors.password_confirmation
                                             ? "border-red-500"
-                                            : "border-gray-300 focus:border-sky-500"
+                                            : "border-slate-300 focus:border-sky-500"
                                     }`}
                                     placeholder="Konfirmasi Password Anda"
                                 />
@@ -208,7 +208,7 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                                             !showPasswordConfirmation
                                         )
                                     }
-                                    className="absolute inset-y-0 right-0 top-6 flex items-center px-3 text-gray-500 cursor-pointer"
+                                    className="absolute inset-y-0 right-0 top-6 flex items-center px-3 text-neutral-500 cursor-pointer"
                                 >
                                     {showPasswordConfirmation ? (
                                         <EyeOff size={20} />
@@ -246,7 +246,7 @@ const RegisterPage = ({ registeredRoles = [] }) => {
                         </div>
                     </form>
                     <div className="mt-4 text-center">
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-neutral-600">
                             Sudah punya akun?{" "}
                             <Link
                                 href={route("login")}

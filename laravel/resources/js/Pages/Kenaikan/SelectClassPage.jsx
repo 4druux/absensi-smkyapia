@@ -57,21 +57,25 @@ const SelectClassPage = () => {
                             <div key={namaKelas} className="mb-8">
                                 <h4 className="text-md font-medium text-neutral-700 mb-4">{`Kelas ${namaKelas}`}</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {kelasList.map((c) => (
-                                        <CardContent
-                                            key={c.id}
-                                            href={route(
-                                                "kenaikan-bersyarat.class.show",
-                                                {
-                                                    kelas: c.kelas,
-                                                    jurusan: c.jurusan,
-                                                }
-                                            )}
-                                            icon={School}
-                                            title={`${c.kelas} ${c.kelompok}`}
-                                            subtitle={c.jurusan}
-                                        />
-                                    ))}
+                                    {kelasList
+                                        .sort((a, b) =>
+                                            a.kelompok.localeCompare(b.kelompok)
+                                        )
+                                        .map((c) => (
+                                            <CardContent
+                                                key={c.id}
+                                                href={route(
+                                                    "kenaikan-bersyarat.class.show",
+                                                    {
+                                                        kelas: c.kelas,
+                                                        jurusan: c.jurusan,
+                                                    }
+                                                )}
+                                                icon={School}
+                                                title={`${c.kelas} ${c.kelompok}`}
+                                                subtitle={c.jurusan}
+                                            />
+                                        ))}
                                 </div>
                             </div>
                         )
@@ -86,6 +90,5 @@ const SelectClassPage = () => {
         </PageContent>
     );
 };
-
 
 export default SelectClassPage;

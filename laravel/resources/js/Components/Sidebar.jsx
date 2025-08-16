@@ -5,8 +5,8 @@ import {
     FileText,
     ChevronDown,
     HomeIcon,
+    Wallet,
 } from "lucide-react";
-import { CiBank } from "react-icons/ci";
 import { Link } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePage } from "@inertiajs/react";
@@ -83,7 +83,7 @@ const Sidebar = ({ isOpen }) => {
         {
             id: "uang-kas",
             label: "Uang Kas",
-            icon: CiBank,
+            icon: Wallet,
             description: "Kelola uang kas",
             href: "/uang-kas",
             canView: auth.user && hasAccess(["walikelas", "bendaharakelas"]),

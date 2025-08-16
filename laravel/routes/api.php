@@ -6,6 +6,7 @@ use App\Http\Controllers\DataSiswa\DataSiswaController;
 use App\Http\Controllers\DataSiswa\JurusanController;
 use App\Http\Controllers\DataSiswa\KelasController;
 use App\Http\Controllers\Absensi\AbsensiApiController;
+use App\Http\Controllers\Beranda\BerandaApiController;
 use App\Http\Controllers\Grafik\GrafikApiController;
 use App\Http\Controllers\Indisipliner\IndisiplinerApiController;
 use App\Http\Controllers\Kenaikan\KenaikanApiController;
@@ -26,6 +27,12 @@ Route::delete('/kelas/{kelas}', [KelasController::class, 'destroy'])->name('api.
 Route::post('/siswa', [DataSiswaController::class, 'storeApi'])->name('api.siswa.store');
 Route::put('/siswa/{siswa}', [DataSiswaController::class, 'updateStudentApi'])->name('api.siswa.update');
 Route::delete('/siswa/{siswa}', [DataSiswaController::class, 'destroyStudentApi'])->name('api.siswa.destroy');
+
+Route::prefix('beranda')->name('api.beranda.')->group(function () {
+    Route::get('/classes', [BerandaApiController::class, 'getClasses'])->name('classes');
+    Route::get('/uang-kas/{kelas}/{jurusan}/{tahun}/{bulanSlug}/weeks', [BerandaApiController::class, 'getWeeklyPayments'])->name('uang-kas.weeks');
+    Route::get('/uang-kas/{kelas}/{jurusan}/{tahun}/{bulanSlug}/other-cash', [BerandaApiController::class, 'getOtherCash'])->name('uang-kas.other-cash');
+});
 
 Route::prefix('absensi')->name('api.absensi.')->group(function () {
     Route::get('/classes', [AbsensiApiController::class, 'getClasses'])->name('classes');

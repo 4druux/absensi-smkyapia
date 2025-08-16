@@ -112,7 +112,7 @@ const ShowSiswaCard = ({
                                     variant="outline"
                                     onClick={() => handleEditClick(student)}
                                 >
-                                    <Edit sclassName="w-4 h-4 mr-1" />
+                                    <Edit className="w-4 h-4 mr-1" />
                                     Edit
                                 </ButtonRounded>
                                 <ButtonRounded

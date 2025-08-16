@@ -4,6 +4,7 @@ use App\Http\Controllers\DataSiswa\DataSiswaController;
 use App\Http\Controllers\DataSiswa\JurusanController;
 use App\Http\Controllers\Absensi\AbsensiController; 
 use App\Http\Controllers\Absensi\AbsensiExportController;
+use App\Http\Controllers\Beranda\BerandaController;
 use App\Http\Controllers\Grafik\GrafikController;
 use App\Http\Controllers\Grafik\GrafikExportController;
 use App\Http\Controllers\Indisipliner\IndisiplinerController;
@@ -20,8 +21,8 @@ use App\Http\Controllers\UangKas\UangKasExportController;
 use App\Http\Controllers\UangKas\UangKasOtherController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\User\UserApiController;
-use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Beranda\UserApiController;
+use App\Http\Controllers\Beranda\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -34,10 +35,21 @@ Route::get('/akses-ditolak', function () {
     return Inertia::render('AccessDenied');
 })->name('access.denied');
 
-Route::get('/beranda', action: [UserController::class, 'showDataUser'])->name('home')->middleware(['auth']);
 
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    Route::get('/beranda', action: [UserController::class, 'showHomePage'])->name('home')->middleware(['auth']);
+    Route::get('/beranda/kelas/{kelas}/{jurusan}', [BerandaController::class, 'selectType'])->name('beranda.class.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/absensi', [BerandaController::class, 'selectYearAbsensi'])->name('beranda.absensi.year.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas', [BerandaController::class, 'selectYearUangKas'])->name('beranda.uang-kas.year.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/absensi/{tahun}/bulan', [BerandaController::class, 'selectMonthAbsensi'])->name('beranda.absensi.month.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas/{tahun}/bulan', [BerandaController::class, 'selectMonthUangKas'])->name('beranda.uang-kas.month.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas/{tahun}/bulan/{bulanSlug}/minggu', [BerandaController::class, 'selectWeekUangKas'])->name('beranda.uang-kas.week.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/absensi/{tahun}/bulan/{bulanSlug}', [BerandaController::class, 'selectDayAbsensi'])->name('beranda.absensi.day.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/absensi/{tahun}/bulan/{bulanSlug}/tanggal/{tanggal}', [BerandaController::class, 'showAbsensiPage'])->name('beranda.absensi.day.detail');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas/{tahun}/bulan/{bulanSlug}/minggu/{minggu}', [BerandaController::class, 'showUangKasWeeklyPage'])->name('beranda.uang-kas.weekly.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas/iuran/{iuranId}', [BerandaController::class, 'showUangKasOtherPage'])->name('beranda.uang-kas.other.show');
 
     Route::middleware(['role:superadmin'])->prefix('api/users')->group(function () {
         Route::get('/pending', [UserApiController::class, 'getPendingUsers'])->name('api.users.pending');

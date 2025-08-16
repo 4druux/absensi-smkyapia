@@ -98,7 +98,7 @@ const Select = forwardRef(
         return (
             <div className="relative" ref={dropdownRef}>
                 {label && (
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-neutral-700">
                         {label}
                     </label>
                 )}
@@ -113,7 +113,7 @@ const Select = forwardRef(
                         ${
                             isOpen
                                 ? "border-sky-300 ring-1 ring-sky-300"
-                                : "border-gray-300"
+                                : "border-slate-300"
                         }
                         ${
                             disabled || isLoading
@@ -124,13 +124,13 @@ const Select = forwardRef(
                 >
                     <span className="flex items-center gap-2 text-sm">
                         {isLoading ? (
-                            <span className="text-gray-500">Memuat...</span>
+                            <span className="text-neutral-500">Memuat...</span>
                         ) : value ? (
-                            <span className="text-gray-900">
+                            <span className="text-neutral-900">
                                 {selectedOptionLabel}
                             </span>
                         ) : (
-                            <span className="text-gray-400">{placeholder}</span>
+                            <span className="text-neutral-400">{placeholder}</span>
                         )}
                     </span>
                     <div
@@ -138,7 +138,7 @@ const Select = forwardRef(
                             isOpen ? "rotate-180" : ""
                         }`}
                     >
-                        <ChevronDown className="w-4 h-4 text-gray-500" />
+                        <ChevronDown className="w-4 h-4 text-neutral-500" />
                     </div>
                 </button>
 
@@ -150,7 +150,7 @@ const Select = forwardRef(
                             exit="hidden"
                             variants={dropdownAnimation.variants}
                             transition={dropdownAnimation.transition}
-                            className="absolute p-3 z-20 mt-1 w-full bg-white border border-gray-300 rounded-2xl shadow-lg"
+                            className="absolute p-3 z-20 mt-1 w-full bg-white border border-slate-300 rounded-2xl shadow-lg"
                         >
                             {isLoading || isProcessing ? (
                                 <div className="flex justify-center items-center py-10">
@@ -161,7 +161,7 @@ const Select = forwardRef(
                                     <div className="px-3 sticky top-0 z-10 bg-white pt-1">
                                         <div className="flex items-center justify-between">
                                             {title && (
-                                                <span className="font-normal text-sm text-gray-700">
+                                                <span className="font-normal text-sm text-neutral-700">
                                                     {title}
                                                 </span>
                                             )}
@@ -176,7 +176,7 @@ const Select = forwardRef(
                                             )}
                                         </div>
                                         {description && (
-                                            <span className="block text-xs text-gray-500 my-2">
+                                            <span className="block text-xs text-neutral-500 my-2">
                                                 {description}
                                             </span>
                                         )}
@@ -197,7 +197,7 @@ const Select = forwardRef(
                                                     onClick={(e) =>
                                                         e.stopPropagation()
                                                     }
-                                                    className="w-full border border-gray-300 rounded-full px-3 py-1.5 text-sm placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-sky-300"
+                                                    className="w-full border border-slate-300 rounded-full px-3 py-1.5 text-sm placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-sky-300"
                                                 />
                                                 {searchTerm && (
                                                     <button
@@ -205,7 +205,7 @@ const Select = forwardRef(
                                                         onClick={
                                                             handleClearSearch
                                                         }
-                                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 cursor-pointer"
+                                                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400 hover:text-neutral-600 cursor-pointer"
                                                     >
                                                         <X className="h-4 w-4" />
                                                     </button>
@@ -213,7 +213,7 @@ const Select = forwardRef(
                                             </div>
                                         )}
 
-                                        <div className="border-b-2 border-gray-200 mb-1" />
+                                        <div className="border-b-2 border-slate-200 mb-1" />
                                     </div>
 
                                     <div className="overflow-y-auto max-h-52 mt-1 py-1">
@@ -253,7 +253,7 @@ const Select = forwardRef(
                                                                 value ===
                                                                 option.value
                                                                     ? "text-sky-600 font-semibold"
-                                                                    : "text-gray-800"
+                                                                    : "text-neutral-800"
                                                             }
                                                         >
                                                             {option.label}
@@ -290,7 +290,7 @@ const Select = forwardRef(
                                                                         option.value
                                                                     )
                                                                 }
-                                                                className="p-1 ml-3 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-20 cursor-pointer"
+                                                                className="p-1 ml-3 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-20 cursor-pointer"
                                                             >
                                                                 <Trash2
                                                                     size={16}
@@ -301,7 +301,7 @@ const Select = forwardRef(
                                                 </div>
                                             ))
                                         ) : !showAddNewOption ? (
-                                            <div className="text-center text-sm text-gray-500 p-3">
+                                            <div className="text-center text-sm text-neutral-500 p-3">
                                                 Tidak ada hasil ditemukan.
                                             </div>
                                         ) : null}

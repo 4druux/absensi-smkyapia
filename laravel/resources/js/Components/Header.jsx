@@ -61,27 +61,27 @@ const Header = ({ onMenuClick }) => {
                                     exit="hidden"
                                     variants={dropdownAnimation.variants}
                                     transition={dropdownAnimation.transition}
-                                    className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200"
+                                    className="absolute top-full right-3 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200"
                                 >
                                     <div
                                         className="py-1 px-2"
                                         role="menu"
                                         aria-orientation="vertical"
                                     >
-                                        <div className="px-4 py-2 text-sm text-gray-900 border-b border-gray-100">
+                                        <div className="px-4 py-2 text-sm text-neutral-900 border-b border-slate-100">
                                             <div className="font-medium">
                                                 {auth.user.name}
                                             </div>
-                                            <div className="text-xs text-gray-500">
+                                            <div className="text-xs text-neutral-500">
                                                 {auth.user.role}
                                             </div>
                                         </div>
                                         <a
                                             href="#"
-                                            className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-slate-100 rounded-md"
+                                            className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-slate-100 rounded-md"
                                             role="menuitem"
                                         >
-                                            <Settings className="w-4 h-4 text-gray-500" />
+                                            <Settings className="w-4 h-4 text-neutral-500" />
                                             <span>Pengaturan Akun</span>
                                         </a>
                                         <button
@@ -98,7 +98,6 @@ const Header = ({ onMenuClick }) => {
                         </AnimatePresence>
                     </div>
                 ) : (
-                    // ... sisa kode tidak berubah
                     <div
                         ref={dropdownRef}
                         className="relative flex items-center"
@@ -124,18 +123,18 @@ const Header = ({ onMenuClick }) => {
                                     <div className="py-1 px-2" role="menu">
                                         <Link
                                             href={route("login")}
-                                            className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-slate-100 rounded-md"
+                                            className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-slate-100 rounded-md"
                                             role="menuitem"
                                         >
-                                            <LogIn className="w-4 h-4 text-gray-500" />
+                                            <LogIn className="w-4 h-4 text-neutral-500" />
                                             <span>Masuk</span>
                                         </Link>
                                         <Link
                                             href={route("register")}
-                                            className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-slate-100 rounded-md"
+                                            className="flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-slate-100 rounded-md"
                                             role="menuitem"
                                         >
-                                            <FileText className="w-4 h-4 text-gray-500" />
+                                            <FileText className="w-4 h-4 text-neutral-500" />
                                             <span>Daftar</span>
                                         </Link>
                                     </div>

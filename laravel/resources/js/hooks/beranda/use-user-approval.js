@@ -5,7 +5,7 @@ import {
     rejectUser,
     getApprovedUsers,
     getPendingUsers,
-} from "@/services/user/user-service";
+} from "@/services/beranda/user-service";
 
 export const useUserApproval = (initialPending, initialApproved) => {
     const SWR_KEY_PENDING = "/users/pending";

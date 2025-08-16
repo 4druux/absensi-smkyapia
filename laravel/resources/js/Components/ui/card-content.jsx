@@ -69,7 +69,7 @@ const CardContent = ({
             ? "text-green-600"
             : variant === "error"
             ? "text-red-600"
-            : "text-gray-500";
+            : "text-neutral-500";
 
     return (
         <Component

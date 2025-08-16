@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\User;
+namespace App\Http\Controllers\Beranda;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -9,7 +9,7 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function showDataUser()
+    public function showHomePage()
     {
         $user = Auth::user();
         $pendingUsers = [];
@@ -25,7 +25,7 @@ class UserController extends Controller
                 ->get();
         }
 
-        return Inertia::render('HomePage', [
+        return Inertia::render('Beranda/HomePage', [
             'initialPendingUsers' => $pendingUsers,
             'initialApprovedUsers' => $approvedUsers,
         ]);

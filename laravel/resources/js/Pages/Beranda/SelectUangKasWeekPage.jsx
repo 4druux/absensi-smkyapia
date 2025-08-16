@@ -1,31 +1,29 @@
-import { useState } from "react";
-import {
-    ArrowLeft,
-    ArrowUpDown,
-    CheckCircle,
-    MinusCircle,
-    PlusCircle,
-} from "lucide-react";
-
+import { FaMoneyBillWave } from "react-icons/fa6";
+import { ArrowLeft, ArrowUpDown, CheckCircle } from "lucide-react";
 import ButtonRounded from "@/Components/common/button-rounded";
 import PageContent from "@/Components/ui/page-content";
 import CardContent from "@/Components/ui/card-content";
 import DotLoader from "@/Components/ui/dot-loader";
-import { useUangKasWeeks } from "@/hooks/uang-kas/use-uang-kas-weeks";
-import { useUangKasOther } from "@/hooks/uang-kas/use-uang-kas-other";
-import UangKasOtherModal from "@/Components/uang-kas/uang-kas-other-modal";
-import { FaMoneyBillWave } from "react-icons/fa6";
-import { useUangKasSummary } from "@/hooks/uang-kas/use-uang-kas-summary";
+import DataNotFound from "@/Components/ui/data-not-found";
+import { useBerandaWeeks } from "@/hooks/beranda/use-beranda-weeks";
+import { useBerandaOtherCash } from "@/hooks/beranda/use-beranda-other-cash";
+import { useBerandaSummary } from "@/hooks/beranda/use-beranda-summary";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { usePage } from "@inertiajs/react";
 
-const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
-    const [isOpenModal, setIsOpenModal] = useState(false);
+const SelectUangKasWeekPage = ({
+    tahun,
+    bulanSlug,
+    namaBulan,
+    selectedClass,
+}) => {
+    const { flash } = usePage().props;
 
     const {
         weeks: weeklyData,
         isLoading: isLoadingWeeks,
         error: errorWeeks,
-    } = useUangKasWeeks(
+    } = useBerandaWeeks(
         selectedClass.kelas,
         selectedClass.jurusan,
         tahun,
@@ -36,15 +34,14 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
         otherCashData,
         isLoading: isLoadingOther,
         error: errorOther,
-        mutate: mutateOtherCash,
-    } = useUangKasOther(
+    } = useBerandaOtherCash(
         selectedClass.kelas,
         selectedClass.jurusan,
         tahun,
         bulanSlug
     );
 
-    const { summary, isLoading: isLoadingSummary } = useUangKasSummary(
+    const { summary, isLoading: isLoadingSummary } = useBerandaSummary(
         selectedClass.kelas,
         selectedClass.jurusan,
         tahun,
@@ -83,21 +80,28 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
     }
 
     const breadcrumbItems = [
-        { label: "Uang Kas", href: route("uang-kas.index") },
+        { label: "Beranda", href: route("home") },
         {
             label: `${selectedClass.kelas} ${selectedClass.kelompok} - ${selectedClass.jurusan}`,
-            href: route("uang-kas.index"),
+            href: route("home"),
+        },
+        {
+            label: "Uang Kas",
+            href: route("beranda.class.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+            }),
         },
         {
             label: tahun,
-            href: route("uang-kas.class.show", {
+            href: route("beranda.uang-kas.year.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
             }),
         },
         {
             label: namaBulan,
-            href: route("uang-kas.year.show", {
+            href: route("beranda.uang-kas.month.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
                 tahun: tahun,
@@ -162,60 +166,24 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                         </div>
                     </div>
                 </div>
-
-                <div className="flex items-center justify-end gap-2">
-                    <ButtonRounded
-                        as="link"
-                        variant="outline"
-                        size="sm"
-                        href={route("uang-kas.pengeluaran.index", {
-                            kelas: selectedClass.kelas,
-                            jurusan: selectedClass.jurusan,
-                            tahun: tahun,
-                            bulanSlug: bulanSlug,
-                        })}
-                        className="w-full md:w-auto"
-                    >
-                        <MinusCircle className="w-4 h-4 hidden md:block mr-2" />
-                        <span className="text-xs md:text-sm font-medium">
-                            Pengeluaran kas
-                        </span>
-                    </ButtonRounded>
-                    <ButtonRounded
-                        disabled={isLoading}
-                        variant="primary"
-                        size="sm"
-                        onClick={() => setIsOpenModal(true)}
-                        className="w-full md:w-auto"
-                    >
-                        <PlusCircle className="w-4 h-4 hidden md:block mr-2" />
-                        <span className="text-xs md:text-sm font-medium">
-                            Tambah Iuran Lain
-                        </span>
-                    </ButtonRounded>
-                </div>
             </div>
 
             <div>
                 <h4 className="text-base font-medium text-neutral-600 mb-4">
                     Iuran Mingguan
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {weeklyData &&
-                        weeklyData.map((card) => (
+                {weeklyData && weeklyData.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {weeklyData.map((card) => (
                             <CardContent
                                 key={`weekly-${card.id}`}
-                                href={
-                                    card.is_holiday
-                                        ? null
-                                        : route("uang-kas.week.show", {
-                                              kelas: selectedClass.kelas,
-                                              jurusan: selectedClass.jurusan,
-                                              tahun,
-                                              bulanSlug,
-                                              minggu: card.id,
-                                          })
-                                }
+                                href={route("beranda.uang-kas.weekly.show", {
+                                    kelas: selectedClass.kelas,
+                                    jurusan: selectedClass.jurusan,
+                                    tahun: tahun,
+                                    bulanSlug: bulanSlug,
+                                    minggu: card.minggu_ke,
+                                })}
                                 variant={
                                     card.is_paid
                                         ? "success"
@@ -240,24 +208,28 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                                 )}
                             </CardContent>
                         ))}
-                </div>
+                    </div>
+                ) : (
+                    <DataNotFound
+                        title="Data Iuran Mingguan Kosong"
+                        message="Belum ada data iuran mingguan di bulan ini."
+                    />
+                )}
             </div>
 
             <div className="mt-8">
                 <h4 className="text-base font-medium text-neutral-600 mb-4">
                     Iuran Lainnya
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {otherCashData && otherCashData.length > 0 ? (
-                        otherCashData.map((card) => (
+                {otherCashData && otherCashData.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {otherCashData.map((card) => (
                             <CardContent
                                 key={card.id}
-                                href={route("uang-kas.other-cash.show", {
+                                href={route("beranda.uang-kas.other.show", {
                                     kelas: selectedClass.kelas,
                                     jurusan: selectedClass.jurusan,
-                                    tahun: tahun,
-                                    bulanSlug: bulanSlug,
-                                    iuran: card.other_id,
+                                    iuranId: card.id,
                                 })}
                                 variant={card.is_paid ? "success" : "default"}
                                 title={card.label}
@@ -269,20 +241,20 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                                     </div>
                                 )}
                             </CardContent>
-                        ))
-                    ) : (
-                        <div className="col-span-4 text-center py-24 text-neutral-500 text-sm">
-                            Belum ada iuran lainnya di bulan ini.
-                        </div>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="col-span-4 text-center py-24 text-neutral-500 text-sm">
+                        Belum ada iuran lainnya di bulan ini.
+                    </div>
+                )}
             </div>
 
             <div className="flex justify-start mt-8">
                 <ButtonRounded
                     as="link"
                     variant="outline"
-                    href={route("uang-kas.year.show", {
+                    href={route("beranda.uang-kas.month.show", {
                         kelas: selectedClass.kelas,
                         jurusan: selectedClass.jurusan,
                         tahun: tahun,
@@ -292,18 +264,8 @@ const SelectWeekPage = ({ tahun, bulanSlug, namaBulan, selectedClass }) => {
                     Kembali
                 </ButtonRounded>
             </div>
-
-            <UangKasOtherModal
-                isOpen={isOpenModal}
-                onClose={() => setIsOpenModal(false)}
-                selectedClass={selectedClass}
-                onSuccess={() => mutateOtherCash()}
-                displayYear={displayYear}
-                bulanSlug={bulanSlug}
-                namaBulan={namaBulan}
-            />
         </PageContent>
     );
 };
 
-export default SelectWeekPage;
+export default SelectUangKasWeekPage;
