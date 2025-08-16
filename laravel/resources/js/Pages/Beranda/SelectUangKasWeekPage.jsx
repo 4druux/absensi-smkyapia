@@ -9,7 +9,6 @@ import { useBerandaWeeks } from "@/hooks/beranda/use-beranda-weeks";
 import { useBerandaOtherCash } from "@/hooks/beranda/use-beranda-other-cash";
 import { useBerandaSummary } from "@/hooks/beranda/use-beranda-summary";
 import { formatRupiah } from "@/utils/formatRupiah";
-import { usePage } from "@inertiajs/react";
 
 const SelectUangKasWeekPage = ({
     tahun,
@@ -17,8 +16,6 @@ const SelectUangKasWeekPage = ({
     namaBulan,
     selectedClass,
 }) => {
-    const { flash } = usePage().props;
-
     const {
         weeks: weeklyData,
         isLoading: isLoadingWeeks,
@@ -87,24 +84,26 @@ const SelectUangKasWeekPage = ({
         },
         {
             label: "Uang Kas",
-            href: route("beranda.class.show", {
-                kelas: selectedClass.kelas,
-                jurusan: selectedClass.jurusan,
-            }),
-        },
-        {
-            label: tahun,
             href: route("beranda.uang-kas.year.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
             }),
         },
         {
-            label: namaBulan,
+            label: tahun,
             href: route("beranda.uang-kas.month.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
                 tahun: tahun,
+            }),
+        },
+        {
+            label: namaBulan,
+            href: route("beranda.uang-kas.week.show", {
+                kelas: selectedClass.kelas,
+                jurusan: selectedClass.jurusan,
+                tahun: tahun,
+                bulanSlug: bulanSlug,
             }),
         },
         { label: "Pilih Iuran", href: null },
@@ -182,7 +181,7 @@ const SelectUangKasWeekPage = ({
                                     jurusan: selectedClass.jurusan,
                                     tahun: tahun,
                                     bulanSlug: bulanSlug,
-                                    minggu: card.minggu_ke,
+                                    minggu: card.id,
                                 })}
                                 variant={
                                     card.is_paid
@@ -229,7 +228,9 @@ const SelectUangKasWeekPage = ({
                                 href={route("beranda.uang-kas.other.show", {
                                     kelas: selectedClass.kelas,
                                     jurusan: selectedClass.jurusan,
-                                    iuranId: card.id,
+                                    tahun: tahun,
+                                    bulanSlug: bulanSlug,
+                                    iuranId: card.other_id,
                                 })}
                                 variant={card.is_paid ? "success" : "default"}
                                 title={card.label}

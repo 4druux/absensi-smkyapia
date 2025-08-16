@@ -21,6 +21,7 @@ const UangKasPage = ({
     iuranData,
 }) => {
     const isWeeklyMode = !!minggu;
+
     const hookResult = isWeeklyMode
         ? useBerandaWeeklyPayments(
               selectedClass.kelas,
@@ -35,11 +36,13 @@ const UangKasPage = ({
               iuranData.id
           );
     const { payments, fixedNominal, isLoading, error, dbSummary } = hookResult;
+
     const { props } = usePage();
     useEffect(() => {
         if (props.flash?.success) toast.success(props.flash.success);
         if (props.flash?.error) toast.error(props.flash.error);
     }, [props.flash]);
+
     if (
         !studentData ||
         !studentData.students ||
@@ -54,6 +57,7 @@ const UangKasPage = ({
             </PageContent>
         );
     }
+
     if (isLoading || !payments) {
         return (
             <div className="flex items-center justify-center h-screen">
@@ -68,6 +72,7 @@ const UangKasPage = ({
             </div>
         );
     }
+
     const breadcrumbItems = [
         { label: "Beranda", href: route("home") },
         {
@@ -85,27 +90,35 @@ const UangKasPage = ({
             }),
         },
         {
-            label: tahun,
+            label: isWeeklyMode ? tahun : iuranData?.tahun,
             href: route("beranda.uang-kas.month.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
-                tahun: tahun,
+                tahun: isWeeklyMode ? tahun : iuranData?.tahun,
             }),
         },
         {
-            label: namaBulan,
-            href: route("beranda.uang-kas.day.show", {
+            label: isWeeklyMode ? namaBulan : iuranData?.bulan,
+            href: route("beranda.uang-kas.week.show", {
                 kelas: selectedClass.kelas,
                 jurusan: selectedClass.jurusan,
-                tahun: tahun,
-                bulanSlug: bulanSlug,
+                tahun: isWeeklyMode ? tahun : iuranData?.tahun,
+                bulanSlug: isWeeklyMode ? bulanSlug : iuranData?.bulanSlug,
             }),
         },
         {
-            label: isWeeklyMode ? `Minggu ke-${minggu}` : iuranData.deskripsi,
+            label: isWeeklyMode ? `Minggu ke-${minggu}` : iuranData?.deskripsi,
             href: null,
         },
     ];
+
+    const backButtonHref = route("beranda.uang-kas.week.show", {
+        kelas: selectedClass.kelas,
+        jurusan: selectedClass.jurusan,
+        tahun: isWeeklyMode ? tahun : iuranData?.tahun,
+        bulanSlug: isWeeklyMode ? bulanSlug : iuranData?.bulanSlug,
+    });
+
     return (
         <PageContent
             breadcrumbItems={breadcrumbItems}
@@ -146,12 +159,7 @@ const UangKasPage = ({
                 <ButtonRounded
                     as="link"
                     variant="outline"
-                    href={route("beranda.uang-kas.month.show", {
-                        kelas: selectedClass.kelas,
-                        jurusan: selectedClass.jurusan,
-                        tahun,
-                        bulanSlug,
-                    })}
+                    href={backButtonHref}
                 >
                     <ArrowLeft size={16} className="mr-2" />
                     Kembali

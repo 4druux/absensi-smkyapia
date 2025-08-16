@@ -49,7 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/beranda/kelas/{kelas}/{jurusan}/absensi/{tahun}/bulan/{bulanSlug}', [BerandaController::class, 'selectDayAbsensi'])->name('beranda.absensi.day.show');
     Route::get('/beranda/kelas/{kelas}/{jurusan}/absensi/{tahun}/bulan/{bulanSlug}/tanggal/{tanggal}', [BerandaController::class, 'showAbsensiPage'])->name('beranda.absensi.day.detail');
     Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas/{tahun}/bulan/{bulanSlug}/minggu/{minggu}', [BerandaController::class, 'showUangKasWeeklyPage'])->name('beranda.uang-kas.weekly.show');
-    Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas/iuran/{iuranId}', [BerandaController::class, 'showUangKasOtherPage'])->name('beranda.uang-kas.other.show');
+    Route::get('/beranda/kelas/{kelas}/{jurusan}/uang-kas/{tahun}/bulan/{bulanSlug}/iuran/{iuranId}', [BerandaController::class, 'showUangKasOtherPage'])->name('beranda.uang-kas.other.show');
 
     Route::middleware(['role:superadmin'])->prefix('api/users')->group(function () {
         Route::get('/pending', [UserApiController::class, 'getPendingUsers'])->name('api.users.pending');
